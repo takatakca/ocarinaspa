@@ -34,6 +34,13 @@ export const Route = createRootRoute({
       { name: "description", content: "Spécialiste en réparation, installation, ouverture, fermeture et entretien de spas. Service à domicile partout au Québec." },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "format-detection", content: "telephone=yes" },
+      { property: "og:title", content: "Ocarina Spa Québec — Réparation et installation de spas" },
+      { name: "twitter:title", content: "Ocarina Spa Québec — Réparation et installation de spas" },
+      { property: "og:description", content: "Spécialiste en réparation, installation, ouverture, fermeture et entretien de spas. Service à domicile partout au Québec." },
+      { name: "twitter:description", content: "Spécialiste en réparation, installation, ouverture, fermeture et entretien de spas. Service à domicile partout au Québec." },
+      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/T4diMFkWjWfo8fJU7GOTzhR4Sju1/social-images/social-1777685087364-ChatGPT_Image_1_mai_2026,_21_24_20.webp" },
+      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/T4diMFkWjWfo8fJU7GOTzhR4Sju1/social-images/social-1777685087364-ChatGPT_Image_1_mai_2026,_21_24_20.webp" },
+      { property: "og:type", content: "website" },
     ],
     links: [
       {
