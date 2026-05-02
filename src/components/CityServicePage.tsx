@@ -15,7 +15,7 @@ export function CityServicePage({ serviceSlug, villeSlug }: CityServicePageProps
   const service = findServiceBySlug(serviceSlug);
   if (!muni || !service) throw notFound();
 
-  const title = `${service.label} à ${muni.name}`;
+  
 
   const faqs = [
     {
