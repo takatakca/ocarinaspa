@@ -1,4 +1,5 @@
 import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
+import { Toaster } from "@/components/ui/sonner";
 
 import appCss from "../styles.css?url";
 
@@ -29,14 +30,10 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
-      { name: "twitter:site", content: "@Lovable" },
+      { title: "Ocarina Spa Québec — Réparation et installation de spas" },
+      { name: "description", content: "Spécialiste en réparation, installation, ouverture, fermeture et entretien de spas. Service à domicile partout au Québec." },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "format-detection", content: "telephone=yes" },
     ],
     links: [
       {
@@ -58,6 +55,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         {children}
+        <Toaster />
         <Scripts />
       </body>
     </html>

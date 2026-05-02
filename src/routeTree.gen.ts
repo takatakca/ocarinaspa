@@ -9,38 +9,187 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as VillesRouteImport } from './routes/villes'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as ServicesRouteImport } from './routes/services'
+import { Route as ContactRouteImport } from './routes/contact'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ReparationSpaVilleRouteImport } from './routes/reparation-spa.$ville'
+import { Route as OuvertureSpaVilleRouteImport } from './routes/ouverture-spa.$ville'
+import { Route as InstallationSpaVilleRouteImport } from './routes/installation-spa.$ville'
+import { Route as FermetureSpaVilleRouteImport } from './routes/fermeture-spa.$ville'
+import { Route as EntretienSpaVilleRouteImport } from './routes/entretien-spa.$ville'
 
+const VillesRoute = VillesRouteImport.update({
+  id: '/villes',
+  path: '/villes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ServicesRoute = ServicesRouteImport.update({
+  id: '/services',
+  path: '/services',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ReparationSpaVilleRoute = ReparationSpaVilleRouteImport.update({
+  id: '/reparation-spa/$ville',
+  path: '/reparation-spa/$ville',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OuvertureSpaVilleRoute = OuvertureSpaVilleRouteImport.update({
+  id: '/ouverture-spa/$ville',
+  path: '/ouverture-spa/$ville',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InstallationSpaVilleRoute = InstallationSpaVilleRouteImport.update({
+  id: '/installation-spa/$ville',
+  path: '/installation-spa/$ville',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FermetureSpaVilleRoute = FermetureSpaVilleRouteImport.update({
+  id: '/fermeture-spa/$ville',
+  path: '/fermeture-spa/$ville',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EntretienSpaVilleRoute = EntretienSpaVilleRouteImport.update({
+  id: '/entretien-spa/$ville',
+  path: '/entretien-spa/$ville',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/contact': typeof ContactRoute
+  '/services': typeof ServicesRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/villes': typeof VillesRoute
+  '/entretien-spa/$ville': typeof EntretienSpaVilleRoute
+  '/fermeture-spa/$ville': typeof FermetureSpaVilleRoute
+  '/installation-spa/$ville': typeof InstallationSpaVilleRoute
+  '/ouverture-spa/$ville': typeof OuvertureSpaVilleRoute
+  '/reparation-spa/$ville': typeof ReparationSpaVilleRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/contact': typeof ContactRoute
+  '/services': typeof ServicesRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/villes': typeof VillesRoute
+  '/entretien-spa/$ville': typeof EntretienSpaVilleRoute
+  '/fermeture-spa/$ville': typeof FermetureSpaVilleRoute
+  '/installation-spa/$ville': typeof InstallationSpaVilleRoute
+  '/ouverture-spa/$ville': typeof OuvertureSpaVilleRoute
+  '/reparation-spa/$ville': typeof ReparationSpaVilleRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/contact': typeof ContactRoute
+  '/services': typeof ServicesRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/villes': typeof VillesRoute
+  '/entretien-spa/$ville': typeof EntretienSpaVilleRoute
+  '/fermeture-spa/$ville': typeof FermetureSpaVilleRoute
+  '/installation-spa/$ville': typeof InstallationSpaVilleRoute
+  '/ouverture-spa/$ville': typeof OuvertureSpaVilleRoute
+  '/reparation-spa/$ville': typeof ReparationSpaVilleRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/contact'
+    | '/services'
+    | '/sitemap.xml'
+    | '/villes'
+    | '/entretien-spa/$ville'
+    | '/fermeture-spa/$ville'
+    | '/installation-spa/$ville'
+    | '/ouverture-spa/$ville'
+    | '/reparation-spa/$ville'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/contact'
+    | '/services'
+    | '/sitemap.xml'
+    | '/villes'
+    | '/entretien-spa/$ville'
+    | '/fermeture-spa/$ville'
+    | '/installation-spa/$ville'
+    | '/ouverture-spa/$ville'
+    | '/reparation-spa/$ville'
+  id:
+    | '__root__'
+    | '/'
+    | '/contact'
+    | '/services'
+    | '/sitemap.xml'
+    | '/villes'
+    | '/entretien-spa/$ville'
+    | '/fermeture-spa/$ville'
+    | '/installation-spa/$ville'
+    | '/ouverture-spa/$ville'
+    | '/reparation-spa/$ville'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ContactRoute: typeof ContactRoute
+  ServicesRoute: typeof ServicesRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  VillesRoute: typeof VillesRoute
+  EntretienSpaVilleRoute: typeof EntretienSpaVilleRoute
+  FermetureSpaVilleRoute: typeof FermetureSpaVilleRoute
+  InstallationSpaVilleRoute: typeof InstallationSpaVilleRoute
+  OuvertureSpaVilleRoute: typeof OuvertureSpaVilleRoute
+  ReparationSpaVilleRoute: typeof ReparationSpaVilleRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/villes': {
+      id: '/villes'
+      path: '/villes'
+      fullPath: '/villes'
+      preLoaderRoute: typeof VillesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/services': {
+      id: '/services'
+      path: '/services'
+      fullPath: '/services'
+      preLoaderRoute: typeof ServicesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,11 +197,55 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/reparation-spa/$ville': {
+      id: '/reparation-spa/$ville'
+      path: '/reparation-spa/$ville'
+      fullPath: '/reparation-spa/$ville'
+      preLoaderRoute: typeof ReparationSpaVilleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ouverture-spa/$ville': {
+      id: '/ouverture-spa/$ville'
+      path: '/ouverture-spa/$ville'
+      fullPath: '/ouverture-spa/$ville'
+      preLoaderRoute: typeof OuvertureSpaVilleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/installation-spa/$ville': {
+      id: '/installation-spa/$ville'
+      path: '/installation-spa/$ville'
+      fullPath: '/installation-spa/$ville'
+      preLoaderRoute: typeof InstallationSpaVilleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/fermeture-spa/$ville': {
+      id: '/fermeture-spa/$ville'
+      path: '/fermeture-spa/$ville'
+      fullPath: '/fermeture-spa/$ville'
+      preLoaderRoute: typeof FermetureSpaVilleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/entretien-spa/$ville': {
+      id: '/entretien-spa/$ville'
+      path: '/entretien-spa/$ville'
+      fullPath: '/entretien-spa/$ville'
+      preLoaderRoute: typeof EntretienSpaVilleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ContactRoute: ContactRoute,
+  ServicesRoute: ServicesRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
+  VillesRoute: VillesRoute,
+  EntretienSpaVilleRoute: EntretienSpaVilleRoute,
+  FermetureSpaVilleRoute: FermetureSpaVilleRoute,
+  InstallationSpaVilleRoute: InstallationSpaVilleRoute,
+  OuvertureSpaVilleRoute: OuvertureSpaVilleRoute,
+  ReparationSpaVilleRoute: ReparationSpaVilleRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
