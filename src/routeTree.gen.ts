@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as VillesRouteImport } from './routes/villes'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ServicesRouteImport } from './routes/services'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as IndexRouteImport } from './routes/index'
@@ -22,6 +23,11 @@ import { Route as EntretienSpaVilleRouteImport } from './routes/entretien-spa.$v
 const VillesRoute = VillesRouteImport.update({
   id: '/villes',
   path: '/villes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ServicesRoute = ServicesRouteImport.update({
@@ -69,6 +75,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/contact': typeof ContactRoute
   '/services': typeof ServicesRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/villes': typeof VillesRoute
   '/entretien-spa/$ville': typeof EntretienSpaVilleRoute
   '/fermeture-spa/$ville': typeof FermetureSpaVilleRoute
@@ -80,6 +87,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/contact': typeof ContactRoute
   '/services': typeof ServicesRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/villes': typeof VillesRoute
   '/entretien-spa/$ville': typeof EntretienSpaVilleRoute
   '/fermeture-spa/$ville': typeof FermetureSpaVilleRoute
@@ -92,6 +100,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/contact': typeof ContactRoute
   '/services': typeof ServicesRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/villes': typeof VillesRoute
   '/entretien-spa/$ville': typeof EntretienSpaVilleRoute
   '/fermeture-spa/$ville': typeof FermetureSpaVilleRoute
@@ -105,6 +114,7 @@ export interface FileRouteTypes {
     | '/'
     | '/contact'
     | '/services'
+    | '/sitemap.xml'
     | '/villes'
     | '/entretien-spa/$ville'
     | '/fermeture-spa/$ville'
@@ -116,6 +126,7 @@ export interface FileRouteTypes {
     | '/'
     | '/contact'
     | '/services'
+    | '/sitemap.xml'
     | '/villes'
     | '/entretien-spa/$ville'
     | '/fermeture-spa/$ville'
@@ -127,6 +138,7 @@ export interface FileRouteTypes {
     | '/'
     | '/contact'
     | '/services'
+    | '/sitemap.xml'
     | '/villes'
     | '/entretien-spa/$ville'
     | '/fermeture-spa/$ville'
@@ -139,6 +151,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ContactRoute: typeof ContactRoute
   ServicesRoute: typeof ServicesRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   VillesRoute: typeof VillesRoute
   EntretienSpaVilleRoute: typeof EntretienSpaVilleRoute
   FermetureSpaVilleRoute: typeof FermetureSpaVilleRoute
@@ -154,6 +167,13 @@ declare module '@tanstack/react-router' {
       path: '/villes'
       fullPath: '/villes'
       preLoaderRoute: typeof VillesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/services': {
@@ -219,6 +239,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ContactRoute: ContactRoute,
   ServicesRoute: ServicesRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   VillesRoute: VillesRoute,
   EntretienSpaVilleRoute: EntretienSpaVilleRoute,
   FermetureSpaVilleRoute: FermetureSpaVilleRoute,
