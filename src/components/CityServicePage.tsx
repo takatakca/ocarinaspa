@@ -1,4 +1,4 @@
-import { createFileRoute, Link, notFound, useRouter } from "@tanstack/react-router";
+import { Link, notFound } from "@tanstack/react-router";
 import { Layout } from "@/components/Layout";
 import { ServiceRequestForm } from "@/components/ServiceRequestForm";
 import { findMunicipalityBySlug, findServiceBySlug, type ServiceSlug } from "@/data/quebecMunicipalities";
