@@ -10,8 +10,13 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as VillesRouteImport } from './routes/villes'
+import { Route as VenteSpasRouteImport } from './routes/vente-spas'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ServicesRouteImport } from './routes/services'
+import { Route as RegionsRouteImport } from './routes/regions'
+import { Route as PiscineRouteImport } from './routes/piscine'
+import { Route as PiecesRouteImport } from './routes/pieces'
+import { Route as EnRouteImport } from './routes/en'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ReparationSpaVilleRouteImport } from './routes/reparation-spa.$ville'
@@ -25,6 +30,11 @@ const VillesRoute = VillesRouteImport.update({
   path: '/villes',
   getParentRoute: () => rootRouteImport,
 } as any)
+const VenteSpasRoute = VenteSpasRouteImport.update({
+  id: '/vente-spas',
+  path: '/vente-spas',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
@@ -33,6 +43,26 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
 const ServicesRoute = ServicesRouteImport.update({
   id: '/services',
   path: '/services',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RegionsRoute = RegionsRouteImport.update({
+  id: '/regions',
+  path: '/regions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PiscineRoute = PiscineRouteImport.update({
+  id: '/piscine',
+  path: '/piscine',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PiecesRoute = PiecesRouteImport.update({
+  id: '/pieces',
+  path: '/pieces',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnRoute = EnRouteImport.update({
+  id: '/en',
+  path: '/en',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ContactRoute = ContactRouteImport.update({
@@ -74,8 +104,13 @@ const EntretienSpaVilleRoute = EntretienSpaVilleRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/contact': typeof ContactRoute
+  '/en': typeof EnRoute
+  '/pieces': typeof PiecesRoute
+  '/piscine': typeof PiscineRoute
+  '/regions': typeof RegionsRoute
   '/services': typeof ServicesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/vente-spas': typeof VenteSpasRoute
   '/villes': typeof VillesRoute
   '/entretien-spa/$ville': typeof EntretienSpaVilleRoute
   '/fermeture-spa/$ville': typeof FermetureSpaVilleRoute
@@ -86,8 +121,13 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/contact': typeof ContactRoute
+  '/en': typeof EnRoute
+  '/pieces': typeof PiecesRoute
+  '/piscine': typeof PiscineRoute
+  '/regions': typeof RegionsRoute
   '/services': typeof ServicesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/vente-spas': typeof VenteSpasRoute
   '/villes': typeof VillesRoute
   '/entretien-spa/$ville': typeof EntretienSpaVilleRoute
   '/fermeture-spa/$ville': typeof FermetureSpaVilleRoute
@@ -99,8 +139,13 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/contact': typeof ContactRoute
+  '/en': typeof EnRoute
+  '/pieces': typeof PiecesRoute
+  '/piscine': typeof PiscineRoute
+  '/regions': typeof RegionsRoute
   '/services': typeof ServicesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/vente-spas': typeof VenteSpasRoute
   '/villes': typeof VillesRoute
   '/entretien-spa/$ville': typeof EntretienSpaVilleRoute
   '/fermeture-spa/$ville': typeof FermetureSpaVilleRoute
@@ -113,8 +158,13 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/contact'
+    | '/en'
+    | '/pieces'
+    | '/piscine'
+    | '/regions'
     | '/services'
     | '/sitemap.xml'
+    | '/vente-spas'
     | '/villes'
     | '/entretien-spa/$ville'
     | '/fermeture-spa/$ville'
@@ -125,8 +175,13 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/contact'
+    | '/en'
+    | '/pieces'
+    | '/piscine'
+    | '/regions'
     | '/services'
     | '/sitemap.xml'
+    | '/vente-spas'
     | '/villes'
     | '/entretien-spa/$ville'
     | '/fermeture-spa/$ville'
@@ -137,8 +192,13 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/contact'
+    | '/en'
+    | '/pieces'
+    | '/piscine'
+    | '/regions'
     | '/services'
     | '/sitemap.xml'
+    | '/vente-spas'
     | '/villes'
     | '/entretien-spa/$ville'
     | '/fermeture-spa/$ville'
@@ -150,8 +210,13 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ContactRoute: typeof ContactRoute
+  EnRoute: typeof EnRoute
+  PiecesRoute: typeof PiecesRoute
+  PiscineRoute: typeof PiscineRoute
+  RegionsRoute: typeof RegionsRoute
   ServicesRoute: typeof ServicesRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  VenteSpasRoute: typeof VenteSpasRoute
   VillesRoute: typeof VillesRoute
   EntretienSpaVilleRoute: typeof EntretienSpaVilleRoute
   FermetureSpaVilleRoute: typeof FermetureSpaVilleRoute
@@ -169,6 +234,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VillesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/vente-spas': {
+      id: '/vente-spas'
+      path: '/vente-spas'
+      fullPath: '/vente-spas'
+      preLoaderRoute: typeof VenteSpasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/sitemap.xml': {
       id: '/sitemap.xml'
       path: '/sitemap.xml'
@@ -181,6 +253,34 @@ declare module '@tanstack/react-router' {
       path: '/services'
       fullPath: '/services'
       preLoaderRoute: typeof ServicesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/regions': {
+      id: '/regions'
+      path: '/regions'
+      fullPath: '/regions'
+      preLoaderRoute: typeof RegionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/piscine': {
+      id: '/piscine'
+      path: '/piscine'
+      fullPath: '/piscine'
+      preLoaderRoute: typeof PiscineRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pieces': {
+      id: '/pieces'
+      path: '/pieces'
+      fullPath: '/pieces'
+      preLoaderRoute: typeof PiecesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/en': {
+      id: '/en'
+      path: '/en'
+      fullPath: '/en'
+      preLoaderRoute: typeof EnRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/contact': {
@@ -238,8 +338,13 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ContactRoute: ContactRoute,
+  EnRoute: EnRoute,
+  PiecesRoute: PiecesRoute,
+  PiscineRoute: PiscineRoute,
+  RegionsRoute: RegionsRoute,
   ServicesRoute: ServicesRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  VenteSpasRoute: VenteSpasRoute,
   VillesRoute: VillesRoute,
   EntretienSpaVilleRoute: EntretienSpaVilleRoute,
   FermetureSpaVilleRoute: FermetureSpaVilleRoute,
