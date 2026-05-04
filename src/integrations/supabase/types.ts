@@ -14,7 +14,93 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      contact_messages: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          message: string
+          name: string
+          phone: string | null
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          message: string
+          name: string
+          phone?: string | null
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          message?: string
+          name?: string
+          phone?: string | null
+          status?: string
+        }
+        Relationships: []
+      }
+      service_requests: {
+        Row: {
+          city: string | null
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          notes: string | null
+          phone: string
+          postal_code: string | null
+          preferred_date: string | null
+          problem_description: string | null
+          service_type: string
+          source_url: string | null
+          spa_brand: string | null
+          spa_model: string | null
+          status: string
+          urgency: string | null
+        }
+        Insert: {
+          city?: string | null
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          notes?: string | null
+          phone: string
+          postal_code?: string | null
+          preferred_date?: string | null
+          problem_description?: string | null
+          service_type: string
+          source_url?: string | null
+          spa_brand?: string | null
+          spa_model?: string | null
+          status?: string
+          urgency?: string | null
+        }
+        Update: {
+          city?: string | null
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          notes?: string | null
+          phone?: string
+          postal_code?: string | null
+          preferred_date?: string | null
+          problem_description?: string | null
+          service_type?: string
+          source_url?: string | null
+          spa_brand?: string | null
+          spa_model?: string | null
+          status?: string
+          urgency?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
