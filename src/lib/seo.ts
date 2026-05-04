@@ -1,8 +1,13 @@
+import logo from "@/assets/ocarina-logo.png";
+
 export const SITE = {
-  name: "Ocarina Spa Québec",
+  name: "Ocarina Spa",
+  legalName: "Ocarina Spa Québec",
   domain: "https://ocarinaspa.ca",
-  phone: "(819) 913-7727",
+  phone: "819-913-7727",
   phoneTel: "+18199137727",
+  email: "info@ocarinaspa.ca",
+  logo,
   address: {
     street: "16280 Boul Bécancour",
     city: "Bécancour",
@@ -10,19 +15,19 @@ export const SITE = {
     postalCode: "G9H 2M1",
     country: "CA",
   },
-  hours: "24/7",
-  email: "info@ocarinaspa.ca",
 };
 
-export const localBusinessSchema = () => ({
+export const localBusinessSchema = (extra?: { areaName?: string; image?: string }) => ({
   "@context": "https://schema.org",
-  "@type": "LocalBusiness",
+  "@type": ["LocalBusiness", "HomeAndConstructionBusiness"],
   "@id": SITE.domain + "/#business",
-  name: SITE.name,
+  name: SITE.legalName,
+  alternateName: SITE.name,
   url: SITE.domain,
   telephone: SITE.phoneTel,
   priceRange: "$$",
-  image: SITE.domain + "/og-default.jpg",
+  image: extra?.image ?? SITE.domain + "/ocarina-logo.png",
+  logo: SITE.domain + "/ocarina-logo.png",
   address: {
     "@type": "PostalAddress",
     streetAddress: SITE.address.street,
@@ -31,30 +36,21 @@ export const localBusinessSchema = () => ({
     postalCode: SITE.address.postalCode,
     addressCountry: SITE.address.country,
   },
-  areaServed: { "@type": "AdministrativeArea", name: "Québec, Canada" },
-  openingHoursSpecification: [
-    {
-      "@type": "OpeningHoursSpecification",
-      dayOfWeek: [
-        "Monday",
-        "Tuesday",
-        "Wednesday",
-        "Thursday",
-        "Friday",
-        "Saturday",
-        "Sunday",
-      ],
-      opens: "00:00",
-      closes: "23:59",
-    },
-  ],
+  areaServed: extra?.areaName
+    ? { "@type": "City", name: extra.areaName }
+    : { "@type": "AdministrativeArea", name: "Québec, Canada" },
+  openingHoursSpecification: [{
+    "@type": "OpeningHoursSpecification",
+    dayOfWeek: ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"],
+    opens: "00:00", closes: "23:59",
+  }],
 });
 
 export const serviceSchema = (service: string, city: string) => ({
   "@context": "https://schema.org",
   "@type": "Service",
   serviceType: service,
-  provider: { "@type": "LocalBusiness", name: SITE.name, telephone: SITE.phoneTel },
+  provider: { "@type": "LocalBusiness", name: SITE.legalName, telephone: SITE.phoneTel },
   areaServed: { "@type": "City", name: city },
   name: `${service} à ${city}`,
 });
@@ -66,5 +62,16 @@ export const faqSchema = (faqs: Array<{ q: string; a: string }>) => ({
     "@type": "Question",
     name: f.q,
     acceptedAnswer: { "@type": "Answer", text: f.a },
+  })),
+});
+
+export const breadcrumbSchema = (items: Array<{ name: string; url: string }>) => ({
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: items.map((it, i) => ({
+    "@type": "ListItem",
+    position: i + 1,
+    name: it.name,
+    item: it.url,
   })),
 });

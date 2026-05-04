@@ -1,32 +1,49 @@
 import { useState } from "react";
 import { z } from "zod";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { Loader2 } from "lucide-react";
 
 const schema = z.object({
-  name: z.string().trim().min(2, "Nom requis").max(100),
+  full_name: z.string().trim().min(2, "Nom requis").max(100),
   phone: z.string().trim().min(7, "Téléphone requis").max(30),
   email: z.string().trim().email("Courriel invalide").max(255),
   city: z.string().trim().min(2, "Ville requise").max(100),
-  service: z.string().min(1, "Service requis"),
-  message: z.string().trim().max(1000).optional(),
+  postal_code: z.string().trim().max(10).optional().or(z.literal("")),
+  service_type: z.string().min(1, "Service requis"),
+  spa_brand: z.string().trim().max(80).optional().or(z.literal("")),
+  spa_model: z.string().trim().max(80).optional().or(z.literal("")),
+  problem_description: z.string().trim().max(1500).optional().or(z.literal("")),
+  urgency: z.string().optional().or(z.literal("")),
+  preferred_date: z.string().optional().or(z.literal("")),
+  consent: z.literal("on", { message: "Veuillez accepter le contact" }),
 });
 
-const services = [
+const SERVICES = [
   "Réparation de spa",
+  "Entretien de spa",
+  "Vente de spa",
   "Installation de spa",
   "Ouverture de spa",
   "Fermeture de spa",
-  "Entretien de spa",
-  "Pièces & accessoires",
+  "Pièces et accessoires",
+  "Hot tub repair",
+  "Nettoyage de piscine",
+  "Ouverture de piscine",
+  "Fermeture de piscine",
   "Autre",
 ];
 
-export function ServiceRequestForm({ defaultCity = "", defaultService = "" }: { defaultCity?: string; defaultService?: string }) {
+export function ServiceRequestForm({
+  defaultCity = "",
+  defaultService = "",
+}: { defaultCity?: string; defaultService?: string }) {
   const [submitting, setSubmitting] = useState(false);
 
-  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const fd = new FormData(e.currentTarget);
+    const form = e.currentTarget;
+    const fd = new FormData(form);
     const data = Object.fromEntries(fd.entries());
     const parsed = schema.safeParse(data);
     if (!parsed.success) {
@@ -34,50 +51,61 @@ export function ServiceRequestForm({ defaultCity = "", defaultService = "" }: { 
       return;
     }
     setSubmitting(true);
-    setTimeout(() => {
-      setSubmitting(false);
-      toast.success("Merci ! Nous vous contacterons sous peu.");
-      (e.target as HTMLFormElement).reset();
-    }, 600);
+    const { consent: _c, preferred_date, ...rest } = parsed.data;
+    const payload = {
+      ...rest,
+      preferred_date: preferred_date || null,
+      source_url: typeof window !== "undefined" ? window.location.href : null,
+    };
+    const { error } = await supabase.from("service_requests").insert(payload);
+    setSubmitting(false);
+    if (error) {
+      console.error(error);
+      toast.error("Une erreur est survenue. Appelez-nous au 819-913-7727.");
+      return;
+    }
+    toast.success("Demande envoyée ! Nous vous contactons rapidement.");
+    form.reset();
   };
 
   return (
     <form onSubmit={onSubmit} className="grid gap-4 bg-card p-6 md:p-8 rounded-xl border border-border shadow-sm">
-      <h3 className="font-display text-2xl font-bold text-foreground">Demande de service</h3>
-      <p className="text-sm text-muted-foreground -mt-2">Remplissez le formulaire et nous vous rappelons rapidement.</p>
+      <div>
+        <h3 className="font-display text-2xl font-bold text-foreground">Demande de service</h3>
+        <p className="text-sm text-muted-foreground mt-1">Remplissez le formulaire — nous vous rappelons rapidement.</p>
+      </div>
       <div className="grid sm:grid-cols-2 gap-4">
-        <Field label="Nom complet" name="name" required />
-        <Field label="Téléphone" name="phone" type="tel" required />
-        <Field label="Courriel" name="email" type="email" required />
-        <Field label="Ville" name="city" defaultValue={defaultCity} required />
+        <Field label="Nom complet *" name="full_name" required />
+        <Field label="Téléphone *" name="phone" type="tel" required />
+        <Field label="Courriel *" name="email" type="email" required />
+        <Field label="Ville *" name="city" defaultValue={defaultCity} required />
+        <Field label="Code postal" name="postal_code" />
+        <Select label="Type de service *" name="service_type" defaultValue={defaultService} required options={SERVICES} />
+        <Field label="Marque du spa" name="spa_brand" />
+        <Field label="Modèle (si connu)" name="spa_model" />
+        <Select label="Urgence" name="urgency" options={["Standard", "Sous 48h", "Urgent — aujourd'hui"]} />
+        <Field label="Date souhaitée" name="preferred_date" type="date" />
       </div>
       <label className="grid gap-1.5">
-        <span className="text-sm font-medium text-foreground">Type de service</span>
-        <select
-          name="service"
-          defaultValue={defaultService}
-          required
-          className="border border-input bg-background rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand"
-        >
-          <option value="">Choisir...</option>
-          {services.map((s) => <option key={s} value={s}>{s}</option>)}
-        </select>
-      </label>
-      <label className="grid gap-1.5">
-        <span className="text-sm font-medium text-foreground">Décrivez votre besoin</span>
+        <span className="text-sm font-medium text-foreground">Décrivez le problème ou le besoin</span>
         <textarea
-          name="message"
+          name="problem_description"
           rows={4}
-          maxLength={1000}
+          maxLength={1500}
           className="border border-input bg-background rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand"
         />
+      </label>
+      <label className="flex items-start gap-2 text-sm text-muted-foreground">
+        <input type="checkbox" name="consent" required className="mt-1 accent-[var(--brand)]" />
+        <span>J'accepte d'être contacté par Ocarina Spa au sujet de ma demande.</span>
       </label>
       <button
         type="submit"
         disabled={submitting}
-        className="bg-brand text-brand-foreground font-semibold py-3 rounded-md hover:bg-brand-dark transition-colors disabled:opacity-60"
+        className="bg-brand text-brand-foreground font-semibold py-3.5 rounded-md hover:bg-brand-dark transition-colors disabled:opacity-60 inline-flex items-center justify-center gap-2"
       >
-        {submitting ? "Envoi..." : "Envoyer ma demande"}
+        {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
+        {submitting ? "Envoi en cours..." : "Envoyer ma demande"}
       </button>
     </form>
   );
@@ -91,6 +119,25 @@ function Field({ label, ...props }: { label: string } & React.InputHTMLAttribute
         {...props}
         className="border border-input bg-background rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand"
       />
+    </label>
+  );
+}
+
+function Select({
+  label, name, options, defaultValue, required,
+}: { label: string; name: string; options: string[]; defaultValue?: string; required?: boolean }) {
+  return (
+    <label className="grid gap-1.5">
+      <span className="text-sm font-medium text-foreground">{label}</span>
+      <select
+        name={name}
+        defaultValue={defaultValue ?? ""}
+        required={required}
+        className="border border-input bg-background rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand"
+      >
+        <option value="">Choisir...</option>
+        {options.map((o) => <option key={o} value={o}>{o}</option>)}
+      </select>
     </label>
   );
 }
