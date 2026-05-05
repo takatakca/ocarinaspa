@@ -21,10 +21,17 @@ import { Route as ContactRouteImport } from './routes/contact'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as VenteSpaVilleRouteImport } from './routes/vente-spa.$ville'
 import { Route as ReparationSpaVilleRouteImport } from './routes/reparation-spa.$ville'
+import { Route as PiecesSpaVilleRouteImport } from './routes/pieces-spa.$ville'
 import { Route as OuvertureSpaVilleRouteImport } from './routes/ouverture-spa.$ville'
+import { Route as OuverturePiscineVilleRouteImport } from './routes/ouverture-piscine.$ville'
+import { Route as NettoyagePiscineVilleRouteImport } from './routes/nettoyage-piscine.$ville'
 import { Route as InstallationSpaVilleRouteImport } from './routes/installation-spa.$ville'
+import { Route as HotTubRepairVilleRouteImport } from './routes/hot-tub-repair.$ville'
+import { Route as HotTubMaintenanceVilleRouteImport } from './routes/hot-tub-maintenance.$ville'
 import { Route as FermetureSpaVilleRouteImport } from './routes/fermeture-spa.$ville'
+import { Route as FermeturePiscineVilleRouteImport } from './routes/fermeture-piscine.$ville'
 import { Route as EntretienSpaVilleRouteImport } from './routes/entretien-spa.$ville'
+import { Route as EntretienPiscineVilleRouteImport } from './routes/entretien-piscine.$ville'
 
 const VillesRoute = VillesRouteImport.update({
   id: '/villes',
@@ -86,9 +93,24 @@ const ReparationSpaVilleRoute = ReparationSpaVilleRouteImport.update({
   path: '/reparation-spa/$ville',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PiecesSpaVilleRoute = PiecesSpaVilleRouteImport.update({
+  id: '/pieces-spa/$ville',
+  path: '/pieces-spa/$ville',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const OuvertureSpaVilleRoute = OuvertureSpaVilleRouteImport.update({
   id: '/ouverture-spa/$ville',
   path: '/ouverture-spa/$ville',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OuverturePiscineVilleRoute = OuverturePiscineVilleRouteImport.update({
+  id: '/ouverture-piscine/$ville',
+  path: '/ouverture-piscine/$ville',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NettoyagePiscineVilleRoute = NettoyagePiscineVilleRouteImport.update({
+  id: '/nettoyage-piscine/$ville',
+  path: '/nettoyage-piscine/$ville',
   getParentRoute: () => rootRouteImport,
 } as any)
 const InstallationSpaVilleRoute = InstallationSpaVilleRouteImport.update({
@@ -96,14 +118,34 @@ const InstallationSpaVilleRoute = InstallationSpaVilleRouteImport.update({
   path: '/installation-spa/$ville',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HotTubRepairVilleRoute = HotTubRepairVilleRouteImport.update({
+  id: '/hot-tub-repair/$ville',
+  path: '/hot-tub-repair/$ville',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HotTubMaintenanceVilleRoute = HotTubMaintenanceVilleRouteImport.update({
+  id: '/hot-tub-maintenance/$ville',
+  path: '/hot-tub-maintenance/$ville',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const FermetureSpaVilleRoute = FermetureSpaVilleRouteImport.update({
   id: '/fermeture-spa/$ville',
   path: '/fermeture-spa/$ville',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FermeturePiscineVilleRoute = FermeturePiscineVilleRouteImport.update({
+  id: '/fermeture-piscine/$ville',
+  path: '/fermeture-piscine/$ville',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EntretienSpaVilleRoute = EntretienSpaVilleRouteImport.update({
   id: '/entretien-spa/$ville',
   path: '/entretien-spa/$ville',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EntretienPiscineVilleRoute = EntretienPiscineVilleRouteImport.update({
+  id: '/entretien-piscine/$ville',
+  path: '/entretien-piscine/$ville',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -118,10 +160,17 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/vente-spas': typeof VenteSpasRoute
   '/villes': typeof VillesRoute
+  '/entretien-piscine/$ville': typeof EntretienPiscineVilleRoute
   '/entretien-spa/$ville': typeof EntretienSpaVilleRoute
+  '/fermeture-piscine/$ville': typeof FermeturePiscineVilleRoute
   '/fermeture-spa/$ville': typeof FermetureSpaVilleRoute
+  '/hot-tub-maintenance/$ville': typeof HotTubMaintenanceVilleRoute
+  '/hot-tub-repair/$ville': typeof HotTubRepairVilleRoute
   '/installation-spa/$ville': typeof InstallationSpaVilleRoute
+  '/nettoyage-piscine/$ville': typeof NettoyagePiscineVilleRoute
+  '/ouverture-piscine/$ville': typeof OuverturePiscineVilleRoute
   '/ouverture-spa/$ville': typeof OuvertureSpaVilleRoute
+  '/pieces-spa/$ville': typeof PiecesSpaVilleRoute
   '/reparation-spa/$ville': typeof ReparationSpaVilleRoute
   '/vente-spa/$ville': typeof VenteSpaVilleRoute
 }
@@ -136,10 +185,17 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/vente-spas': typeof VenteSpasRoute
   '/villes': typeof VillesRoute
+  '/entretien-piscine/$ville': typeof EntretienPiscineVilleRoute
   '/entretien-spa/$ville': typeof EntretienSpaVilleRoute
+  '/fermeture-piscine/$ville': typeof FermeturePiscineVilleRoute
   '/fermeture-spa/$ville': typeof FermetureSpaVilleRoute
+  '/hot-tub-maintenance/$ville': typeof HotTubMaintenanceVilleRoute
+  '/hot-tub-repair/$ville': typeof HotTubRepairVilleRoute
   '/installation-spa/$ville': typeof InstallationSpaVilleRoute
+  '/nettoyage-piscine/$ville': typeof NettoyagePiscineVilleRoute
+  '/ouverture-piscine/$ville': typeof OuverturePiscineVilleRoute
   '/ouverture-spa/$ville': typeof OuvertureSpaVilleRoute
+  '/pieces-spa/$ville': typeof PiecesSpaVilleRoute
   '/reparation-spa/$ville': typeof ReparationSpaVilleRoute
   '/vente-spa/$ville': typeof VenteSpaVilleRoute
 }
@@ -155,10 +211,17 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/vente-spas': typeof VenteSpasRoute
   '/villes': typeof VillesRoute
+  '/entretien-piscine/$ville': typeof EntretienPiscineVilleRoute
   '/entretien-spa/$ville': typeof EntretienSpaVilleRoute
+  '/fermeture-piscine/$ville': typeof FermeturePiscineVilleRoute
   '/fermeture-spa/$ville': typeof FermetureSpaVilleRoute
+  '/hot-tub-maintenance/$ville': typeof HotTubMaintenanceVilleRoute
+  '/hot-tub-repair/$ville': typeof HotTubRepairVilleRoute
   '/installation-spa/$ville': typeof InstallationSpaVilleRoute
+  '/nettoyage-piscine/$ville': typeof NettoyagePiscineVilleRoute
+  '/ouverture-piscine/$ville': typeof OuverturePiscineVilleRoute
   '/ouverture-spa/$ville': typeof OuvertureSpaVilleRoute
+  '/pieces-spa/$ville': typeof PiecesSpaVilleRoute
   '/reparation-spa/$ville': typeof ReparationSpaVilleRoute
   '/vente-spa/$ville': typeof VenteSpaVilleRoute
 }
@@ -175,10 +238,17 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/vente-spas'
     | '/villes'
+    | '/entretien-piscine/$ville'
     | '/entretien-spa/$ville'
+    | '/fermeture-piscine/$ville'
     | '/fermeture-spa/$ville'
+    | '/hot-tub-maintenance/$ville'
+    | '/hot-tub-repair/$ville'
     | '/installation-spa/$ville'
+    | '/nettoyage-piscine/$ville'
+    | '/ouverture-piscine/$ville'
     | '/ouverture-spa/$ville'
+    | '/pieces-spa/$ville'
     | '/reparation-spa/$ville'
     | '/vente-spa/$ville'
   fileRoutesByTo: FileRoutesByTo
@@ -193,10 +263,17 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/vente-spas'
     | '/villes'
+    | '/entretien-piscine/$ville'
     | '/entretien-spa/$ville'
+    | '/fermeture-piscine/$ville'
     | '/fermeture-spa/$ville'
+    | '/hot-tub-maintenance/$ville'
+    | '/hot-tub-repair/$ville'
     | '/installation-spa/$ville'
+    | '/nettoyage-piscine/$ville'
+    | '/ouverture-piscine/$ville'
     | '/ouverture-spa/$ville'
+    | '/pieces-spa/$ville'
     | '/reparation-spa/$ville'
     | '/vente-spa/$ville'
   id:
@@ -211,10 +288,17 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/vente-spas'
     | '/villes'
+    | '/entretien-piscine/$ville'
     | '/entretien-spa/$ville'
+    | '/fermeture-piscine/$ville'
     | '/fermeture-spa/$ville'
+    | '/hot-tub-maintenance/$ville'
+    | '/hot-tub-repair/$ville'
     | '/installation-spa/$ville'
+    | '/nettoyage-piscine/$ville'
+    | '/ouverture-piscine/$ville'
     | '/ouverture-spa/$ville'
+    | '/pieces-spa/$ville'
     | '/reparation-spa/$ville'
     | '/vente-spa/$ville'
   fileRoutesById: FileRoutesById
@@ -230,10 +314,17 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   VenteSpasRoute: typeof VenteSpasRoute
   VillesRoute: typeof VillesRoute
+  EntretienPiscineVilleRoute: typeof EntretienPiscineVilleRoute
   EntretienSpaVilleRoute: typeof EntretienSpaVilleRoute
+  FermeturePiscineVilleRoute: typeof FermeturePiscineVilleRoute
   FermetureSpaVilleRoute: typeof FermetureSpaVilleRoute
+  HotTubMaintenanceVilleRoute: typeof HotTubMaintenanceVilleRoute
+  HotTubRepairVilleRoute: typeof HotTubRepairVilleRoute
   InstallationSpaVilleRoute: typeof InstallationSpaVilleRoute
+  NettoyagePiscineVilleRoute: typeof NettoyagePiscineVilleRoute
+  OuverturePiscineVilleRoute: typeof OuverturePiscineVilleRoute
   OuvertureSpaVilleRoute: typeof OuvertureSpaVilleRoute
+  PiecesSpaVilleRoute: typeof PiecesSpaVilleRoute
   ReparationSpaVilleRoute: typeof ReparationSpaVilleRoute
   VenteSpaVilleRoute: typeof VenteSpaVilleRoute
 }
@@ -324,11 +415,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ReparationSpaVilleRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/pieces-spa/$ville': {
+      id: '/pieces-spa/$ville'
+      path: '/pieces-spa/$ville'
+      fullPath: '/pieces-spa/$ville'
+      preLoaderRoute: typeof PiecesSpaVilleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/ouverture-spa/$ville': {
       id: '/ouverture-spa/$ville'
       path: '/ouverture-spa/$ville'
       fullPath: '/ouverture-spa/$ville'
       preLoaderRoute: typeof OuvertureSpaVilleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ouverture-piscine/$ville': {
+      id: '/ouverture-piscine/$ville'
+      path: '/ouverture-piscine/$ville'
+      fullPath: '/ouverture-piscine/$ville'
+      preLoaderRoute: typeof OuverturePiscineVilleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/nettoyage-piscine/$ville': {
+      id: '/nettoyage-piscine/$ville'
+      path: '/nettoyage-piscine/$ville'
+      fullPath: '/nettoyage-piscine/$ville'
+      preLoaderRoute: typeof NettoyagePiscineVilleRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/installation-spa/$ville': {
@@ -338,6 +450,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InstallationSpaVilleRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/hot-tub-repair/$ville': {
+      id: '/hot-tub-repair/$ville'
+      path: '/hot-tub-repair/$ville'
+      fullPath: '/hot-tub-repair/$ville'
+      preLoaderRoute: typeof HotTubRepairVilleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hot-tub-maintenance/$ville': {
+      id: '/hot-tub-maintenance/$ville'
+      path: '/hot-tub-maintenance/$ville'
+      fullPath: '/hot-tub-maintenance/$ville'
+      preLoaderRoute: typeof HotTubMaintenanceVilleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/fermeture-spa/$ville': {
       id: '/fermeture-spa/$ville'
       path: '/fermeture-spa/$ville'
@@ -345,11 +471,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FermetureSpaVilleRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/fermeture-piscine/$ville': {
+      id: '/fermeture-piscine/$ville'
+      path: '/fermeture-piscine/$ville'
+      fullPath: '/fermeture-piscine/$ville'
+      preLoaderRoute: typeof FermeturePiscineVilleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/entretien-spa/$ville': {
       id: '/entretien-spa/$ville'
       path: '/entretien-spa/$ville'
       fullPath: '/entretien-spa/$ville'
       preLoaderRoute: typeof EntretienSpaVilleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/entretien-piscine/$ville': {
+      id: '/entretien-piscine/$ville'
+      path: '/entretien-piscine/$ville'
+      fullPath: '/entretien-piscine/$ville'
+      preLoaderRoute: typeof EntretienPiscineVilleRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -366,10 +506,17 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   VenteSpasRoute: VenteSpasRoute,
   VillesRoute: VillesRoute,
+  EntretienPiscineVilleRoute: EntretienPiscineVilleRoute,
   EntretienSpaVilleRoute: EntretienSpaVilleRoute,
+  FermeturePiscineVilleRoute: FermeturePiscineVilleRoute,
   FermetureSpaVilleRoute: FermetureSpaVilleRoute,
+  HotTubMaintenanceVilleRoute: HotTubMaintenanceVilleRoute,
+  HotTubRepairVilleRoute: HotTubRepairVilleRoute,
   InstallationSpaVilleRoute: InstallationSpaVilleRoute,
+  NettoyagePiscineVilleRoute: NettoyagePiscineVilleRoute,
+  OuverturePiscineVilleRoute: OuverturePiscineVilleRoute,
   OuvertureSpaVilleRoute: OuvertureSpaVilleRoute,
+  PiecesSpaVilleRoute: PiecesSpaVilleRoute,
   ReparationSpaVilleRoute: ReparationSpaVilleRoute,
   VenteSpaVilleRoute: VenteSpaVilleRoute,
 }
