@@ -19,6 +19,7 @@ import { Route as PiecesRouteImport } from './routes/pieces'
 import { Route as EnRouteImport } from './routes/en'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as VenteSpaVilleRouteImport } from './routes/vente-spa.$ville'
 import { Route as ReparationSpaVilleRouteImport } from './routes/reparation-spa.$ville'
 import { Route as OuvertureSpaVilleRouteImport } from './routes/ouverture-spa.$ville'
 import { Route as InstallationSpaVilleRouteImport } from './routes/installation-spa.$ville'
@@ -75,6 +76,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const VenteSpaVilleRoute = VenteSpaVilleRouteImport.update({
+  id: '/vente-spa/$ville',
+  path: '/vente-spa/$ville',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ReparationSpaVilleRoute = ReparationSpaVilleRouteImport.update({
   id: '/reparation-spa/$ville',
   path: '/reparation-spa/$ville',
@@ -117,6 +123,7 @@ export interface FileRoutesByFullPath {
   '/installation-spa/$ville': typeof InstallationSpaVilleRoute
   '/ouverture-spa/$ville': typeof OuvertureSpaVilleRoute
   '/reparation-spa/$ville': typeof ReparationSpaVilleRoute
+  '/vente-spa/$ville': typeof VenteSpaVilleRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -134,6 +141,7 @@ export interface FileRoutesByTo {
   '/installation-spa/$ville': typeof InstallationSpaVilleRoute
   '/ouverture-spa/$ville': typeof OuvertureSpaVilleRoute
   '/reparation-spa/$ville': typeof ReparationSpaVilleRoute
+  '/vente-spa/$ville': typeof VenteSpaVilleRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -152,6 +160,7 @@ export interface FileRoutesById {
   '/installation-spa/$ville': typeof InstallationSpaVilleRoute
   '/ouverture-spa/$ville': typeof OuvertureSpaVilleRoute
   '/reparation-spa/$ville': typeof ReparationSpaVilleRoute
+  '/vente-spa/$ville': typeof VenteSpaVilleRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -171,6 +180,7 @@ export interface FileRouteTypes {
     | '/installation-spa/$ville'
     | '/ouverture-spa/$ville'
     | '/reparation-spa/$ville'
+    | '/vente-spa/$ville'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -188,6 +198,7 @@ export interface FileRouteTypes {
     | '/installation-spa/$ville'
     | '/ouverture-spa/$ville'
     | '/reparation-spa/$ville'
+    | '/vente-spa/$ville'
   id:
     | '__root__'
     | '/'
@@ -205,6 +216,7 @@ export interface FileRouteTypes {
     | '/installation-spa/$ville'
     | '/ouverture-spa/$ville'
     | '/reparation-spa/$ville'
+    | '/vente-spa/$ville'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -223,6 +235,7 @@ export interface RootRouteChildren {
   InstallationSpaVilleRoute: typeof InstallationSpaVilleRoute
   OuvertureSpaVilleRoute: typeof OuvertureSpaVilleRoute
   ReparationSpaVilleRoute: typeof ReparationSpaVilleRoute
+  VenteSpaVilleRoute: typeof VenteSpaVilleRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -297,6 +310,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/vente-spa/$ville': {
+      id: '/vente-spa/$ville'
+      path: '/vente-spa/$ville'
+      fullPath: '/vente-spa/$ville'
+      preLoaderRoute: typeof VenteSpaVilleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/reparation-spa/$ville': {
       id: '/reparation-spa/$ville'
       path: '/reparation-spa/$ville'
@@ -351,7 +371,17 @@ const rootRouteChildren: RootRouteChildren = {
   InstallationSpaVilleRoute: InstallationSpaVilleRoute,
   OuvertureSpaVilleRoute: OuvertureSpaVilleRoute,
   ReparationSpaVilleRoute: ReparationSpaVilleRoute,
+  VenteSpaVilleRoute: VenteSpaVilleRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
