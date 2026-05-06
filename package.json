@@ -4,6 +4,7 @@
   "sideEffects": false,
   "type": "module",
   "scripts": {
+    "import:municipalities": "bun run scripts/import-quebec-municipalities.ts",
     "dev": "vite dev",
     "build": "vite build",
     "build:dev": "vite build --mode development",
