@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Layout } from "@/components/Layout";
 import { ServiceRequestForm } from "@/components/ServiceRequestForm";
-import { SITE, localBusinessSchema } from "@/lib/seo";
+import { SITE, localBusinessSchema, altLinks } from "@/lib/seo";
 import { Phone, CheckCircle2 } from "lucide-react";
 import truck from "@/assets/ocarina-truck.jpg";
 
@@ -12,6 +12,13 @@ export const Route = createFileRoute("/en")({
       { name: "description", content: "Professional hot tub and spa service across Quebec: repair, maintenance, installation, opening, closing. Pool service available. Call 819-913-7727." },
       { property: "og:title", content: "Ocarina Spa — Hot tub & spa service in Quebec" },
       { property: "og:description", content: "Mobile hot tub repair and maintenance across Quebec." },
+      { property: "og:locale", content: "en_CA" },
+    ],
+    links: [
+      { rel: "canonical", href: SITE.domain + "/en" },
+      { rel: "alternate", hreflang: "en-CA", href: SITE.domain + "/en" },
+      { rel: "alternate", hreflang: "fr-CA", href: SITE.domain + "/" },
+      { rel: "alternate", hreflang: "x-default", href: SITE.domain + "/" },
     ],
     scripts: [{ type: "application/ld+json", children: JSON.stringify(localBusinessSchema()) }],
   }),

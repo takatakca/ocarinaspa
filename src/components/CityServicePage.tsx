@@ -3,7 +3,14 @@ import { Layout } from "@/components/Layout";
 import { ServiceRequestForm } from "@/components/ServiceRequestForm";
 import { findMunicipalityBySlug, findServiceBySlug, SERVICE_TYPES, type ServiceSlug } from "@/data/quebecMunicipalities";
 import { Phone, CheckCircle2, MapPin } from "lucide-react";
-import { SITE, serviceSchema, faqSchema, localBusinessSchema, breadcrumbSchema } from "@/lib/seo";
+import { SITE, serviceSchema, faqSchema, localBusinessSchema, breadcrumbSchema, altLinks } from "@/lib/seo";
+
+const FR_EN_MAP: Record<string, string> = {
+  "reparation-spa": "hot-tub-repair",
+  "entretien-spa": "hot-tub-maintenance",
+  "hot-tub-repair": "reparation-spa",
+  "hot-tub-maintenance": "entretien-spa",
+};
 
 export interface CityServicePageProps {
   serviceSlug: ServiceSlug;
@@ -190,6 +197,24 @@ export const cityServiceHead = (serviceSlug: ServiceSlug, villeSlug: string) => 
     ? `${service.label} in ${muni.name}, Quebec. 20+ years of experience. Call ${SITE.phone}.`
     : `Service de ${service.label.toLowerCase()} à ${muni.name}, ${region}. Expert depuis 20 ans. Appelez le ${SITE.phone}.`;
   const url = `${SITE.domain}/${service.slug}/${muni.slug}`;
+  const counterpart = FR_EN_MAP[service.slug];
+  const counterpartPath = counterpart ? `/${counterpart}/${muni.slug}` : null;
+  const links = altLinks({
+    path: `/${service.slug}/${muni.slug}`,
+    enPath: isEn
+      ? null // self is EN; FR alternate handled below
+      : counterpartPath,
+    lang: isEn ? "en-CA" : "fr-CA",
+  });
+  // Fix EN-self case: when current page is EN, primary canonical is itself, FR is the counterpart
+  const linksFinal = isEn && counterpart
+    ? [
+        { rel: "canonical", href: url },
+        { rel: "alternate", hreflang: "en-CA", href: url },
+        { rel: "alternate", hreflang: "fr-CA", href: `${SITE.domain}/${counterpart}/${muni.slug}` },
+        { rel: "alternate", hreflang: "x-default", href: `${SITE.domain}/${counterpart}/${muni.slug}` },
+      ]
+    : links;
   const faqs = isEn
     ? [
         { q: `Do you offer ${service.label.toLowerCase()} in ${muni.name}?`, a: `Yes, we serve ${muni.name} and the surrounding area.` },
@@ -207,8 +232,9 @@ export const cityServiceHead = (serviceSlug: ServiceSlug, villeSlug: string) => 
       { property: "og:description", content: description },
       { property: "og:type", content: "website" },
       { property: "og:url", content: url },
-      { rel: "canonical", href: url },
+      { property: "og:locale", content: isEn ? "en_CA" : "fr_CA" },
     ],
+    links: linksFinal,
     scripts: [
       { type: "application/ld+json", children: JSON.stringify(localBusinessSchema({ areaName: muni.name })) },
       { type: "application/ld+json", children: JSON.stringify(serviceSchema(service.label, muni.name)) },

@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { z } from "zod";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
 
 const schema = z.object({
@@ -51,21 +50,26 @@ export function ServiceRequestForm({
       return;
     }
     setSubmitting(true);
-    const { consent: _c, preferred_date, ...rest } = parsed.data;
+    const { consent: _c, ...rest } = parsed.data;
     const payload = {
       ...rest,
-      preferred_date: preferred_date || null,
       source_url: typeof window !== "undefined" ? window.location.href : null,
     };
-    const { error } = await supabase.from("service_requests").insert(payload);
-    setSubmitting(false);
-    if (error) {
-      console.error(error);
+    try {
+      const res = await fetch("/api/public/service-request", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error(await res.text());
+      toast.success("Demande envoyée ! Nous vous contactons rapidement.");
+      form.reset();
+    } catch (err) {
+      console.error(err);
       toast.error("Une erreur est survenue. Appelez-nous au 819-913-7727.");
-      return;
+    } finally {
+      setSubmitting(false);
     }
-    toast.success("Demande envoyée ! Nous vous contactons rapidement.");
-    form.reset();
   };
 
   return (

@@ -5,7 +5,7 @@ import { ServiceRequestForm } from "@/components/ServiceRequestForm";
 import { Link } from "@tanstack/react-router";
 import { Phone, CheckCircle2, ShieldCheck, Truck, Wrench } from "lucide-react";
 import truck from "@/assets/ocarina-truck.jpg";
-import { SITE, localBusinessSchema, faqSchema } from "@/lib/seo";
+import { SITE, localBusinessSchema, faqSchema, altLinks } from "@/lib/seo";
 
 const FAQS = [
   { q: "Réparez-vous toutes les marques de spas ?", a: "Oui, nous travaillons sur toutes les marques et tous les modèles de spas et bains à remous au Québec." },
@@ -25,7 +25,9 @@ export const Route = createFileRoute("/")({
       { property: "og:description", content: "Service mobile partout au Québec : réparation, vente, entretien, ouverture et fermeture de spas." },
       { property: "og:type", content: "website" },
       { property: "og:image", content: SITE.domain + "/ocarina-logo.png" },
+      { property: "og:locale", content: "fr_CA" },
     ],
+    links: altLinks({ path: "/", enPath: "/en" }),
     scripts: [
       { type: "application/ld+json", children: JSON.stringify(localBusinessSchema()) },
       { type: "application/ld+json", children: JSON.stringify(faqSchema(FAQS)) },

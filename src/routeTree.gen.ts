@@ -32,6 +32,7 @@ import { Route as FermetureSpaVilleRouteImport } from './routes/fermeture-spa.$v
 import { Route as FermeturePiscineVilleRouteImport } from './routes/fermeture-piscine.$ville'
 import { Route as EntretienSpaVilleRouteImport } from './routes/entretien-spa.$ville'
 import { Route as EntretienPiscineVilleRouteImport } from './routes/entretien-piscine.$ville'
+import { Route as ApiPublicServiceRequestRouteImport } from './routes/api/public/service-request'
 
 const VillesRoute = VillesRouteImport.update({
   id: '/villes',
@@ -148,6 +149,11 @@ const EntretienPiscineVilleRoute = EntretienPiscineVilleRouteImport.update({
   path: '/entretien-piscine/$ville',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicServiceRequestRoute = ApiPublicServiceRequestRouteImport.update({
+  id: '/api/public/service-request',
+  path: '/api/public/service-request',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -173,6 +179,7 @@ export interface FileRoutesByFullPath {
   '/pieces-spa/$ville': typeof PiecesSpaVilleRoute
   '/reparation-spa/$ville': typeof ReparationSpaVilleRoute
   '/vente-spa/$ville': typeof VenteSpaVilleRoute
+  '/api/public/service-request': typeof ApiPublicServiceRequestRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -198,6 +205,7 @@ export interface FileRoutesByTo {
   '/pieces-spa/$ville': typeof PiecesSpaVilleRoute
   '/reparation-spa/$ville': typeof ReparationSpaVilleRoute
   '/vente-spa/$ville': typeof VenteSpaVilleRoute
+  '/api/public/service-request': typeof ApiPublicServiceRequestRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -224,6 +232,7 @@ export interface FileRoutesById {
   '/pieces-spa/$ville': typeof PiecesSpaVilleRoute
   '/reparation-spa/$ville': typeof ReparationSpaVilleRoute
   '/vente-spa/$ville': typeof VenteSpaVilleRoute
+  '/api/public/service-request': typeof ApiPublicServiceRequestRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -251,6 +260,7 @@ export interface FileRouteTypes {
     | '/pieces-spa/$ville'
     | '/reparation-spa/$ville'
     | '/vente-spa/$ville'
+    | '/api/public/service-request'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -276,6 +286,7 @@ export interface FileRouteTypes {
     | '/pieces-spa/$ville'
     | '/reparation-spa/$ville'
     | '/vente-spa/$ville'
+    | '/api/public/service-request'
   id:
     | '__root__'
     | '/'
@@ -301,6 +312,7 @@ export interface FileRouteTypes {
     | '/pieces-spa/$ville'
     | '/reparation-spa/$ville'
     | '/vente-spa/$ville'
+    | '/api/public/service-request'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -327,6 +339,7 @@ export interface RootRouteChildren {
   PiecesSpaVilleRoute: typeof PiecesSpaVilleRoute
   ReparationSpaVilleRoute: typeof ReparationSpaVilleRoute
   VenteSpaVilleRoute: typeof VenteSpaVilleRoute
+  ApiPublicServiceRequestRoute: typeof ApiPublicServiceRequestRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -492,6 +505,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EntretienPiscineVilleRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/service-request': {
+      id: '/api/public/service-request'
+      path: '/api/public/service-request'
+      fullPath: '/api/public/service-request'
+      preLoaderRoute: typeof ApiPublicServiceRequestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -519,16 +539,8 @@ const rootRouteChildren: RootRouteChildren = {
   PiecesSpaVilleRoute: PiecesSpaVilleRoute,
   ReparationSpaVilleRoute: ReparationSpaVilleRoute,
   VenteSpaVilleRoute: VenteSpaVilleRoute,
+  ApiPublicServiceRequestRoute: ApiPublicServiceRequestRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}

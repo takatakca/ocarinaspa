@@ -65,6 +65,30 @@ export const faqSchema = (faqs: Array<{ q: string; a: string }>) => ({
   })),
 });
 
+/**
+ * Build canonical + hreflang link tags for a page.
+ * Pass the FR path; the EN equivalent (or `/en`) is added automatically.
+ */
+export const altLinks = (opts: {
+  path: string;
+  enPath?: string | null;
+  lang?: "fr-CA" | "en-CA";
+}) => {
+  const lang = opts.lang ?? "fr-CA";
+  const fr = SITE.domain + opts.path;
+  const en = opts.enPath === null ? null : SITE.domain + (opts.enPath ?? "/en");
+  const self = lang === "en-CA" ? en! : fr;
+  const links: Array<{ rel: string; href: string; hreflang?: string }> = [
+    { rel: "canonical", href: self },
+    { rel: "alternate", hreflang: "fr-CA", href: fr },
+  ];
+  if (en) {
+    links.push({ rel: "alternate", hreflang: "en-CA", href: en });
+    links.push({ rel: "alternate", hreflang: "x-default", href: fr });
+  }
+  return links;
+};
+
 export const breadcrumbSchema = (items: Array<{ name: string; url: string }>) => ({
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
