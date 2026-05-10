@@ -4,9 +4,8 @@
 // Run with:  npm start
 // Listens on process.env.PORT (provided by cPanel) — falls back to 3000.
 import { serve } from "@hono/node-server";
-import sirv from "sirv";
-import { createRequire } from "node:module";
-import { dirname, join } from "node:path";
+import { createReadStream, statSync } from "node:fs";
+import { dirname, join, normalize } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -15,14 +14,54 @@ const serverEntryPath = join(__dirname, "dist", "server", "server.js");
 
 const ssr = (await import(serverEntryPath)).default;
 
-const staticHandler = sirv(clientDir, {
-  etag: true,
-  immutable: true,
-  maxAge: 31536000,
-  gzip: true,
-  brotli: true,
-  dev: false,
-});
+const MIME = {
+  ".html": "text/html; charset=utf-8",
+  ".js": "application/javascript; charset=utf-8",
+  ".mjs": "application/javascript; charset=utf-8",
+  ".css": "text/css; charset=utf-8",
+  ".json": "application/json; charset=utf-8",
+  ".svg": "image/svg+xml",
+  ".png": "image/png",
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".webp": "image/webp",
+  ".ico": "image/x-icon",
+  ".woff": "font/woff",
+  ".woff2": "font/woff2",
+  ".ttf": "font/ttf",
+  ".txt": "text/plain; charset=utf-8",
+  ".xml": "application/xml; charset=utf-8",
+  ".map": "application/json; charset=utf-8",
+};
+
+function tryServeStatic(pathname) {
+  // Only handle paths that look like files (have an extension).
+  if (!/\.[a-zA-Z0-9]+$/.test(pathname)) return null;
+  const safe = normalize(pathname).replace(/^\/+/, "");
+  if (safe.includes("..")) return null;
+  const filePath = join(clientDir, safe);
+  let stat;
+  try {
+    stat = statSync(filePath);
+  } catch {
+    return null;
+  }
+  if (!stat.isFile()) return null;
+  const ext = safe.slice(safe.lastIndexOf(".")).toLowerCase();
+  const type = MIME[ext] || "application/octet-stream";
+  const isHashed = /-[A-Za-z0-9_]{8,}\.[a-z0-9]+$/.test(safe);
+  const cacheControl = isHashed
+    ? "public, max-age=31536000, immutable"
+    : "public, max-age=3600";
+  return new Response(createReadStream(filePath), {
+    status: 200,
+    headers: {
+      "content-type": type,
+      "content-length": String(stat.size),
+      "cache-control": cacheControl,
+    },
+  });
+}
 
 const port = Number(process.env.PORT) || 3000;
 const host = process.env.HOST || "0.0.0.0";
@@ -31,40 +70,8 @@ serve(
   {
     fetch: async (request) => {
       const url = new URL(request.url);
-      // Try static asset first (only for paths that look like files).
-      if (/\.[a-zA-Z0-9]+$/.test(url.pathname)) {
-        const staticResponse = await new Promise((resolve) => {
-          const fakeReq = {
-            url: url.pathname + url.search,
-            method: request.method,
-            headers: Object.fromEntries(request.headers),
-          };
-          let statusCode = 200;
-          const headers = {};
-          let body = null;
-          const fakeRes = {
-            statusCode: 200,
-            setHeader(k, v) { headers[k.toLowerCase()] = v; },
-            getHeader(k) { return headers[k.toLowerCase()]; },
-            removeHeader(k) { delete headers[k.toLowerCase()]; },
-            writeHead(code, hdrs) {
-              statusCode = code;
-              if (hdrs) for (const k of Object.keys(hdrs)) headers[k.toLowerCase()] = hdrs[k];
-            },
-            end(data) {
-              statusCode = this.statusCode || statusCode;
-              body = data ?? null;
-              resolve(new Response(body, { status: statusCode, headers }));
-            },
-            on() {},
-            once() {},
-            emit() {},
-          };
-          staticHandler(fakeReq, fakeRes, () => resolve(null));
-        });
-        if (staticResponse) return staticResponse;
-      }
-      // Fall through to SSR / server routes.
+      const staticResponse = tryServeStatic(url.pathname);
+      if (staticResponse) return staticResponse;
       return ssr.fetch(request);
     },
     port,
