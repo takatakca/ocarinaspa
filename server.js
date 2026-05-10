@@ -5,6 +5,7 @@
 // Listens on process.env.PORT (provided by cPanel) — falls back to 3000.
 import { serve } from "@hono/node-server";
 import { createReadStream, statSync } from "node:fs";
+import { Readable } from "node:stream";
 import { dirname, join, normalize } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -53,7 +54,7 @@ function tryServeStatic(pathname) {
   const cacheControl = isHashed
     ? "public, max-age=31536000, immutable"
     : "public, max-age=3600";
-  return new Response(createReadStream(filePath), {
+  return new Response(Readable.toWeb(createReadStream(filePath)), {
     status: 200,
     headers: {
       "content-type": type,
