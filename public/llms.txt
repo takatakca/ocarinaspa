@@ -1,0 +1,22 @@
+# Ocarina Spa Québec
+
+> Réparation, vente, installation et entretien de spas et piscines partout au Québec. Plus de 20 ans d'expertise. Service mobile dans toutes les régions. Téléphone : 819-913-7727.
+
+## Pages principales
+
+- [Accueil](/): Présentation des services de spa et piscine au Québec.
+- [Services](/services): Liste complète des services de spa (réparation, installation, entretien, ouverture, fermeture).
+- [Piscine](/piscine): Services de piscine — ouverture, fermeture, nettoyage, entretien.
+- [Vente de spas](/vente-spas): Vente de spas neufs et usagés au Québec.
+- [Pièces et accessoires](/pieces): Pompes, chauffe-eau, panneaux de contrôle, jets, filtres.
+- [Régions desservies](/regions): Toutes les régions administratives du Québec couvertes.
+- [Villes desservies](/villes): Liste des villes et municipalités où nous offrons le service.
+- [Contact](/contact): Formulaire de demande de service et coordonnées.
+
+## English
+
+- [Home (EN)](/en): Hot tub repair, maintenance and spa service across Quebec.
+
+## Optional
+
+- [Sitemap](/sitemap.xml): Liste complète de toutes les pages.
