@@ -8,6 +8,7 @@ const nav = [
   { to: "/", label: "Accueil" },
   { to: "/services", label: "Services" },
   { to: "/vente-spas", label: "Vente" },
+  { to: "/marques", label: "Marques" },
   { to: "/pieces", label: "Pièces" },
   { to: "/piscine", label: "Piscine" },
   { to: "/regions", label: "Régions" },

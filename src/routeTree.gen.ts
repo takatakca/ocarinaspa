@@ -16,6 +16,7 @@ import { Route as ServicesRouteImport } from './routes/services'
 import { Route as RegionsRouteImport } from './routes/regions'
 import { Route as PiscineRouteImport } from './routes/piscine'
 import { Route as PiecesRouteImport } from './routes/pieces'
+import { Route as MarquesRouteImport } from './routes/marques'
 import { Route as EnRouteImport } from './routes/en'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as IndexRouteImport } from './routes/index'
@@ -67,6 +68,11 @@ const PiscineRoute = PiscineRouteImport.update({
 const PiecesRoute = PiecesRouteImport.update({
   id: '/pieces',
   path: '/pieces',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MarquesRoute = MarquesRouteImport.update({
+  id: '/marques',
+  path: '/marques',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EnRoute = EnRouteImport.update({
@@ -159,6 +165,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/contact': typeof ContactRoute
   '/en': typeof EnRoute
+  '/marques': typeof MarquesRoute
   '/pieces': typeof PiecesRoute
   '/piscine': typeof PiscineRoute
   '/regions': typeof RegionsRoute
@@ -185,6 +192,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/contact': typeof ContactRoute
   '/en': typeof EnRoute
+  '/marques': typeof MarquesRoute
   '/pieces': typeof PiecesRoute
   '/piscine': typeof PiscineRoute
   '/regions': typeof RegionsRoute
@@ -212,6 +220,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/contact': typeof ContactRoute
   '/en': typeof EnRoute
+  '/marques': typeof MarquesRoute
   '/pieces': typeof PiecesRoute
   '/piscine': typeof PiscineRoute
   '/regions': typeof RegionsRoute
@@ -240,6 +249,7 @@ export interface FileRouteTypes {
     | '/'
     | '/contact'
     | '/en'
+    | '/marques'
     | '/pieces'
     | '/piscine'
     | '/regions'
@@ -266,6 +276,7 @@ export interface FileRouteTypes {
     | '/'
     | '/contact'
     | '/en'
+    | '/marques'
     | '/pieces'
     | '/piscine'
     | '/regions'
@@ -292,6 +303,7 @@ export interface FileRouteTypes {
     | '/'
     | '/contact'
     | '/en'
+    | '/marques'
     | '/pieces'
     | '/piscine'
     | '/regions'
@@ -319,6 +331,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ContactRoute: typeof ContactRoute
   EnRoute: typeof EnRoute
+  MarquesRoute: typeof MarquesRoute
   PiecesRoute: typeof PiecesRoute
   PiscineRoute: typeof PiscineRoute
   RegionsRoute: typeof RegionsRoute
@@ -391,6 +404,13 @@ declare module '@tanstack/react-router' {
       path: '/pieces'
       fullPath: '/pieces'
       preLoaderRoute: typeof PiecesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/marques': {
+      id: '/marques'
+      path: '/marques'
+      fullPath: '/marques'
+      preLoaderRoute: typeof MarquesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/en': {
@@ -519,6 +539,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ContactRoute: ContactRoute,
   EnRoute: EnRoute,
+  MarquesRoute: MarquesRoute,
   PiecesRoute: PiecesRoute,
   PiscineRoute: PiscineRoute,
   RegionsRoute: RegionsRoute,

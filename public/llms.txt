@@ -8,6 +8,7 @@
 - [Services](/services): Liste complète des services de spa (réparation, installation, entretien, ouverture, fermeture).
 - [Piscine](/piscine): Services de piscine — ouverture, fermeture, nettoyage, entretien.
 - [Vente de spas](/vente-spas): Vente de spas neufs et usagés au Québec.
+- [Marques réparées](/marques): Liste des marques de spas réparées (Jacuzzi, Hydropool, Arctic Spas, Beachcomber, etc.).
 - [Pièces et accessoires](/pieces): Pompes, chauffe-eau, panneaux de contrôle, jets, filtres.
 - [Régions desservies](/regions): Toutes les régions administratives du Québec couvertes.
 - [Villes desservies](/villes): Liste des villes et municipalités où nous offrons le service.

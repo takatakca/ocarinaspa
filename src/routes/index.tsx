@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Layout } from "@/components/Layout";
 import { ServiceCards } from "@/components/ServiceCards";
+import { SpaBrands } from "@/components/SpaBrands";
 import { ServiceRequestForm } from "@/components/ServiceRequestForm";
 import { Link } from "@tanstack/react-router";
 import { Phone, CheckCircle2, ShieldCheck, Truck, Wrench } from "lucide-react";
@@ -75,6 +76,8 @@ function Index() {
       </section>
 
       <ServiceCards />
+
+      <SpaBrands compact />
 
       <section className="container mx-auto px-4 py-20 grid lg:grid-cols-3 gap-8">
         {[
