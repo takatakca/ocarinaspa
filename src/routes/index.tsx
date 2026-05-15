@@ -19,7 +19,7 @@ const FAQS = [
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Ocarina Spa Québec — Réparation, vente et entretien de spas" },
+      { title: "Ocarina Spa Québec — Réparation et vente de spas" },
       { name: "description", content: "Réparation, vente, entretien, installation, ouverture et fermeture de spas partout au Québec. Service à domicile. Appelez le 819-913-7727." },
       { property: "og:title", content: "Ocarina Spa Québec — Réparation & vente de spas" },
       { property: "og:description", content: "Service mobile partout au Québec : réparation, vente, entretien, ouverture et fermeture de spas." },
