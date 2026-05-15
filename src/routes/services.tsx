@@ -14,7 +14,7 @@ const icons: Record<string, typeof Stethoscope> = {
 export const Route = createFileRoute("/services")({
   head: () => ({
     meta: [
-      { title: "Services de spa au Québec — Réparation, installation, entretien | Ocarina Spa" },
+      { title: "Services de spa au Québec — Ocarina Spa" },
       { name: "description", content: "Tous nos services de spa au Québec : réparation, installation, ouverture, fermeture et entretien à domicile par des experts." },
       { property: "og:title", content: "Nos services de spa au Québec" },
       { property: "og:description", content: "Réparation, installation, ouverture, fermeture, entretien à domicile partout au Québec." },

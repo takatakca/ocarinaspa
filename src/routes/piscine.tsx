@@ -14,7 +14,7 @@ const SERVICES = [
 export const Route = createFileRoute("/piscine")({
   head: () => ({
     meta: [
-      { title: "Service de piscine au Québec — Ouverture, fermeture, nettoyage | Ocarina Spa" },
+      { title: "Service de piscine au Québec — Ocarina Spa" },
       { name: "description", content: "Ouverture, fermeture, nettoyage et entretien de piscine résidentielle au Québec. Service professionnel à domicile. 819-913-7727." },
       { property: "og:title", content: "Service de piscine — Ocarina Spa Québec" },
       { property: "og:description", content: "Ouverture, fermeture, nettoyage et entretien de piscine partout au Québec." },

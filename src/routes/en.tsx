@@ -8,7 +8,7 @@ import truck from "@/assets/ocarina-truck.jpg";
 export const Route = createFileRoute("/en")({
   head: () => ({
     meta: [
-      { title: "Hot tub repair, maintenance & spa service in Quebec — Ocarina Spa" },
+      { title: "Hot Tub Repair & Spa Service in Quebec — Ocarina Spa" },
       { name: "description", content: "Professional hot tub and spa service across Quebec: repair, maintenance, installation, opening, closing. Pool service available. Call 819-913-7727." },
       { property: "og:title", content: "Ocarina Spa — Hot tub & spa service in Quebec" },
       { property: "og:description", content: "Mobile hot tub repair and maintenance across Quebec." },

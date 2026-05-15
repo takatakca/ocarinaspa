@@ -1,21 +1,26 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { quebecMunicipalities, SERVICE_TYPES } from "@/data/quebecMunicipalities";
-import { SITE } from "@/lib/seo";
+
+const BASE = "https://ocarinaspa.lovable.app";
 
 export const Route = createFileRoute("/sitemap.xml")({
   server: {
     handlers: {
       GET: () => {
-        const base = SITE.domain;
         const urls: string[] = [
-          `${base}/`,
-          `${base}/services`,
-          `${base}/villes`,
-          `${base}/contact`,
+          `${BASE}/`,
+          `${BASE}/en`,
+          `${BASE}/services`,
+          `${BASE}/piscine`,
+          `${BASE}/vente-spas`,
+          `${BASE}/pieces`,
+          `${BASE}/regions`,
+          `${BASE}/villes`,
+          `${BASE}/contact`,
         ];
         for (const s of SERVICE_TYPES) {
           for (const m of quebecMunicipalities) {
-            urls.push(`${base}/${s.slug}/${m.slug}`);
+            urls.push(`${BASE}/${s.slug}/${m.slug}`);
           }
         }
         const xml =
