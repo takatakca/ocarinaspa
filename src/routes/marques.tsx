@@ -110,8 +110,16 @@ function MarquesPage() {
       <SpaBrands />
 
       <section className="bg-surface">
-        <div className="container mx-auto px-4 py-16 grid lg:grid-cols-2 gap-10">
-          <div>
+        <div className="container mx-auto px-4 py-16 grid lg:grid-cols-2 gap-10 items-center">
+          <img
+            src={winterSpaImg}
+            alt="Spa extérieur avec vapeur dans la neige au Québec en hiver"
+            width={1600}
+            height={900}
+            loading="lazy"
+            className="w-full h-auto rounded-2xl shadow-xl order-2 lg:order-1"
+          />
+          <div className="order-1 lg:order-2">
             <h2 className="font-display text-3xl font-bold text-foreground">
               Réparation de spa usagé acheté sur Marketplace
             </h2>
@@ -125,8 +133,11 @@ function MarquesPage() {
               partout dans la province.
             </p>
           </div>
-          <ServiceRequestForm />
         </div>
+      </section>
+
+      <section className="container mx-auto px-4 pb-16">
+        <ServiceRequestForm />
       </section>
     </Layout>
   );
