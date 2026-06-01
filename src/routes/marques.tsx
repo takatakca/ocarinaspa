@@ -5,6 +5,8 @@ import { SpaBrands } from "@/components/SpaBrands";
 import { ServiceRequestForm } from "@/components/ServiceRequestForm";
 import { SITE, localBusinessSchema, altLinks, breadcrumbSchema } from "@/lib/seo";
 import { ALL_BRANDS } from "@/data/spaBrands";
+import technicianImg from "@/assets/spa-technician-repair.jpg";
+import winterSpaImg from "@/assets/spa-winter-quebec.jpg";
 
 export const Route = createFileRoute("/marques")({
   head: () => ({
@@ -63,36 +65,45 @@ function MarquesPage() {
   return (
     <Layout>
       <section className="bg-surface">
-        <div className="container mx-auto px-4 py-14 md:py-20">
-          <p className="text-brand font-semibold uppercase text-sm tracking-wide">
-            Réparation de spa au Québec
-          </p>
-          <h1 className="mt-3 font-display text-4xl md:text-5xl font-bold text-foreground max-w-3xl">
-            Marques de spas que nous réparons au Québec
-          </h1>
-          <p className="mt-5 text-lg text-muted-foreground max-w-3xl">
-            Ocarina Spa répare la majorité des marques de spas présentes au Québec, incluant
-            Jacuzzi, Hydropool, Arctic Spas, Beachcomber, Sundance Spas, Maax Spas, Vita Spa,
-            Bullfrog Spas, Master Spas, Hot Spring, Caldera, Coast Spas et plusieurs autres.
-            Même si les marques sont différentes, plusieurs spas utilisent des composantes
-            communes comme Balboa, Gecko, Waterway ou LX. Nous pouvons donc diagnostiquer et
-            réparer les problèmes fréquents : chauffage, pompe, fuite, jets, panneau de
-            contrôle, pack électronique, filtration, ozonateur et problèmes électriques.
-          </p>
-          <div className="mt-7 flex flex-wrap gap-3">
-            <a
-              href={`tel:${SITE.phoneTel}`}
-              className="inline-flex items-center gap-2 bg-brand text-brand-foreground px-6 py-3 rounded-md font-semibold hover:bg-brand-dark transition-colors"
-            >
-              <Phone className="w-5 h-5" /> Appeler {SITE.phone}
-            </a>
-            <Link
-              to="/contact"
-              className="inline-flex items-center gap-2 border-2 border-brand text-brand px-6 py-3 rounded-md font-semibold hover:bg-brand hover:text-brand-foreground transition-colors"
-            >
-              Demander un diagnostic
-            </Link>
+        <div className="container mx-auto px-4 py-14 md:py-20 grid lg:grid-cols-2 gap-10 items-center">
+          <div>
+            <p className="text-brand font-semibold uppercase text-sm tracking-wide">
+              Réparation de spa au Québec
+            </p>
+            <h1 className="mt-3 font-display text-4xl md:text-5xl font-bold text-foreground">
+              Marques de spas que nous réparons au Québec
+            </h1>
+            <p className="mt-5 text-lg text-muted-foreground">
+              Ocarina Spa répare la majorité des marques de spas présentes au Québec, incluant
+              Jacuzzi, Hydropool, Arctic Spas, Beachcomber, Sundance Spas, Maax Spas, Vita Spa,
+              Bullfrog Spas, Master Spas, Hot Spring, Caldera, Coast Spas et plusieurs autres.
+              Même si les marques sont différentes, plusieurs spas utilisent des composantes
+              communes comme Balboa, Gecko, Waterway ou LX. Nous pouvons donc diagnostiquer et
+              réparer les problèmes fréquents : chauffage, pompe, fuite, jets, panneau de
+              contrôle, pack électronique, filtration, ozonateur et problèmes électriques.
+            </p>
+            <div className="mt-7 flex flex-wrap gap-3">
+              <a
+                href={`tel:${SITE.phoneTel}`}
+                className="inline-flex items-center gap-2 bg-brand text-brand-foreground px-6 py-3 rounded-md font-semibold hover:bg-brand-dark transition-colors"
+              >
+                <Phone className="w-5 h-5" /> Appeler {SITE.phone}
+              </a>
+              <Link
+                to="/contact"
+                className="inline-flex items-center gap-2 border-2 border-brand text-brand px-6 py-3 rounded-md font-semibold hover:bg-brand hover:text-brand-foreground transition-colors"
+              >
+                Demander un diagnostic
+              </Link>
+            </div>
           </div>
+          <img
+            src={technicianImg}
+            alt="Technicien Ocarina Spa réparant un pack électronique et une pompe de spa"
+            width={1600}
+            height={1000}
+            className="w-full h-auto rounded-2xl shadow-2xl"
+          />
         </div>
       </section>
 
