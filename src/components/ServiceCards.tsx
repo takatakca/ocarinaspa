@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Wrench, Stethoscope, Sun, Snowflake, Cog, Droplets } from "lucide-react";
-import spaWater from "@/assets/spa-water.jpg";
+import spaWater from "@/assets/spa-winter-quebec.jpg";
 
 const items = [
   { icon: Stethoscope, title: "Réparation", desc: "Diagnostic et réparation rapide à domicile." },
