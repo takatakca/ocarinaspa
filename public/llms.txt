@@ -9,6 +9,9 @@
 - [Piscine](/piscine): Services de piscine — ouverture, fermeture, nettoyage, entretien.
 - [Vente de spas](/vente-spas): Vente de spas neufs et usagés au Québec.
 - [Marques réparées](/marques): Liste des marques de spas réparées (Jacuzzi, Hydropool, Arctic Spas, Beachcomber, etc.).
+- [Codes d'erreur de spa](/codes-erreur): FLO, OH, DR, SN, ICE, HL, LF, FLC — significations et solutions.
+- [Diagnostiqueur AI](/diagnostic): Outil AI gratuit pour identifier un problème de spa.
+- [Urgence Spa 24/7](/urgence-spa): Service d'urgence pour spa arrêté en hiver, gel de plomberie.
 - [Pièces et accessoires](/pieces): Pompes, chauffe-eau, panneaux de contrôle, jets, filtres.
 - [Régions desservies](/regions): Toutes les régions administratives du Québec couvertes.
 - [Villes desservies](/villes): Liste des villes et municipalités où nous offrons le service.

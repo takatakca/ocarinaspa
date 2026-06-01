@@ -2,6 +2,10 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Layout } from "@/components/Layout";
 import { ServiceCards } from "@/components/ServiceCards";
 import { SpaBrands } from "@/components/SpaBrands";
+import { RepairsGrid } from "@/components/RepairsGrid";
+import { EmergencyBanner } from "@/components/EmergencyBanner";
+import { BeforeAfter } from "@/components/BeforeAfter";
+import { CityLinks } from "@/components/CityLinks";
 import { ServiceRequestForm } from "@/components/ServiceRequestForm";
 import { Link } from "@tanstack/react-router";
 import { Phone, CheckCircle2, ShieldCheck, Truck, Wrench } from "lucide-react";
@@ -40,6 +44,7 @@ export const Route = createFileRoute("/")({
 function Index() {
   return (
     <Layout>
+      <EmergencyBanner />
       <section className="bg-surface">
         <div className="container mx-auto px-4 py-14 md:py-20 grid lg:grid-cols-2 gap-10 items-center">
           <div>
@@ -75,9 +80,15 @@ function Index() {
         </div>
       </section>
 
+      <RepairsGrid />
+
+      <BeforeAfter />
+
       <ServiceCards />
 
       <SpaBrands compact />
+
+      <CityLinks />
 
       <section className="container mx-auto px-4 py-20 grid lg:grid-cols-3 gap-8">
         {[
