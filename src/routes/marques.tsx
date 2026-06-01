@@ -58,9 +58,6 @@ export const Route = createFileRoute("/marques")({
   }),
   component: MarquesPage,
 });
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const _imgImports = ({});
 });
 
 function MarquesPage() {
