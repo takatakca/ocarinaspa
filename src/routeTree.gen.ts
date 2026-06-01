@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as VillesRouteImport } from './routes/villes'
 import { Route as VenteSpasRouteImport } from './routes/vente-spas'
+import { Route as UrgenceSpaRouteImport } from './routes/urgence-spa'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ServicesRouteImport } from './routes/services'
 import { Route as RegionsRouteImport } from './routes/regions'
@@ -18,7 +19,9 @@ import { Route as PiscineRouteImport } from './routes/piscine'
 import { Route as PiecesRouteImport } from './routes/pieces'
 import { Route as MarquesRouteImport } from './routes/marques'
 import { Route as EnRouteImport } from './routes/en'
+import { Route as DiagnosticRouteImport } from './routes/diagnostic'
 import { Route as ContactRouteImport } from './routes/contact'
+import { Route as CodesErreurRouteImport } from './routes/codes-erreur'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as VenteSpaVilleRouteImport } from './routes/vente-spa.$ville'
 import { Route as ReparationSpaVilleRouteImport } from './routes/reparation-spa.$ville'
@@ -43,6 +46,11 @@ const VillesRoute = VillesRouteImport.update({
 const VenteSpasRoute = VenteSpasRouteImport.update({
   id: '/vente-spas',
   path: '/vente-spas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UrgenceSpaRoute = UrgenceSpaRouteImport.update({
+  id: '/urgence-spa',
+  path: '/urgence-spa',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -80,9 +88,19 @@ const EnRoute = EnRouteImport.update({
   path: '/en',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DiagnosticRoute = DiagnosticRouteImport.update({
+  id: '/diagnostic',
+  path: '/diagnostic',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ContactRoute = ContactRouteImport.update({
   id: '/contact',
   path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CodesErreurRoute = CodesErreurRouteImport.update({
+  id: '/codes-erreur',
+  path: '/codes-erreur',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -163,7 +181,9 @@ const ApiPublicServiceRequestRoute = ApiPublicServiceRequestRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/codes-erreur': typeof CodesErreurRoute
   '/contact': typeof ContactRoute
+  '/diagnostic': typeof DiagnosticRoute
   '/en': typeof EnRoute
   '/marques': typeof MarquesRoute
   '/pieces': typeof PiecesRoute
@@ -171,6 +191,7 @@ export interface FileRoutesByFullPath {
   '/regions': typeof RegionsRoute
   '/services': typeof ServicesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/urgence-spa': typeof UrgenceSpaRoute
   '/vente-spas': typeof VenteSpasRoute
   '/villes': typeof VillesRoute
   '/entretien-piscine/$ville': typeof EntretienPiscineVilleRoute
@@ -190,7 +211,9 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/codes-erreur': typeof CodesErreurRoute
   '/contact': typeof ContactRoute
+  '/diagnostic': typeof DiagnosticRoute
   '/en': typeof EnRoute
   '/marques': typeof MarquesRoute
   '/pieces': typeof PiecesRoute
@@ -198,6 +221,7 @@ export interface FileRoutesByTo {
   '/regions': typeof RegionsRoute
   '/services': typeof ServicesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/urgence-spa': typeof UrgenceSpaRoute
   '/vente-spas': typeof VenteSpasRoute
   '/villes': typeof VillesRoute
   '/entretien-piscine/$ville': typeof EntretienPiscineVilleRoute
@@ -218,7 +242,9 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/codes-erreur': typeof CodesErreurRoute
   '/contact': typeof ContactRoute
+  '/diagnostic': typeof DiagnosticRoute
   '/en': typeof EnRoute
   '/marques': typeof MarquesRoute
   '/pieces': typeof PiecesRoute
@@ -226,6 +252,7 @@ export interface FileRoutesById {
   '/regions': typeof RegionsRoute
   '/services': typeof ServicesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/urgence-spa': typeof UrgenceSpaRoute
   '/vente-spas': typeof VenteSpasRoute
   '/villes': typeof VillesRoute
   '/entretien-piscine/$ville': typeof EntretienPiscineVilleRoute
@@ -247,7 +274,9 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/codes-erreur'
     | '/contact'
+    | '/diagnostic'
     | '/en'
     | '/marques'
     | '/pieces'
@@ -255,6 +284,7 @@ export interface FileRouteTypes {
     | '/regions'
     | '/services'
     | '/sitemap.xml'
+    | '/urgence-spa'
     | '/vente-spas'
     | '/villes'
     | '/entretien-piscine/$ville'
@@ -274,7 +304,9 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/codes-erreur'
     | '/contact'
+    | '/diagnostic'
     | '/en'
     | '/marques'
     | '/pieces'
@@ -282,6 +314,7 @@ export interface FileRouteTypes {
     | '/regions'
     | '/services'
     | '/sitemap.xml'
+    | '/urgence-spa'
     | '/vente-spas'
     | '/villes'
     | '/entretien-piscine/$ville'
@@ -301,7 +334,9 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/codes-erreur'
     | '/contact'
+    | '/diagnostic'
     | '/en'
     | '/marques'
     | '/pieces'
@@ -309,6 +344,7 @@ export interface FileRouteTypes {
     | '/regions'
     | '/services'
     | '/sitemap.xml'
+    | '/urgence-spa'
     | '/vente-spas'
     | '/villes'
     | '/entretien-piscine/$ville'
@@ -329,7 +365,9 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CodesErreurRoute: typeof CodesErreurRoute
   ContactRoute: typeof ContactRoute
+  DiagnosticRoute: typeof DiagnosticRoute
   EnRoute: typeof EnRoute
   MarquesRoute: typeof MarquesRoute
   PiecesRoute: typeof PiecesRoute
@@ -337,6 +375,7 @@ export interface RootRouteChildren {
   RegionsRoute: typeof RegionsRoute
   ServicesRoute: typeof ServicesRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  UrgenceSpaRoute: typeof UrgenceSpaRoute
   VenteSpasRoute: typeof VenteSpasRoute
   VillesRoute: typeof VillesRoute
   EntretienPiscineVilleRoute: typeof EntretienPiscineVilleRoute
@@ -369,6 +408,13 @@ declare module '@tanstack/react-router' {
       path: '/vente-spas'
       fullPath: '/vente-spas'
       preLoaderRoute: typeof VenteSpasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/urgence-spa': {
+      id: '/urgence-spa'
+      path: '/urgence-spa'
+      fullPath: '/urgence-spa'
+      preLoaderRoute: typeof UrgenceSpaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sitemap.xml': {
@@ -420,11 +466,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EnRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/diagnostic': {
+      id: '/diagnostic'
+      path: '/diagnostic'
+      fullPath: '/diagnostic'
+      preLoaderRoute: typeof DiagnosticRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/contact': {
       id: '/contact'
       path: '/contact'
       fullPath: '/contact'
       preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/codes-erreur': {
+      id: '/codes-erreur'
+      path: '/codes-erreur'
+      fullPath: '/codes-erreur'
+      preLoaderRoute: typeof CodesErreurRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -537,7 +597,9 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CodesErreurRoute: CodesErreurRoute,
   ContactRoute: ContactRoute,
+  DiagnosticRoute: DiagnosticRoute,
   EnRoute: EnRoute,
   MarquesRoute: MarquesRoute,
   PiecesRoute: PiecesRoute,
@@ -545,6 +607,7 @@ const rootRouteChildren: RootRouteChildren = {
   RegionsRoute: RegionsRoute,
   ServicesRoute: ServicesRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  UrgenceSpaRoute: UrgenceSpaRoute,
   VenteSpasRoute: VenteSpasRoute,
   VillesRoute: VillesRoute,
   EntretienPiscineVilleRoute: EntretienPiscineVilleRoute,
