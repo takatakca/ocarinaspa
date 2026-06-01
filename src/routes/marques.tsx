@@ -58,7 +58,6 @@ export const Route = createFileRoute("/marques")({
   }),
   component: MarquesPage,
 });
-});
 
 function MarquesPage() {
   return (
