@@ -1,11 +1,12 @@
 import { useMemo, useState } from "react";
+import { Link } from "@tanstack/react-router";
 import { Search, Wrench, Snowflake, CheckCircle2 } from "lucide-react";
 import {
   SPA_BRAND_CATEGORIES,
-  TOP_BRANDS_QC,
   WINTER_BRANDS,
   REPAIRED_SYSTEMS,
 } from "@/data/spaBrands";
+import { FEATURED_BRANDS, BRAND_IMAGES } from "@/data/brandImages";
 
 export function SpaBrands({ compact = false }: { compact?: boolean }) {
   const [query, setQuery] = useState("");
@@ -24,47 +25,49 @@ export function SpaBrands({ compact = false }: { compact?: boolean }) {
       <div className="container mx-auto px-4 py-16 md:py-20">
         <div className="max-w-3xl">
           <p className="text-brand font-semibold uppercase text-sm tracking-wide">
-            Réparation toutes marques
+            Marques de spas réparées
           </p>
           <h2 className="mt-3 font-display text-3xl md:text-4xl font-bold text-foreground">
             Marques de spas que nous réparons au Québec
           </h2>
           <p className="mt-4 text-muted-foreground">
-            Chez Ocarina Spa, nous réparons une grande variété de marques de spas, hot tubs et
-            spas de nage au Québec. Même si chaque marque possède son propre design, plusieurs
-            utilisent des composantes internes similaires comme Balboa, Gecko, Waterway ou LX.
-            Cela nous permet d'intervenir sur les problèmes les plus fréquents : pompe,
-            chauffe-eau, panneau de contrôle, jets, fuite d'eau, ozonateur, pack électronique
-            et entretien général.
+            Ocarina Spa intervient sur la majorité des marques de spas, hot tubs et spas de
+            nage présents au Québec. Plusieurs marques utilisent des composantes communes —
+            Balboa, Gecko, Waterway, LX — ce qui nous permet de diagnostiquer rapidement les
+            problèmes courants.
           </p>
         </div>
 
-        {/* Top brands */}
-        <div className="mt-10">
-          <h3 className="font-display text-xl font-semibold text-foreground">
-            Marques les plus fréquentes en réparation au Québec
-          </h3>
-          <p className="mt-2 text-sm text-muted-foreground max-w-2xl">
-            Hydropool, Jacuzzi, Sundance, Arctic Spas, Beachcomber, Maax, Vita Spa, Bullfrog,
-            Master Spas et Hot Spring sont les marques que nos techniciens voient le plus
-            souvent.
-          </p>
-          <div className="mt-4 flex flex-wrap gap-2">
-            {TOP_BRANDS_QC.map((b) => (
-              <span
-                key={b}
-                className="inline-flex items-center gap-1.5 bg-brand/10 border border-brand/30 text-foreground px-3 py-1.5 rounded-full text-sm font-medium"
-              >
-                <CheckCircle2 className="w-3.5 h-3.5 text-brand" /> {b}
-              </span>
-            ))}
-          </div>
+        {/* Featured brand cards with images */}
+        <div className="mt-10 grid gap-5 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
+          {FEATURED_BRANDS.map((b) => (
+            <Link
+              key={b.name}
+              to="/marques"
+              className="group bg-card border border-border rounded-xl overflow-hidden hover:shadow-xl hover:border-brand/50 transition-all"
+            >
+              <div className="aspect-[4/3] overflow-hidden bg-surface">
+                <img
+                  src={b.img}
+                  alt={`Réparation de spa ${b.name} au Québec`}
+                  width={800}
+                  height={600}
+                  loading="lazy"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+              </div>
+              <div className="p-3.5">
+                <h3 className="font-semibold text-foreground text-sm leading-tight">{b.name}</h3>
+                <p className="mt-1 text-xs text-muted-foreground">{b.tag}</p>
+              </div>
+            </Link>
+          ))}
         </div>
 
         {!compact && (
           <>
             {/* Search */}
-            <div className="mt-12">
+            <div className="mt-14">
               <label className="block text-sm font-medium text-foreground mb-2">
                 Rechercher votre marque de spa
               </label>
@@ -92,14 +95,32 @@ export function SpaBrands({ compact = false }: { compact?: boolean }) {
                   </h3>
                   <p className="mt-1 text-sm text-muted-foreground">{cat.description}</p>
                   <ul className="mt-4 flex flex-wrap gap-2">
-                    {cat.brands.map((b) => (
-                      <li
-                        key={b}
-                        className="px-3 py-1 rounded-full bg-surface border border-border text-sm text-foreground"
-                      >
-                        {b}
-                      </li>
-                    ))}
+                    {cat.brands.map((b) => {
+                      const img = BRAND_IMAGES[b];
+                      return (
+                        <li
+                          key={b}
+                          className="inline-flex items-center gap-2 pl-1 pr-3 py-1 rounded-full bg-surface border border-border text-sm text-foreground"
+                        >
+                          {img ? (
+                            <img
+                              src={img}
+                              alt=""
+                              aria-hidden="true"
+                              width={28}
+                              height={28}
+                              loading="lazy"
+                              className="w-6 h-6 rounded-full object-cover"
+                            />
+                          ) : (
+                            <span className="w-6 h-6 rounded-full bg-brand/15 inline-flex items-center justify-center text-[10px] font-bold text-brand">
+                              {b.charAt(0)}
+                            </span>
+                          )}
+                          {b}
+                        </li>
+                      );
+                    })}
                   </ul>
                 </div>
               ))}
@@ -119,9 +140,8 @@ export function SpaBrands({ compact = false }: { compact?: boolean }) {
                     Systèmes de spa que nous réparons
                   </h3>
                   <p className="mt-2 text-sm text-muted-foreground max-w-3xl">
-                    La plupart des spas utilisent des composantes similaires, même lorsque la
-                    marque est différente. Nous pouvons intervenir sur les systèmes et pièces
-                    courantes comme Balboa, Gecko, Waterway et LX.
+                    Composantes internes communes à la majorité des marques : Balboa, Gecko,
+                    Waterway et LX.
                   </p>
                 </div>
               </div>
@@ -143,12 +163,11 @@ export function SpaBrands({ compact = false }: { compact?: boolean }) {
                 <Snowflake className="w-6 h-6 text-brand shrink-0" strokeWidth={1.75} />
                 <div>
                   <h3 className="font-display text-xl font-semibold text-foreground">
-                    Réparation de spas conçus pour le climat du Québec
+                    Spas conçus pour l'hiver québécois
                   </h3>
                   <p className="mt-2 text-sm text-muted-foreground max-w-3xl">
-                    Certaines marques sont reconnues pour leur performance dans les hivers
-                    québécois grâce à leur isolation, leur efficacité énergétique et leurs
-                    composantes adaptées au froid. Nous réparons notamment :
+                    Marques particulièrement performantes par grand froid grâce à leur isolation
+                    et leurs composantes adaptées :
                   </p>
                   <div className="mt-4 flex flex-wrap gap-2">
                     {WINTER_BRANDS.map((b) => (

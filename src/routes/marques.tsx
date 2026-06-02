@@ -5,8 +5,8 @@ import { SpaBrands } from "@/components/SpaBrands";
 import { ServiceRequestForm } from "@/components/ServiceRequestForm";
 import { SITE, localBusinessSchema, altLinks, breadcrumbSchema } from "@/lib/seo";
 import { ALL_BRANDS } from "@/data/spaBrands";
-import technicianImg from "@/assets/spa-technician-repair.jpg";
-import winterSpaImg from "@/assets/spa-winter-quebec.jpg";
+import technicianImg from "@/assets/hero-technicien-ocarina.jpg";
+import winterSpaImg from "@/assets/brand-arctic-spas.jpg";
 
 export const Route = createFileRoute("/marques")({
   head: () => ({
