@@ -8,8 +8,8 @@ import { BeforeAfter } from "@/components/BeforeAfter";
 import { CityLinks } from "@/components/CityLinks";
 import { ServiceRequestForm } from "@/components/ServiceRequestForm";
 import { Link } from "@tanstack/react-router";
-import { Phone, CheckCircle2, ShieldCheck, Truck, Wrench } from "lucide-react";
-import truck from "@/assets/ocarina-truck.jpg";
+import { Phone, CheckCircle2, ShieldCheck, Truck, Wrench, Sparkles } from "lucide-react";
+import heroTechnician from "@/assets/hero-technicien-ocarina.jpg";
 import { SITE, localBusinessSchema, faqSchema, altLinks } from "@/lib/seo";
 
 const FAQS = [
@@ -45,29 +45,34 @@ function Index() {
   return (
     <Layout>
       <EmergencyBanner />
+
+      {/* Hero */}
       <section className="bg-surface">
         <div className="container mx-auto px-4 py-14 md:py-20 grid lg:grid-cols-2 gap-10 items-center">
           <div>
-            <p className="text-brand font-semibold tracking-wide uppercase text-sm">Vente • Entretien • Réparation</p>
+            <p className="text-brand font-semibold tracking-wide uppercase text-sm">
+              Techniciens spécialisés • Service au Québec
+            </p>
             <h1 className="mt-3 font-display text-4xl md:text-5xl lg:text-6xl font-bold leading-tight text-foreground">
-              Réparation, entretien et <span className="text-brand">vente de spas</span> partout au Québec
+              Réparation et vente de <span className="text-brand">spas</span> partout au Québec
             </h1>
             <p className="mt-6 text-lg text-muted-foreground max-w-lg">
-              Service mobile professionnel : réparation, installation, ouverture, fermeture, pièces et accessoires — pour spas, bains à remous et piscines.
+              Service mobile professionnel : diagnostic, réparation, ouverture, fermeture, pièces
+              et installation. Toutes les marques — Balboa, Gecko, Waterway, LX.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <a href={`tel:${SITE.phoneTel}`} className="inline-flex items-center gap-2 bg-brand text-brand-foreground px-6 py-3.5 rounded-md font-semibold text-lg hover:bg-brand-dark transition-colors shadow-lg shadow-brand/30">
                 <Phone className="w-5 h-5" /> Appeler maintenant
               </a>
               <Link to="/contact" className="inline-flex items-center gap-2 border-2 border-brand text-brand px-6 py-3.5 rounded-md font-semibold text-lg hover:bg-brand hover:text-brand-foreground transition-colors">
-                Demander une soumission
+                Soumission rapide
               </Link>
-              <Link to="/villes" className="inline-flex items-center gap-2 border border-border text-foreground px-6 py-3.5 rounded-md font-semibold text-lg hover:border-brand hover:text-brand transition-colors">
-                Villes desservies
+              <Link to="/diagnostic" className="inline-flex items-center gap-2 border border-border text-foreground px-6 py-3.5 rounded-md font-semibold text-lg hover:border-brand hover:text-brand transition-colors">
+                <Sparkles className="w-5 h-5" /> Diagnostic AI
               </Link>
             </div>
             <div className="mt-8 flex flex-wrap gap-2">
-              {["Service mobile", "Techniciens spécialisés", "Diagnostic rapide", "Service au Québec", "Spas & bains à remous"].map((b) => (
+              {["Service mobile", "Techniciens certifiés", "Réparation 1re visite", "Pièces à bord", "20+ ans d'expérience"].map((b) => (
                 <span key={b} className="inline-flex items-center gap-1.5 bg-card border border-border px-3 py-1.5 rounded-full text-xs text-foreground">
                   <CheckCircle2 className="w-3.5 h-3.5 text-brand" /> {b}
                 </span>
@@ -75,21 +80,33 @@ function Index() {
             </div>
           </div>
           <div className="relative">
-            <img src={truck} alt="Camion de service Ocarina Spa réparation et vente de spas" className="w-full h-auto rounded-2xl shadow-2xl" />
+            <img
+              src={heroTechnician}
+              alt="Technicien Ocarina Spa en uniforme réparant un pack électronique de spa en hiver au Québec"
+              width={1600}
+              height={1067}
+              className="w-full h-auto rounded-2xl shadow-2xl object-cover"
+            />
           </div>
         </div>
       </section>
 
+      {/* 1. Réparations effectuées */}
       <RepairsGrid />
 
-      <BeforeAfter />
-
-      <ServiceCards />
-
+      {/* 2. Marques de spas réparées */}
       <SpaBrands compact />
 
+      {/* 3. Avant / Après */}
+      <BeforeAfter />
+
+      {/* 4. Services à domicile */}
+      <ServiceCards />
+
+      {/* 5. Zones desservies */}
       <CityLinks />
 
+      {/* 6. Pourquoi Ocarina Spa */}
       <section className="container mx-auto px-4 py-20 grid lg:grid-cols-3 gap-8">
         {[
           { icon: Truck, title: "Service mobile au Québec", desc: "Notre équipe se déplace dans toutes les régions avec les pièces courantes à bord." },
@@ -104,6 +121,7 @@ function Index() {
         ))}
       </section>
 
+      {/* 7. FAQ + Form */}
       <section className="bg-surface">
         <div className="container mx-auto px-4 py-20 grid lg:grid-cols-2 gap-12">
           <div>
