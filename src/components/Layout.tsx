@@ -10,6 +10,8 @@ export function Layout({ children }: { children: ReactNode }) {
       <main className="flex-1">{children}</main>
       <Footer />
       <StickyCallButton />
+      {/* Spacer so sticky mobile bar doesn't cover content */}
+      <div className="lg:hidden h-16" aria-hidden="true" />
     </div>
   );
 }

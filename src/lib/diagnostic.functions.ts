@@ -4,9 +4,14 @@ import { z } from "zod";
 const DiagnosticInput = z.object({
   errorCode: z.string().max(20).optional(),
   brand: z.string().max(80).optional(),
+  model: z.string().max(80).optional(),
+  year: z.string().max(10).optional(),
   symptoms: z.string().min(3).max(2000),
   heating: z.enum(["oui", "non", "intermittent", "inconnu"]).optional(),
   pumpNoise: z.enum(["oui", "non", "inconnu"]).optional(),
+  pumpWorks: z.enum(["oui", "non", "inconnu"]).optional(),
+  since: z.string().max(80).optional(),
+  city: z.string().max(80).optional(),
 });
 
 export type DiagnosticResult = {
@@ -24,10 +29,15 @@ export const diagnoseSpaIssue = createServerFn({ method: "POST" })
     if (!key) throw new Error("Missing LOVABLE_API_KEY");
 
     const userMessage = `Code d'erreur affiché : ${data.errorCode || "aucun"}
-Marque/modèle : ${data.brand || "inconnu"}
+Marque : ${data.brand || "inconnu"}
+Modèle : ${data.model || "inconnu"}
+Année approximative : ${data.year || "inconnu"}
 Symptômes : ${data.symptoms}
 Le spa chauffe ? ${data.heating || "inconnu"}
-La pompe fait du bruit ? ${data.pumpNoise || "inconnu"}`;
+La pompe fonctionne ? ${data.pumpWorks || "inconnu"}
+La pompe fait du bruit ? ${data.pumpNoise || "inconnu"}
+Depuis quand le problème est présent ? ${data.since || "inconnu"}
+Ville : ${data.city || "inconnu"}`;
 
     const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",

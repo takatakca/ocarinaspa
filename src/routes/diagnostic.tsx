@@ -56,9 +56,14 @@ function DiagnosticPage() {
         data: {
           errorCode: String(fd.get("errorCode") || "").trim() || undefined,
           brand: String(fd.get("brand") || "").trim() || undefined,
+          model: String(fd.get("model") || "").trim() || undefined,
+          year: String(fd.get("year") || "").trim() || undefined,
           symptoms: String(fd.get("symptoms") || "").trim(),
           heating: (fd.get("heating") as string) as DiagnosticResultInput["heating"],
+          pumpWorks: (fd.get("pumpWorks") as string) as DiagnosticResultInput["pumpNoise"],
           pumpNoise: (fd.get("pumpNoise") as string) as DiagnosticResultInput["pumpNoise"],
+          since: String(fd.get("since") || "").trim() || undefined,
+          city: String(fd.get("city") || "").trim() || undefined,
         },
       });
       setResult(res);
@@ -95,23 +100,45 @@ function DiagnosticPage() {
           <div className="grid sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-foreground mb-1.5">
-                Code d'erreur affiché (optionnel)
-              </label>
-              <input
-                name="errorCode"
-                placeholder="Ex. FLO, OH, DR…"
-                maxLength={20}
-                className="w-full px-3 py-2.5 border border-border rounded-md bg-background"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-1.5">
-                Marque / modèle (optionnel)
+                Marque du spa
               </label>
               <input
                 name="brand"
                 placeholder="Ex. Jacuzzi, Hydropool, Arctic Spas…"
                 maxLength={80}
+                className="w-full px-3 py-2.5 border border-border rounded-md bg-background"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-1.5">
+                Modèle (si connu)
+              </label>
+              <input
+                name="model"
+                placeholder="Ex. J-345, Serenity 6800…"
+                maxLength={80}
+                className="w-full px-3 py-2.5 border border-border rounded-md bg-background"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-1.5">
+                Année approximative
+              </label>
+              <input
+                name="year"
+                placeholder="Ex. 2018"
+                maxLength={10}
+                className="w-full px-3 py-2.5 border border-border rounded-md bg-background"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-1.5">
+                Code d'erreur affiché
+              </label>
+              <input
+                name="errorCode"
+                placeholder="Ex. FLO, OH, DR…"
+                maxLength={20}
                 className="w-full px-3 py-2.5 border border-border rounded-md bg-background"
               />
             </div>
@@ -132,10 +159,10 @@ function DiagnosticPage() {
             />
           </div>
 
-          <div className="grid sm:grid-cols-2 gap-4">
+          <div className="grid sm:grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-medium text-foreground mb-1.5">
-                Le spa chauffe-t-il ?
+                Est-ce que le spa chauffe ?
               </label>
               <select
                 name="heating"
@@ -146,6 +173,20 @@ function DiagnosticPage() {
                 <option value="oui">Oui, normalement</option>
                 <option value="intermittent">Intermittent</option>
                 <option value="non">Non, plus du tout</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-1.5">
+                Est-ce que la pompe fonctionne ?
+              </label>
+              <select
+                name="pumpWorks"
+                defaultValue="inconnu"
+                className="w-full px-3 py-2.5 border border-border rounded-md bg-background"
+              >
+                <option value="inconnu">Je ne sais pas</option>
+                <option value="oui">Oui</option>
+                <option value="non">Non</option>
               </select>
             </div>
             <div>
@@ -161,6 +202,31 @@ function DiagnosticPage() {
                 <option value="non">Non, silencieuse</option>
                 <option value="oui">Oui, bruit anormal</option>
               </select>
+            </div>
+          </div>
+
+          <div className="grid sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-1.5">
+                Depuis quand le problème est présent ?
+              </label>
+              <input
+                name="since"
+                placeholder="Ex. Depuis 2 jours, depuis ce matin…"
+                maxLength={80}
+                className="w-full px-3 py-2.5 border border-border rounded-md bg-background"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-1.5">
+                Votre ville
+              </label>
+              <input
+                name="city"
+                placeholder="Ex. Laval, Montréal…"
+                maxLength={80}
+                className="w-full px-3 py-2.5 border border-border rounded-md bg-background"
+              />
             </div>
           </div>
 
