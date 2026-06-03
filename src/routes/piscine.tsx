@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Layout } from "@/components/Layout";
 import { ServiceRequestForm } from "@/components/ServiceRequestForm";
 import { SITE, localBusinessSchema } from "@/lib/seo";
+import { trackPhoneCall } from "@/lib/gtag";
 import { Phone, Sun, Snowflake, Droplets, Sparkles } from "lucide-react";
 
 const SERVICES = [
@@ -29,7 +30,7 @@ export const Route = createFileRoute("/piscine")({
           <p className="mt-4 text-muted-foreground max-w-2xl">
             Ouverture, fermeture, nettoyage et entretien de piscine résidentielle. Notre équipe se déplace partout au Québec.
           </p>
-          <a href={`tel:${SITE.phoneTel}`} className="mt-6 inline-flex items-center gap-2 bg-brand text-brand-foreground px-5 py-3 rounded-md font-semibold">
+          <a href={`tel:${SITE.phoneTel}`} onClick={trackPhoneCall} className="mt-6 inline-flex items-center gap-2 bg-brand text-brand-foreground px-5 py-3 rounded-md font-semibold">
             <Phone className="w-4 h-4" /> {SITE.phone}
           </a>
         </div>
