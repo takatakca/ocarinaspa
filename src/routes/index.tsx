@@ -6,6 +6,7 @@ import { RepairsGrid } from "@/components/RepairsGrid";
 import { EmergencyBanner } from "@/components/EmergencyBanner";
 import { BeforeAfter } from "@/components/BeforeAfter";
 import { CityLinks } from "@/components/CityLinks";
+import { WhyChooseUs } from "@/components/WhyChooseUs";
 import { ServiceRequestForm } from "@/components/ServiceRequestForm";
 import { Link } from "@tanstack/react-router";
 import { Phone, CheckCircle2, ShieldCheck, Truck, Wrench, Sparkles } from "lucide-react";
@@ -103,22 +104,29 @@ function Index() {
       {/* 4. Services à domicile */}
       <ServiceCards />
 
-      {/* 5. Zones desservies */}
+      {/* 5. Pourquoi choisir Ocarina Spa */}
+      <WhyChooseUs />
+
+      {/* 6. Zones desservies */}
       <CityLinks />
 
-      {/* 6. Pourquoi Ocarina Spa */}
-      <section className="container mx-auto px-4 py-20 grid lg:grid-cols-3 gap-8">
-        {[
-          { icon: Truck, title: "Service mobile au Québec", desc: "Notre équipe se déplace dans toutes les régions avec les pièces courantes à bord." },
-          { icon: Wrench, title: "Réparation dès la 1re visite", desc: "Dans la majorité des cas, le diagnostic et la réparation se font dès le premier rendez-vous." },
-          { icon: ShieldCheck, title: "Toutes marques de spas", desc: "Nous travaillons sur tous les modèles de spas, bains à remous et hot tubs." },
-        ].map((c) => (
-          <div key={c.title} className="bg-card border border-border rounded-xl p-6">
-            <c.icon className="w-10 h-10 text-brand" strokeWidth={1.75} />
-            <h3 className="mt-4 font-display text-xl font-semibold text-foreground">{c.title}</h3>
-            <p className="mt-2 text-sm text-muted-foreground">{c.desc}</p>
+      {/* 6b. SEO local — texte naturel */}
+      <section className="bg-background">
+        <div className="container mx-auto px-4 py-12 max-w-4xl">
+          <div className="bg-surface border border-border rounded-xl p-6 md:p-8">
+            <h2 className="font-display text-2xl font-bold text-foreground">
+              Réparation de spas partout dans le Grand Montréal et au Québec
+            </h2>
+            <p className="mt-4 text-muted-foreground leading-relaxed">
+              Ocarina Spa offre la réparation de spas et hot tubs à <strong>Laval, Montréal,
+              Terrebonne, Blainville, Repentigny, Mascouche, Saint-Jérôme, Longueuil,
+              Trois-Rivières et Québec</strong>. Notre équipe mobile intervient à domicile pour
+              le diagnostic, la réparation de pompes, de chauffe-eau, de packs électroniques,
+              de fuites et la résolution des codes d'erreur (FLO, OH, DR, SN). Service
+              d'urgence 24/7 en hiver pour éviter le gel des canalisations.
+            </p>
           </div>
-        ))}
+        </div>
       </section>
 
       {/* 7. FAQ + Form */}

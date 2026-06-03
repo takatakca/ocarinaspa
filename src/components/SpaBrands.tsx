@@ -39,12 +39,11 @@ export function SpaBrands({ compact = false }: { compact?: boolean }) {
         </div>
 
         {/* Featured brand cards with images */}
-        <div className="mt-10 grid gap-5 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
+        <div className="mt-10 grid gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
           {FEATURED_BRANDS.map((b) => (
-            <Link
+            <div
               key={b.name}
-              to="/marques"
-              className="group bg-card border border-border rounded-xl overflow-hidden hover:shadow-xl hover:border-brand/50 transition-all"
+              className="group bg-card border border-border rounded-xl overflow-hidden hover:shadow-xl hover:border-brand/50 transition-all flex flex-col"
             >
               <div className="aspect-[4/3] overflow-hidden bg-surface">
                 <img
@@ -56,11 +55,17 @@ export function SpaBrands({ compact = false }: { compact?: boolean }) {
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
               </div>
-              <div className="p-3.5">
+              <div className="p-4 flex flex-col flex-1">
                 <h3 className="font-semibold text-foreground text-sm leading-tight">{b.name}</h3>
-                <p className="mt-1 text-xs text-muted-foreground">{b.tag}</p>
+                <p className="mt-1 text-xs text-muted-foreground flex-1">{b.tag}</p>
+                <Link
+                  to="/contact"
+                  className="mt-3 inline-flex items-center justify-center gap-1 bg-brand/10 text-brand hover:bg-brand hover:text-brand-foreground px-3 py-2 rounded-md text-xs font-semibold transition-colors"
+                >
+                  Réparer cette marque →
+                </Link>
               </div>
-            </Link>
+            </div>
           ))}
         </div>
 
