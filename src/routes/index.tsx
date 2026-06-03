@@ -9,7 +9,7 @@ import { CityLinks } from "@/components/CityLinks";
 import { WhyChooseUs } from "@/components/WhyChooseUs";
 import { ServiceRequestForm } from "@/components/ServiceRequestForm";
 import { Link } from "@tanstack/react-router";
-import { Phone, CheckCircle2, ShieldCheck, Truck, Wrench, Sparkles } from "lucide-react";
+import { Phone, CheckCircle2, Sparkles } from "lucide-react";
 import heroTechnician from "@/assets/hero-technicien-ocarina.jpg";
 import { SITE, localBusinessSchema, faqSchema, altLinks } from "@/lib/seo";
 
