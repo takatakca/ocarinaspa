@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Phone, MapPin } from "lucide-react";
+import { Phone, MapPin, AlertTriangle, Sparkles, Wrench, AlertCircle } from "lucide-react";
 import { SITE } from "@/lib/seo";
 import logo from "@/assets/ocarina-logo.png";
 
@@ -15,13 +15,14 @@ export function Footer() {
           <a href={SITE.domain} className="block text-sm text-brand mt-3 hover:underline">www.ocarinaspa.ca</a>
         </div>
         <div>
-          <h3 className="text-brand font-display font-semibold text-lg mb-4">Services</h3>
+          <h3 className="text-brand font-display font-semibold text-lg mb-4">Services & outils</h3>
           <ul className="space-y-2 text-sm opacity-90">
-            <li><Link to="/services" className="hover:text-brand">Réparation de spa</Link></li>
-            <li><Link to="/services" className="hover:text-brand">Entretien de spa</Link></li>
+            <li><Link to="/services" className="hover:text-brand inline-flex items-center gap-1.5"><Wrench className="w-3.5 h-3.5" /> Réparation de spa</Link></li>
+            <li><Link to="/urgence-spa" className="hover:text-brand inline-flex items-center gap-1.5"><AlertTriangle className="w-3.5 h-3.5 text-red-400" /> Urgence Spa 24/7</Link></li>
+            <li><Link to="/codes-erreur" className="hover:text-brand inline-flex items-center gap-1.5"><AlertCircle className="w-3.5 h-3.5" /> Codes d'erreur</Link></li>
+            <li><Link to="/diagnostic" className="hover:text-brand inline-flex items-center gap-1.5"><Sparkles className="w-3.5 h-3.5" /> Diagnostic AI</Link></li>
+            <li><Link to="/marques" className="hover:text-brand">Marques réparées</Link></li>
             <li><Link to="/vente-spas" className="hover:text-brand">Vente de spas</Link></li>
-            <li><Link to="/services" className="hover:text-brand">Installation</Link></li>
-            <li><Link to="/services" className="hover:text-brand">Ouverture / Fermeture</Link></li>
             <li><Link to="/pieces" className="hover:text-brand">Pièces & accessoires</Link></li>
             <li><Link to="/piscine" className="hover:text-brand">Service de piscine</Link></li>
           </ul>
@@ -46,7 +47,12 @@ export function Footer() {
             <MapPin className="w-4 h-4 mt-0.5 shrink-0 text-brand" />
             <span>{SITE.address.street}<br />{SITE.address.city}, {SITE.address.region} {SITE.address.postalCode}</span>
           </p>
-          <p className="text-sm opacity-70 mt-3">Ouvert 24h sur 24, 7 jours sur 7</p>
+          <p className="text-sm opacity-90 mt-3 inline-flex items-center gap-1.5">
+            <AlertTriangle className="w-4 h-4 text-red-400" /> Urgence 24h/7j
+          </p>
+          <p className="text-xs opacity-70 mt-2">
+            Marques réparées : Jacuzzi, Hydropool, Arctic Spas, Sundance, Beachcomber, Bullfrog, Hot Spring, Maax, Master Spas, Coast Spas et plus.
+          </p>
         </div>
       </div>
       <div className="border-t border-white/10">
