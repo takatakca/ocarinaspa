@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Layout } from "@/components/Layout";
 import { ServiceRequestForm } from "@/components/ServiceRequestForm";
 import { SITE, localBusinessSchema, altLinks } from "@/lib/seo";
+import { trackPhoneCall } from "@/lib/gtag";
 import { Phone, CheckCircle2 } from "lucide-react";
 import truck from "@/assets/ocarina-truck.jpg";
 
@@ -34,7 +35,7 @@ export const Route = createFileRoute("/en")({
             <p className="mt-5 text-muted-foreground">
               Ocarina Spa offers professional mobile service for hot tubs, spas and pools across Quebec — repair, maintenance, installation, opening and closing.
             </p>
-            <a href={`tel:${SITE.phoneTel}`} className="mt-6 inline-flex items-center gap-2 bg-brand text-brand-foreground px-6 py-3.5 rounded-md font-semibold text-lg">
+            <a href={`tel:${SITE.phoneTel}`} onClick={trackPhoneCall} className="mt-6 inline-flex items-center gap-2 bg-brand text-brand-foreground px-6 py-3.5 rounded-md font-semibold text-lg">
               <Phone className="w-5 h-5" /> Call {SITE.phone}
             </a>
             <ul className="mt-6 grid sm:grid-cols-2 gap-2 text-sm">

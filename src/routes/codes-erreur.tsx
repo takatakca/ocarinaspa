@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Phone, AlertTriangle } from "lucide-react";
 import { Layout } from "@/components/Layout";
 import { SITE, altLinks, breadcrumbSchema, faqSchema } from "@/lib/seo";
+import { trackPhoneCall } from "@/lib/gtag";
 import { SPA_ERROR_CODES } from "@/data/spaErrorCodes";
 
 export const Route = createFileRoute("/codes-erreur")({
@@ -67,6 +68,7 @@ function CodesErreurPage() {
           <div className="mt-6 flex flex-wrap gap-3">
             <a
               href={`tel:${SITE.phoneTel}`}
+              onClick={trackPhoneCall}
               className="inline-flex items-center gap-2 bg-brand text-brand-foreground px-6 py-3 rounded-md font-semibold hover:bg-brand-dark"
             >
               <Phone className="w-5 h-5" /> Aide immédiate {SITE.phone}
@@ -125,6 +127,7 @@ function CodesErreurPage() {
           <div className="mt-4 flex flex-wrap justify-center gap-3">
             <a
               href={`tel:${SITE.phoneTel}`}
+              onClick={trackPhoneCall}
               className="inline-flex items-center gap-2 bg-brand text-brand-foreground px-5 py-2.5 rounded-md font-semibold"
             >
               <Phone className="w-4 h-4" /> {SITE.phone}

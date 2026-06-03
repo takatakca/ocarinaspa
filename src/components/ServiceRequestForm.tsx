@@ -2,6 +2,7 @@ import { useState } from "react";
 import { z } from "zod";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { trackFormSubmit } from "@/lib/gtag";
 
 const schema = z.object({
   full_name: z.string().trim().min(2, "Nom requis").max(100),
@@ -63,6 +64,7 @@ export function ServiceRequestForm({
       });
       if (!res.ok) throw new Error(await res.text());
       toast.success("Demande envoyée ! Nous vous contactons rapidement.");
+      trackFormSubmit();
       form.reset();
     } catch (err) {
       console.error(err);

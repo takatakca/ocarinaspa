@@ -5,6 +5,7 @@ import { Phone, Sparkles, AlertTriangle, CheckCircle2, Loader2 } from "lucide-re
 import { Layout } from "@/components/Layout";
 import { SITE, altLinks, breadcrumbSchema } from "@/lib/seo";
 import { diagnoseSpaIssue, type DiagnosticResult } from "@/lib/diagnostic.functions";
+import { trackPhoneCall, trackDiagnosticComplete, trackQuickSubmission } from "@/lib/gtag";
 
 export const Route = createFileRoute("/diagnostic")({
   head: () => ({
@@ -67,6 +68,7 @@ function DiagnosticPage() {
         },
       });
       setResult(res);
+      trackDiagnosticComplete();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erreur inconnue");
     } finally {
@@ -87,7 +89,7 @@ function DiagnosticPage() {
           <p className="mt-4 text-lg text-muted-foreground">
             Réponds aux quelques questions ci-dessous. Notre AI te donne une piste de
             réparation pour ton spa (toutes marques). Pour une intervention, appelle-nous au{" "}
-            <a href={`tel:${SITE.phoneTel}`} className="text-brand font-semibold">
+            <a href={`tel:${SITE.phoneTel}`} onClick={trackPhoneCall} className="text-brand font-semibold">
               {SITE.phone}
             </a>
             .
@@ -306,12 +308,14 @@ function DiagnosticPage() {
                 <div className="mt-6 flex flex-wrap gap-3">
                   <a
                     href={`tel:${SITE.phoneTel}`}
+                    onClick={trackPhoneCall}
                     className="inline-flex items-center gap-2 bg-brand text-brand-foreground px-5 py-2.5 rounded-md font-semibold"
                   >
                     <Phone className="w-4 h-4" /> Appeler {SITE.phone}
                   </a>
                   <Link
                     to="/contact"
+                    onClick={trackQuickSubmission}
                     className="inline-flex items-center gap-2 border-2 border-brand text-brand px-5 py-2.5 rounded-md font-semibold"
                   >
                     Demander une soumission

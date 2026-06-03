@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Phone } from "lucide-react";
 import { SITE } from "@/lib/seo";
+import { trackPhoneCall, trackQuickSubmission } from "@/lib/gtag";
 import fuiteImg from "@/assets/repair-fuite.jpg";
 import pompeImg from "@/assets/repair-pompe.jpg";
 import chauffeImg from "@/assets/repair-chauffe.jpg";
@@ -74,12 +75,14 @@ export function RepairsGrid() {
         <div className="mt-10 flex flex-wrap gap-3">
           <a
             href={`tel:${SITE.phoneTel}`}
+            onClick={trackPhoneCall}
             className="inline-flex items-center gap-2 bg-brand text-brand-foreground px-6 py-3 rounded-md font-semibold hover:bg-brand-dark transition-colors shadow-lg shadow-brand/20"
           >
             <Phone className="w-5 h-5" /> Appeler {SITE.phone}
           </a>
           <Link
             to="/contact"
+            onClick={trackQuickSubmission}
             className="inline-flex items-center gap-2 border-2 border-brand text-brand px-6 py-3 rounded-md font-semibold hover:bg-brand hover:text-brand-foreground transition-colors"
           >
             Soumission rapide

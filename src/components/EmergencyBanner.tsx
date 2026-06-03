@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Phone, Siren } from "lucide-react";
 import { SITE } from "@/lib/seo";
+import { trackPhoneCall } from "@/lib/gtag";
 
 export function EmergencyBanner() {
   return (
@@ -14,6 +15,7 @@ export function EmergencyBanner() {
         </p>
         <a
           href={`tel:${SITE.phoneTel}`}
+          onClick={trackPhoneCall}
           className="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-bold transition-colors"
         >
           <Phone className="w-4 h-4" /> {SITE.phone}

@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { Phone, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { SITE } from "@/lib/seo";
+import { trackPhoneCall } from "@/lib/gtag";
 import logo from "@/assets/ocarina-logo.png";
 
 const nav = [
@@ -45,6 +46,7 @@ export function Header() {
         <div className="flex items-center gap-3">
           <a
             href={`tel:${SITE.phoneTel}`}
+            onClick={trackPhoneCall}
             className="hidden sm:inline-flex items-center gap-2 bg-brand text-brand-foreground px-4 py-2.5 rounded-md font-semibold hover:bg-brand-dark transition-colors shadow-md shadow-brand/20"
           >
             <Phone className="w-4 h-4" /> {SITE.phone}
@@ -74,6 +76,7 @@ export function Header() {
             ))}
             <a
               href={`tel:${SITE.phoneTel}`}
+              onClick={trackPhoneCall}
               className="sm:hidden mt-2 inline-flex items-center justify-center gap-2 bg-brand text-brand-foreground px-4 py-3 rounded-md font-semibold"
             >
               <Phone className="w-4 h-4" /> {SITE.phone}
