@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Phone, MapPin, AlertTriangle, Sparkles, Wrench, AlertCircle } from "lucide-react";
 import { SITE } from "@/lib/seo";
+import { trackPhoneCall } from "@/lib/gtag";
 import logo from "@/assets/ocarina-logo.png";
 
 export function Footer() {
@@ -40,7 +41,7 @@ export function Footer() {
         </div>
         <div>
           <h3 className="text-brand font-display font-semibold text-lg mb-4">Nous joindre</h3>
-          <a href={`tel:${SITE.phoneTel}`} className="inline-flex items-center gap-2 bg-brand text-brand-foreground px-4 py-2.5 rounded-md font-semibold hover:bg-brand-dark transition-colors">
+          <a href={`tel:${SITE.phoneTel}`} onClick={trackPhoneCall} className="inline-flex items-center gap-2 bg-brand text-brand-foreground px-4 py-2.5 rounded-md font-semibold hover:bg-brand-dark transition-colors">
             <Phone className="w-4 h-4" /> {SITE.phone}
           </a>
           <p className="text-sm opacity-80 mt-4 flex items-start gap-2">
