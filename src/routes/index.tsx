@@ -12,6 +12,7 @@ import { Link } from "@tanstack/react-router";
 import { Phone, CheckCircle2, Sparkles } from "lucide-react";
 import heroTechnician from "@/assets/hero-technicien-ocarina.jpg";
 import { SITE, localBusinessSchema, faqSchema, altLinks } from "@/lib/seo";
+import { trackPhoneCall, trackQuickSubmission } from "@/lib/gtag";
 
 const FAQS = [
   { q: "Réparez-vous toutes les marques de spas ?", a: "Oui, nous travaillons sur toutes les marques et tous les modèles de spas et bains à remous au Québec." },
@@ -62,10 +63,10 @@ function Index() {
               et installation. Toutes les marques — Balboa, Gecko, Waterway, LX.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <a href={`tel:${SITE.phoneTel}`} className="inline-flex items-center gap-2 bg-brand text-brand-foreground px-6 py-3.5 rounded-md font-semibold text-lg hover:bg-brand-dark transition-colors shadow-lg shadow-brand/30">
+              <a href={`tel:${SITE.phoneTel}`} onClick={trackPhoneCall} className="inline-flex items-center gap-2 bg-brand text-brand-foreground px-6 py-3.5 rounded-md font-semibold text-lg hover:bg-brand-dark transition-colors shadow-lg shadow-brand/30">
                 <Phone className="w-5 h-5" /> Appeler maintenant
               </a>
-              <Link to="/contact" className="inline-flex items-center gap-2 border-2 border-brand text-brand px-6 py-3.5 rounded-md font-semibold text-lg hover:bg-brand hover:text-brand-foreground transition-colors">
+              <Link to="/contact" onClick={trackQuickSubmission} className="inline-flex items-center gap-2 border-2 border-brand text-brand px-6 py-3.5 rounded-md font-semibold text-lg hover:bg-brand hover:text-brand-foreground transition-colors">
                 Soumission rapide
               </Link>
               <Link to="/diagnostic" className="inline-flex items-center gap-2 border border-border text-foreground px-6 py-3.5 rounded-md font-semibold text-lg hover:border-brand hover:text-brand transition-colors">

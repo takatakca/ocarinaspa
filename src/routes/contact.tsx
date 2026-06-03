@@ -3,6 +3,7 @@ import { Layout } from "@/components/Layout";
 import { ServiceRequestForm } from "@/components/ServiceRequestForm";
 import { Phone, MapPin, Clock } from "lucide-react";
 import { SITE } from "@/lib/seo";
+import { trackPhoneCall } from "@/lib/gtag";
 
 export const Route = createFileRoute("/contact")({
   head: () => ({
@@ -29,7 +30,7 @@ function Contact() {
       </section>
       <section className="container mx-auto px-4 py-16 grid lg:grid-cols-2 gap-10">
         <div className="space-y-6">
-          <InfoCard icon={Phone} title="Téléphone" value={SITE.phone} href={`tel:${SITE.phoneTel}`} />
+          <InfoCard icon={Phone} title="Téléphone" value={SITE.phone} href={`tel:${SITE.phoneTel}`} onClick={trackPhoneCall} />
           <InfoCard
             icon={MapPin}
             title="Adresse"
@@ -43,11 +44,11 @@ function Contact() {
   );
 }
 
-function InfoCard({ icon: Icon, title, value, href }: { icon: typeof Phone; title: string; value: string; href?: string }) {
+function InfoCard({ icon: Icon, title, value, href, onClick }: { icon: typeof Phone; title: string; value: string; href?: string; onClick?: () => void }) {
   const Tag = href ? "a" : "div";
   return (
     <Tag
-      {...(href ? { href } : {})}
+      {...(href ? { href, onClick } : {})}
       className="flex items-start gap-4 bg-card border border-border rounded-xl p-6 hover:border-brand transition-colors"
     >
       <Icon className="w-7 h-7 text-brand shrink-0" />
