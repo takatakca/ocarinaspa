@@ -4,6 +4,7 @@ import { ServiceRequestForm } from "@/components/ServiceRequestForm";
 import { findMunicipalityBySlug, findServiceBySlug, SERVICE_TYPES, type ServiceSlug } from "@/data/quebecMunicipalities";
 import { Phone, CheckCircle2, MapPin } from "lucide-react";
 import { SITE, serviceSchema, faqSchema, localBusinessSchema, breadcrumbSchema, altLinks } from "@/lib/seo";
+import { trackPhoneCall, trackQuickSubmission } from "@/lib/gtag";
 
 const FR_EN_MAP: Record<string, string> = {
   "reparation-spa": "hot-tub-repair",
@@ -114,12 +115,14 @@ export function CityServicePage({ serviceSlug, villeSlug }: CityServicePageProps
           <div className="mt-6 flex flex-wrap gap-3">
             <a
               href={`tel:${SITE.phoneTel}`}
+              onClick={trackPhoneCall}
               className="inline-flex items-center gap-2 bg-brand text-brand-foreground px-5 py-3 rounded-md font-semibold hover:bg-brand-dark transition-colors"
             >
               <Phone className="w-4 h-4" /> {SITE.phone}
             </a>
             <Link
               to="/contact"
+              onClick={trackQuickSubmission}
               className="inline-flex items-center gap-2 border-2 border-brand text-brand px-5 py-3 rounded-md font-semibold hover:bg-brand hover:text-brand-foreground transition-colors"
             >
               {isEn ? "Request a quote" : "Demander une soumission"}
