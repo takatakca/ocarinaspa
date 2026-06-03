@@ -4,6 +4,7 @@ import { Layout } from "@/components/Layout";
 import { SpaBrands } from "@/components/SpaBrands";
 import { ServiceRequestForm } from "@/components/ServiceRequestForm";
 import { SITE, localBusinessSchema, altLinks, breadcrumbSchema } from "@/lib/seo";
+import { trackPhoneCall, trackQuickSubmission } from "@/lib/gtag";
 import { ALL_BRANDS } from "@/data/spaBrands";
 import technicianImg from "@/assets/hero-technicien-ocarina.jpg";
 import winterSpaImg from "@/assets/brand-arctic-spas.jpg";
@@ -85,12 +86,14 @@ function MarquesPage() {
             <div className="mt-7 flex flex-wrap gap-3">
               <a
                 href={`tel:${SITE.phoneTel}`}
+                onClick={trackPhoneCall}
                 className="inline-flex items-center gap-2 bg-brand text-brand-foreground px-6 py-3 rounded-md font-semibold hover:bg-brand-dark transition-colors"
               >
                 <Phone className="w-5 h-5" /> Appeler {SITE.phone}
               </a>
               <Link
                 to="/contact"
+                onClick={trackQuickSubmission}
                 className="inline-flex items-center gap-2 border-2 border-brand text-brand px-6 py-3 rounded-md font-semibold hover:bg-brand hover:text-brand-foreground transition-colors"
               >
                 Demander un diagnostic

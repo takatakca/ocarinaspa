@@ -3,6 +3,7 @@ import { Phone, Siren, Snowflake, Truck, Clock, MapPin } from "lucide-react";
 import { Layout } from "@/components/Layout";
 import { ServiceRequestForm } from "@/components/ServiceRequestForm";
 import { SITE, altLinks, breadcrumbSchema, localBusinessSchema } from "@/lib/seo";
+import { trackPhoneCall } from "@/lib/gtag";
 import hiver from "@/assets/avant-apres-hiver.jpg";
 
 export const Route = createFileRoute("/urgence-spa")({
@@ -75,6 +76,7 @@ function UrgencePage() {
           <div className="mt-7 flex flex-wrap gap-3">
             <a
               href={`tel:${SITE.phoneTel}`}
+              onClick={trackPhoneCall}
               className="inline-flex items-center gap-2 bg-white text-red-700 px-7 py-4 rounded-md font-bold text-lg hover:bg-red-50 shadow-2xl"
             >
               <Phone className="w-5 h-5" /> {SITE.phone}
