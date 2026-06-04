@@ -100,6 +100,13 @@ continuent à remonter dans GA4 (Temps réel > Événements) et dans Google Tag 
 5. Une fois les labels Ads remplis, un événement supplémentaire **conversion**
    apparaît avec le bon `send_to`.
 
+### Vérifier Google Analytics 4
+
+1. Ouvrir [Google Analytics](https://analytics.google.com/) → **Temps réel** → **Événements**.
+2. Naviguer sur le site et cliquer sur le numéro de téléphone.
+3. Vérifier que l'événement `phone_call` apparaît dans la vue temps réel.
+4. De même pour `form_submit`, `quick_submission` et `diagnostic_complete`.
+
 ### Diagnostic Google Ads
 
 Dans Google Ads → **Outils → Diagnostics du tag** : confirmer que la balise
