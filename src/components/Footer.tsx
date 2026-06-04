@@ -26,6 +26,7 @@ export function Footer() {
             <li><Link to="/vente-spas" className="hover:text-brand">Vente de spas</Link></li>
             <li><Link to="/pieces" className="hover:text-brand">Pièces & accessoires</Link></li>
             <li><Link to="/piscine" className="hover:text-brand">Service de piscine</Link></li>
+            <li><Link to="/succursales" className="hover:text-brand">📍 Succursale Québec</Link></li>
           </ul>
         </div>
         <div>
