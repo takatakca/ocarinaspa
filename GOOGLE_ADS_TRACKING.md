@@ -1,10 +1,17 @@
-# Google Ads Conversion Tracking — OcarinaSpa.ca
+# Google Ads & GA4 Conversion Tracking — OcarinaSpa.ca
 
 ## Identifiants
 
 - **Google Ads ID** : `AW-18182973757`
+- **Google Analytics 4 Measurement ID** : `G-8YYZKVZBW0`
 - Tag global (`gtag.js`) chargé dans `<head>` via `src/routes/__root.tsx` — actif sur **toutes les pages**.
 - Helpers de tracking : `src/lib/gtag.ts`.
+
+> **Configuration combinée** : un seul script `gtag.js` est chargé (avec l'ID GA4). Les deux propriétés sont configurées côte à côte :
+> ```js
+> gtag('config', 'AW-18182973757');
+> gtag('config', 'G-8YYZKVZBW0');
+> ```
 
 ## Événements suivis
 
@@ -27,9 +34,11 @@ pour éviter les doubles déclenchements.
 | `trackQuickSubmission` | `RepairsGrid.tsx`, `CityServicePage.tsx`, `diagnostic.tsx` (CTA "Demander une soumission")            |
 | `trackDiagnosticComplete` | `routes/diagnostic.tsx` (après réception du résultat de `diagnoseSpaIssue`)                        |
 
-## Système à 2 couches
+## Système à 2 couches (Google Ads + GA4)
 
-Le helper `trackEvent` envoie **toujours** un événement nommé (fallback) :
+Le helper `trackEvent` envoie **toujours** un événement nommé qui remonte à la fois dans :
+- **Google Analytics 4** (comme événement custom : `phone_call`, `form_submit`, etc.)
+- **Google Tag Assistant** (pour le débogage)
 
 ```js
 gtag('event', 'phone_call', {
@@ -39,7 +48,7 @@ gtag('event', 'phone_call', {
 ```
 
 Et, **si un vrai label Google Ads est configuré**, il envoie en plus la
-conversion officielle :
+conversion officielle Google Ads :
 
 ```js
 gtag('event', 'conversion', {
@@ -50,7 +59,7 @@ gtag('event', 'conversion', {
 ```
 
 Tant que les labels ne sont pas remplis, **rien n'est cassé** : les événements
-fallback continuent à remonter dans GA4 et dans Google Tag Assistant.
+continuent à remonter dans GA4 (Temps réel > Événements) et dans Google Tag Assistant.
 
 ## Comment remplacer les labels Google Ads
 
