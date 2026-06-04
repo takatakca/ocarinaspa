@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as VillesRouteImport } from './routes/villes'
 import { Route as VenteSpasRouteImport } from './routes/vente-spas'
 import { Route as UrgenceSpaRouteImport } from './routes/urgence-spa'
+import { Route as SuccursalesRouteImport } from './routes/succursales'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ServicesRouteImport } from './routes/services'
 import { Route as RegionsRouteImport } from './routes/regions'
@@ -51,6 +52,11 @@ const VenteSpasRoute = VenteSpasRouteImport.update({
 const UrgenceSpaRoute = UrgenceSpaRouteImport.update({
   id: '/urgence-spa',
   path: '/urgence-spa',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SuccursalesRoute = SuccursalesRouteImport.update({
+  id: '/succursales',
+  path: '/succursales',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -191,6 +197,7 @@ export interface FileRoutesByFullPath {
   '/regions': typeof RegionsRoute
   '/services': typeof ServicesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/succursales': typeof SuccursalesRoute
   '/urgence-spa': typeof UrgenceSpaRoute
   '/vente-spas': typeof VenteSpasRoute
   '/villes': typeof VillesRoute
@@ -221,6 +228,7 @@ export interface FileRoutesByTo {
   '/regions': typeof RegionsRoute
   '/services': typeof ServicesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/succursales': typeof SuccursalesRoute
   '/urgence-spa': typeof UrgenceSpaRoute
   '/vente-spas': typeof VenteSpasRoute
   '/villes': typeof VillesRoute
@@ -252,6 +260,7 @@ export interface FileRoutesById {
   '/regions': typeof RegionsRoute
   '/services': typeof ServicesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/succursales': typeof SuccursalesRoute
   '/urgence-spa': typeof UrgenceSpaRoute
   '/vente-spas': typeof VenteSpasRoute
   '/villes': typeof VillesRoute
@@ -284,6 +293,7 @@ export interface FileRouteTypes {
     | '/regions'
     | '/services'
     | '/sitemap.xml'
+    | '/succursales'
     | '/urgence-spa'
     | '/vente-spas'
     | '/villes'
@@ -314,6 +324,7 @@ export interface FileRouteTypes {
     | '/regions'
     | '/services'
     | '/sitemap.xml'
+    | '/succursales'
     | '/urgence-spa'
     | '/vente-spas'
     | '/villes'
@@ -344,6 +355,7 @@ export interface FileRouteTypes {
     | '/regions'
     | '/services'
     | '/sitemap.xml'
+    | '/succursales'
     | '/urgence-spa'
     | '/vente-spas'
     | '/villes'
@@ -375,6 +387,7 @@ export interface RootRouteChildren {
   RegionsRoute: typeof RegionsRoute
   ServicesRoute: typeof ServicesRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  SuccursalesRoute: typeof SuccursalesRoute
   UrgenceSpaRoute: typeof UrgenceSpaRoute
   VenteSpasRoute: typeof VenteSpasRoute
   VillesRoute: typeof VillesRoute
@@ -415,6 +428,13 @@ declare module '@tanstack/react-router' {
       path: '/urgence-spa'
       fullPath: '/urgence-spa'
       preLoaderRoute: typeof UrgenceSpaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/succursales': {
+      id: '/succursales'
+      path: '/succursales'
+      fullPath: '/succursales'
+      preLoaderRoute: typeof SuccursalesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sitemap.xml': {
@@ -607,6 +627,7 @@ const rootRouteChildren: RootRouteChildren = {
   RegionsRoute: RegionsRoute,
   ServicesRoute: ServicesRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  SuccursalesRoute: SuccursalesRoute,
   UrgenceSpaRoute: UrgenceSpaRoute,
   VenteSpasRoute: VenteSpasRoute,
   VillesRoute: VillesRoute,
