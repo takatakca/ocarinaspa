@@ -1,4 +1,7 @@
 export const AW_ID = "AW-18182973757";
+export const GA4_ID = "G-8YYZKVZBW0";
+
+/**
 
 /**
  * Google Ads conversion labels.
@@ -47,8 +50,9 @@ export function gtag(...args: any[]) {
 }
 
 /**
- * Fire a Google Ads conversion event.
- * - Always sends a named event (phone_call, form_submit, etc.) for GA4 / fallback.
+ * Fire a Google Ads / GA4 event.
+ * - Always sends a named event (phone_call, form_submit, etc.) which GA4 picks up
+ *   automatically as a custom event.
  * - If a real Google Ads label is configured, also sends the "conversion" event
  *   with the proper send_to value.
  * - Dedupes per page load so a single click never fires twice.
