@@ -15,6 +15,7 @@ const nav = [
   { to: "/vente-spas", label: "Vente" },
   { to: "/pieces", label: "Pièces" },
   { to: "/villes", label: "Villes" },
+  { to: "/succursales", label: "📍 Nous trouver" },
   { to: "/contact", label: "Contact" },
   { to: "/en", label: "EN" },
 ] as const;
