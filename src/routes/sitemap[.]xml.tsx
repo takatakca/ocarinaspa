@@ -21,6 +21,7 @@ export const Route = createFileRoute("/sitemap.xml")({
           `${BASE}/regions`,
           `${BASE}/villes`,
           `${BASE}/contact`,
+          `${BASE}/succursales`,
         ];
         for (const s of SERVICE_TYPES) {
           for (const m of quebecMunicipalities) {
