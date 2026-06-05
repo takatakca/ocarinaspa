@@ -7,7 +7,7 @@
 - Tag global (`gtag.js`) chargé dans `<head>` via `src/routes/__root.tsx` — actif sur **toutes les pages**.
 - Helpers de tracking : `src/lib/gtag.ts`.
 
-> **Configuration combinée** : un seul script `gtag.js` est chargé (avec l'ID GA4). Les deux propriétés sont configurées côte à côte :
+> **Configuration combinée** : un seul script `gtag.js` est chargé (avec l'ID Google Ads `AW-18182973757`). Les deux propriétés sont configurées côte à côte :
 > ```js
 > gtag('config', 'AW-18182973757');
 > gtag('config', 'G-8YYZKVZBW0');
@@ -93,6 +93,7 @@ continuent à remonter dans GA4 (Temps réel > Événements) et dans Google Tag 
 3. Naviguer sur le site dans la fenêtre Tag Assistant.
 4. Vérifier que :
    - Le tag `AW-18182973757` apparaît en **Loaded** sur chaque page.
+   - Le tag `G-8YYZKVZBW0` apparaît aussi comme destination/configuration GA4.
    - Cliquer sur le numéro `819-913-7727` → un événement `phone_call` apparaît.
    - Soumettre le formulaire → un événement `form_submit`.
    - Cliquer "Demander une soumission" → `quick_submission`.
@@ -111,3 +112,11 @@ continuent à remonter dans GA4 (Temps réel > Événements) et dans Google Tag 
 
 Dans Google Ads → **Outils → Diagnostics du tag** : confirmer que la balise
 `AW-18182973757` est détectée comme **Active — Recent activity**.
+
+
+## Vérification statique effectuée dans le code
+
+- Un seul loader `https://www.googletagmanager.com/gtag/js` est présent dans `src/routes/__root.tsx`.
+- Le script configure les deux destinations : `AW-18182973757` et `G-8YYZKVZBW0`.
+- Aucune clé Google Maps fournie par le snippet Locator Plus n'est hardcodée dans le code source. La carte utilise `VITE_GOOGLE_MAPS_API_KEY` si disponible, sinon un embed public sans clé.
+- `.env` et `.env.*` sont maintenant ignorés par Git; garder seulement `.env.example` dans le dépôt.
