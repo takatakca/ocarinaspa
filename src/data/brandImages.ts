@@ -20,7 +20,6 @@ export const BRAND_IMAGES: Record<string, string> = {
   "Hot Spring": hotspring,
   "Caldera Spas": caldera,
   "Master Spas": master,
-  // Aliases used elsewhere
   "Vita Spa": beachcomber,
   "Coast Spas": maax,
   "Wellis": sundance,
@@ -38,4 +37,8 @@ export const FEATURED_BRANDS: { name: string; img: string; tag: string }[] = [
   { name: "Hot Spring", img: hotspring, tag: "Confort premium" },
   { name: "Caldera Spas", img: caldera, tag: "Design moderne" },
   { name: "Master Spas", img: master, tag: "Spas de nage" },
+  { name: "Vita Spa", img: beachcomber, tag: "Confort accessible" },
+  { name: "Coast Spas", img: maax, tag: "Bord-infini" },
+  { name: "Wellis", img: sundance, tag: "Design européen" },
+  { name: "Passion Spas", img: bullfrog, tag: "Spas hollandais" },
 ];

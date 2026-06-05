@@ -1,5 +1,6 @@
 import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
 import { Toaster } from "@/components/ui/sonner";
+import { AW_ID, GA4_ID } from "@/lib/gtag";
 
 import appCss from "../styles.css?url";
 
@@ -59,14 +60,16 @@ function RootShell({ children }: { children: React.ReactNode }) {
     <html lang="fr-CA">
       <head>
         <HeadContent />
-        <script async src="https://www.googletagmanager.com/gtag/js?id=G-8YYZKVZBW0"></script>
+        {/* Google tag — one gtag.js loader, configured for both Google Ads and GA4. */}
+        <script async src={`https://www.googletagmanager.com/gtag/js?id=${AW_ID}`}></script>
         <script
+          id="ocarina-google-tag"
           dangerouslySetInnerHTML={{
             __html: `window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
-gtag('config', 'AW-18182973757');
-gtag('config', 'G-8YYZKVZBW0');`,
+gtag('config', '${AW_ID}');
+gtag('config', '${GA4_ID}');`,
           }}
         />
       </head>

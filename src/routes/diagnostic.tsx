@@ -1,11 +1,21 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useState, type FormEvent } from "react";
-import { Phone, Sparkles, AlertTriangle, CheckCircle2, Loader2 } from "lucide-react";
+import { Phone, Sparkles, AlertTriangle, CheckCircle2, Loader2, Calendar, ShieldCheck } from "lucide-react";
 import { Layout } from "@/components/Layout";
 import { SITE, altLinks, breadcrumbSchema } from "@/lib/seo";
-import { diagnoseSpaIssue, type DiagnosticResult } from "@/lib/diagnostic.functions";
-import { trackPhoneCall, trackDiagnosticComplete, trackQuickSubmission } from "@/lib/gtag";
+import {
+  diagnoseSpaIssue,
+  saveDiagnosticLead,
+  updateDiagnosticLeadAI,
+  type DiagnosticResult,
+} from "@/lib/diagnostic.functions";
+import {
+  trackPhoneCall,
+  trackDiagnosticComplete,
+  trackDiagnosticLeadSubmit,
+  trackQuickSubmission,
+} from "@/lib/gtag";
 
 export const Route = createFileRoute("/diagnostic")({
   head: () => ({
@@ -14,13 +24,13 @@ export const Route = createFileRoute("/diagnostic")({
       {
         name: "description",
         content:
-          "Diagnostiquez votre problème de spa en moins d'une minute grâce à notre outil AI. Codes d'erreur, pompe, chauffe-eau, fuite — réponse instantanée.",
+          "Diagnostiquez votre problème de spa grâce à notre outil AI. Un technicien Ocarina Spa vous rappelle pour planifier une visite.",
       },
-      { property: "og:title", content: "Diagnostiqueur de spa AI gratuit — Ocarina Spa" },
+      { property: "og:title", content: "Diagnostiqueur de spa AI — Ocarina Spa" },
       {
         property: "og:description",
         content:
-          "Décris ton problème, on te donne une piste en quelques secondes — toutes marques.",
+          "Remplissez le formulaire, recevez un diagnostic AI et un rappel d'un technicien Ocarina Spa.",
       },
       { property: "og:url", content: SITE.domain + "/diagnostic" },
     ],
@@ -42,33 +52,87 @@ export const Route = createFileRoute("/diagnostic")({
 
 function DiagnosticPage() {
   const diagnose = useServerFn(diagnoseSpaIssue);
+  const saveLead = useServerFn(saveDiagnosticLead);
+  const updateLead = useServerFn(updateDiagnosticLeadAI);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<DiagnosticResult | null>(null);
+  const [leadId, setLeadId] = useState<string | null>(null);
+  const [consent, setConsent] = useState(false);
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
     setResult(null);
+
+    if (!consent) {
+      setError("Vous devez accepter d'être contacté par Ocarina Spa pour continuer.");
+      return;
+    }
+
     setLoading(true);
     const fd = new FormData(e.currentTarget);
+    const get = (k: string) => String(fd.get(k) || "").trim();
+
     try {
+      // 1) Save lead first — guarantees we capture the contact even if AI fails.
+      const lead = await saveLead({
+        data: {
+          full_name: get("full_name"),
+          phone: get("phone"),
+          email: get("email"),
+          city: get("city"),
+          brand: get("brand"),
+          model: get("model") || null,
+          spa_year: get("year") || null,
+          error_code: get("errorCode") || null,
+          problem_description: get("symptoms"),
+          heating: get("heating") || null,
+          pump_works: get("pumpWorks") || null,
+          pump_noise: get("pumpNoise") || null,
+          since: get("since") || null,
+          consent: true,
+          source_url: typeof window !== "undefined" ? window.location.href : null,
+        },
+      });
+      setLeadId(lead.id ?? null);
+      trackDiagnosticLeadSubmit();
+
+      // 2) Run AI diagnostic
       const res = await diagnose({
         data: {
-          errorCode: String(fd.get("errorCode") || "").trim() || undefined,
-          brand: String(fd.get("brand") || "").trim() || undefined,
-          model: String(fd.get("model") || "").trim() || undefined,
-          year: String(fd.get("year") || "").trim() || undefined,
-          symptoms: String(fd.get("symptoms") || "").trim(),
-          heating: (fd.get("heating") as string) as DiagnosticResultInput["heating"],
-          pumpWorks: (fd.get("pumpWorks") as string) as DiagnosticResultInput["pumpNoise"],
-          pumpNoise: (fd.get("pumpNoise") as string) as DiagnosticResultInput["pumpNoise"],
-          since: String(fd.get("since") || "").trim() || undefined,
-          city: String(fd.get("city") || "").trim() || undefined,
+          errorCode: get("errorCode") || undefined,
+          brand: get("brand") || undefined,
+          model: get("model") || undefined,
+          year: get("year") || undefined,
+          symptoms: get("symptoms"),
+          heating: (get("heating") as "oui" | "non" | "intermittent" | "inconnu") || undefined,
+          pumpWorks: (get("pumpWorks") as "oui" | "non" | "inconnu") || undefined,
+          pumpNoise: (get("pumpNoise") as "oui" | "non" | "inconnu") || undefined,
+          since: get("since") || undefined,
+          city: get("city") || undefined,
         },
       });
       setResult(res);
       trackDiagnosticComplete();
+
+      // 3) Best-effort: enrich the lead with AI output for follow-up
+      if (lead.id) {
+        try {
+          await updateLead({
+            data: {
+              id: lead.id,
+              ai_diagnostic: res.diagnostic,
+              ai_causes: res.likelyCauses,
+              ai_actions: res.actions,
+              ai_urgency: res.urgency,
+              ai_recommend_call: res.recommendCall,
+            },
+          });
+        } catch (e) {
+          console.warn("updateDiagnosticLeadAI failed", e);
+        }
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erreur inconnue");
     } finally {
@@ -81,14 +145,15 @@ function DiagnosticPage() {
       <section className="bg-surface">
         <div className="container mx-auto px-4 py-14 md:py-20 max-w-3xl">
           <div className="inline-flex items-center gap-2 bg-brand/10 border border-brand/30 px-3 py-1.5 rounded-full text-sm text-brand font-semibold">
-            <Sparkles className="w-4 h-4" /> Outil AI gratuit
+            <Sparkles className="w-4 h-4" /> Outil AI + rappel d'un technicien
           </div>
           <h1 className="mt-4 font-display text-4xl md:text-5xl font-bold text-foreground">
-            Diagnostiqueur de spa — réponse en quelques secondes
+            Diagnostiqueur de spa Ocarina Spa
           </h1>
           <p className="mt-4 text-lg text-muted-foreground">
-            Réponds aux quelques questions ci-dessous. Notre AI te donne une piste de
-            réparation pour ton spa (toutes marques). Pour une intervention, appelle-nous au{" "}
+            Remplis le formulaire ci-dessous. Tu reçois immédiatement un diagnostic AI et un
+            technicien Ocarina Spa te rappelle pour planifier une visite. Pour une urgence,
+            appelle directement le{" "}
             <a href={`tel:${SITE.phoneTel}`} onClick={trackPhoneCall} className="text-brand font-semibold">
               {SITE.phone}
             </a>
@@ -98,49 +163,123 @@ function DiagnosticPage() {
       </section>
 
       <section className="container mx-auto px-4 py-10 max-w-3xl">
-        <form onSubmit={handleSubmit} className="bg-card border border-border rounded-xl p-6 grid gap-4">
+        <form
+          onSubmit={handleSubmit}
+          className="bg-card border border-border rounded-xl p-6 grid gap-5"
+        >
+          {/* === Coordonnées (obligatoire avant l'IA) === */}
+          <div>
+            <h2 className="font-display text-xl font-semibold text-foreground">Vos coordonnées</h2>
+            <p className="text-sm text-muted-foreground">
+              Requis pour qu'un technicien Ocarina Spa puisse vous rappeler.
+            </p>
+          </div>
+
           <div className="grid sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-foreground mb-1.5">
-                Marque du spa
+                Nom complet *
+              </label>
+              <input
+                name="full_name"
+                required
+                minLength={2}
+                maxLength={100}
+                placeholder="Ex. Jean Tremblay"
+                className="w-full px-3 py-2.5 border border-border rounded-md bg-background"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-1.5">
+                Téléphone *
+              </label>
+              <input
+                name="phone"
+                type="tel"
+                required
+                minLength={7}
+                maxLength={30}
+                placeholder="Ex. 819-555-1234"
+                className="w-full px-3 py-2.5 border border-border rounded-md bg-background"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-1.5">
+                Courriel *
+              </label>
+              <input
+                name="email"
+                type="email"
+                required
+                maxLength={255}
+                placeholder="vous@exemple.com"
+                className="w-full px-3 py-2.5 border border-border rounded-md bg-background"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-1.5">
+                Ville *
+              </label>
+              <input
+                name="city"
+                required
+                minLength={2}
+                maxLength={80}
+                placeholder="Ex. Laval, Montréal…"
+                className="w-full px-3 py-2.5 border border-border rounded-md bg-background"
+              />
+            </div>
+          </div>
+
+          {/* === Spa === */}
+          <div className="pt-2 border-t border-border">
+            <h2 className="font-display text-xl font-semibold text-foreground mt-3">Votre spa</h2>
+          </div>
+
+          <div className="grid sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-1.5">
+                Marque du spa *
               </label>
               <input
                 name="brand"
-                placeholder="Ex. Jacuzzi, Hydropool, Arctic Spas…"
+                required
+                minLength={1}
                 maxLength={80}
+                placeholder="Ex. Jacuzzi, Hydropool, Arctic Spas…"
                 className="w-full px-3 py-2.5 border border-border rounded-md bg-background"
               />
             </div>
             <div>
               <label className="block text-sm font-medium text-foreground mb-1.5">
-                Modèle (si connu)
+                Modèle (optionnel)
               </label>
               <input
                 name="model"
-                placeholder="Ex. J-345, Serenity 6800…"
                 maxLength={80}
+                placeholder="Ex. J-345, Serenity 6800…"
                 className="w-full px-3 py-2.5 border border-border rounded-md bg-background"
               />
             </div>
             <div>
               <label className="block text-sm font-medium text-foreground mb-1.5">
-                Année approximative
+                Année approximative (optionnel)
               </label>
               <input
                 name="year"
-                placeholder="Ex. 2018"
                 maxLength={10}
+                placeholder="Ex. 2018"
                 className="w-full px-3 py-2.5 border border-border rounded-md bg-background"
               />
             </div>
             <div>
               <label className="block text-sm font-medium text-foreground mb-1.5">
-                Code d'erreur affiché
+                Code d'erreur affiché (optionnel)
               </label>
               <input
                 name="errorCode"
-                placeholder="Ex. FLO, OH, DR…"
                 maxLength={20}
+                placeholder="Ex. FLO, OH, DR…"
                 className="w-full px-3 py-2.5 border border-border rounded-md bg-background"
               />
             </div>
@@ -148,7 +287,7 @@ function DiagnosticPage() {
 
           <div>
             <label className="block text-sm font-medium text-foreground mb-1.5">
-              Décris le problème *
+              Description du problème *
             </label>
             <textarea
               name="symptoms"
@@ -164,7 +303,7 @@ function DiagnosticPage() {
           <div className="grid sm:grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-medium text-foreground mb-1.5">
-                Est-ce que le spa chauffe ?
+                Le spa chauffe ?
               </label>
               <select
                 name="heating"
@@ -179,7 +318,7 @@ function DiagnosticPage() {
             </div>
             <div>
               <label className="block text-sm font-medium text-foreground mb-1.5">
-                Est-ce que la pompe fonctionne ?
+                La pompe fonctionne ?
               </label>
               <select
                 name="pumpWorks"
@@ -193,7 +332,7 @@ function DiagnosticPage() {
             </div>
             <div>
               <label className="block text-sm font-medium text-foreground mb-1.5">
-                La pompe fait du bruit ?
+                Bruit anormal pompe ?
               </label>
               <select
                 name="pumpNoise"
@@ -207,35 +346,37 @@ function DiagnosticPage() {
             </div>
           </div>
 
-          <div className="grid sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-1.5">
-                Depuis quand le problème est présent ?
-              </label>
-              <input
-                name="since"
-                placeholder="Ex. Depuis 2 jours, depuis ce matin…"
-                maxLength={80}
-                className="w-full px-3 py-2.5 border border-border rounded-md bg-background"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-1.5">
-                Votre ville
-              </label>
-              <input
-                name="city"
-                placeholder="Ex. Laval, Montréal…"
-                maxLength={80}
-                className="w-full px-3 py-2.5 border border-border rounded-md bg-background"
-              />
-            </div>
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-1.5">
+              Depuis quand ?
+            </label>
+            <input
+              name="since"
+              placeholder="Ex. Depuis 2 jours, depuis ce matin…"
+              maxLength={80}
+              className="w-full px-3 py-2.5 border border-border rounded-md bg-background"
+            />
           </div>
+
+          {/* === Consentement === */}
+          <label className="flex items-start gap-3 bg-surface border border-border rounded-md p-4 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={consent}
+              onChange={(e) => setConsent(e.target.checked)}
+              className="mt-1 w-4 h-4 accent-brand"
+              required
+            />
+            <span className="text-sm text-foreground">
+              <ShieldCheck className="inline w-4 h-4 text-brand mr-1" />
+              J'accepte qu'Ocarina Spa me contacte concernant ma demande de diagnostic. *
+            </span>
+          </label>
 
           <button
             type="submit"
-            disabled={loading}
-            className="inline-flex items-center justify-center gap-2 bg-brand text-brand-foreground px-6 py-3 rounded-md font-semibold hover:bg-brand-dark transition-colors disabled:opacity-60"
+            disabled={loading || !consent}
+            className="inline-flex items-center justify-center gap-2 bg-brand text-brand-foreground px-6 py-3.5 rounded-md font-semibold text-lg hover:bg-brand-dark transition-colors disabled:opacity-60"
           >
             {loading ? (
               <>
@@ -243,13 +384,20 @@ function DiagnosticPage() {
               </>
             ) : (
               <>
-                <Sparkles className="w-5 h-5" /> Diagnostiquer mon spa
+                <Sparkles className="w-5 h-5" /> Obtenir mon diagnostic
               </>
             )}
           </button>
+
           {error && (
-            <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-md p-3">
+            <p className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-md p-3">
               {error}
+            </p>
+          )}
+
+          {leadId && !result && !loading && (
+            <p className="text-sm text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-md p-3">
+              Demande enregistrée — un technicien Ocarina Spa vous contactera rapidement.
             </p>
           )}
         </form>
@@ -259,7 +407,9 @@ function DiagnosticPage() {
             <div className="flex items-start gap-3">
               <CheckCircle2 className="w-6 h-6 text-brand shrink-0 mt-1" />
               <div className="flex-1">
-                <h2 className="font-display text-2xl font-bold text-foreground">Diagnostic AI</h2>
+                <h2 className="font-display text-2xl font-bold text-foreground">
+                  Diagnostic AI
+                </h2>
                 <p className="mt-2 text-foreground">{result.diagnostic}</p>
 
                 {result.likelyCauses.length > 0 && (
@@ -275,7 +425,9 @@ function DiagnosticPage() {
 
                 {result.actions.length > 0 && (
                   <>
-                    <h3 className="mt-5 font-semibold text-foreground">À essayer / vérifier</h3>
+                    <h3 className="mt-5 font-semibold text-foreground">
+                      Actions recommandées / conseils temporaires
+                    </h3>
                     <ul className="mt-2 list-disc list-inside text-muted-foreground space-y-1">
                       {result.actions.map((c) => (
                         <li key={c}>{c}</li>
@@ -299,8 +451,8 @@ function DiagnosticPage() {
                   </p>
                   {result.recommendCall && (
                     <p className="mt-2 text-sm">
-                      Une intervention technique est recommandée. Appelez-nous pour un
-                      rendez-vous.
+                      Une intervention technique est recommandée. Appelez Ocarina Spa pour
+                      planifier une visite.
                     </p>
                   )}
                 </div>
@@ -309,21 +461,21 @@ function DiagnosticPage() {
                   <a
                     href={`tel:${SITE.phoneTel}`}
                     onClick={trackPhoneCall}
-                    className="inline-flex items-center gap-2 bg-brand text-brand-foreground px-5 py-2.5 rounded-md font-semibold"
+                    className="inline-flex items-center gap-2 bg-brand text-brand-foreground px-5 py-3 rounded-md font-semibold hover:bg-brand-dark transition-colors"
                   >
-                    <Phone className="w-4 h-4" /> Appeler {SITE.phone}
+                    <Phone className="w-4 h-4" /> Appeler maintenant — {SITE.phone}
                   </a>
                   <Link
                     to="/contact"
                     onClick={trackQuickSubmission}
-                    className="inline-flex items-center gap-2 border-2 border-brand text-brand px-5 py-2.5 rounded-md font-semibold"
+                    className="inline-flex items-center gap-2 border-2 border-brand text-brand px-5 py-3 rounded-md font-semibold hover:bg-brand hover:text-brand-foreground transition-colors"
                   >
-                    Demander une soumission
+                    <Calendar className="w-4 h-4" /> Planifier une visite
                   </Link>
                 </div>
                 <p className="mt-4 text-xs text-muted-foreground">
                   Ce diagnostic est informatif. Seule une inspection physique permet de
-                  confirmer la panne.
+                  confirmer la panne. Votre demande est déjà enregistrée chez Ocarina Spa.
                 </p>
               </div>
             </div>
@@ -333,8 +485,3 @@ function DiagnosticPage() {
     </Layout>
   );
 }
-
-type DiagnosticResultInput = {
-  heating?: "oui" | "non" | "intermittent" | "inconnu";
-  pumpNoise?: "oui" | "non" | "inconnu";
-};

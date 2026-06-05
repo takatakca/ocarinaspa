@@ -15,6 +15,7 @@ export const AW_LABELS: Record<EventName, string> = {
   phone_call: "REMPLACER_LABEL_ICI",
   form_submit: "REMPLACER_LABEL_ICI",
   quick_submission: "REMPLACER_LABEL_ICI",
+  diagnostic_lead_submit: "REMPLACER_LABEL_ICI",
   diagnostic_complete: "REMPLACER_LABEL_ICI",
 };
 
@@ -22,12 +23,14 @@ export type EventName =
   | "phone_call"
   | "form_submit"
   | "quick_submission"
+  | "diagnostic_lead_submit"
   | "diagnostic_complete";
 
 const EVENT_LABELS: Record<EventName, string> = {
   phone_call: "Phone Click",
   form_submit: "Form Submit",
   quick_submission: "Quick Submission",
+  diagnostic_lead_submit: "Diagnostic Lead Submit",
   diagnostic_complete: "Diagnostic Complete",
 };
 
@@ -104,4 +107,9 @@ export function trackQuickSubmission() {
 /** Google Ads conversion — diagnostic AI completed */
 export function trackDiagnosticComplete() {
   trackEvent("diagnostic_complete", { dedupeKey: `diagnostic_complete:${Date.now()}` });
+}
+
+/** Google Ads conversion — diagnostic lead form submitted (before AI runs) */
+export function trackDiagnosticLeadSubmit() {
+  trackEvent("diagnostic_lead_submit", { dedupeKey: `diagnostic_lead_submit:${Date.now()}` });
 }

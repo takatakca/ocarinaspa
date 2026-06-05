@@ -44,6 +44,84 @@ export type Database = {
         }
         Relationships: []
       }
+      diagnostic_leads: {
+        Row: {
+          ai_actions: Json | null
+          ai_causes: Json | null
+          ai_diagnostic: string | null
+          ai_recommend_call: boolean | null
+          ai_urgency: string | null
+          brand: string
+          city: string
+          consent: boolean
+          created_at: string
+          email: string
+          error_code: string | null
+          full_name: string
+          heating: string | null
+          id: string
+          model: string | null
+          phone: string
+          problem_description: string
+          pump_noise: string | null
+          pump_works: string | null
+          since: string | null
+          source_url: string | null
+          spa_year: string | null
+          status: string
+        }
+        Insert: {
+          ai_actions?: Json | null
+          ai_causes?: Json | null
+          ai_diagnostic?: string | null
+          ai_recommend_call?: boolean | null
+          ai_urgency?: string | null
+          brand: string
+          city: string
+          consent?: boolean
+          created_at?: string
+          email: string
+          error_code?: string | null
+          full_name: string
+          heating?: string | null
+          id?: string
+          model?: string | null
+          phone: string
+          problem_description: string
+          pump_noise?: string | null
+          pump_works?: string | null
+          since?: string | null
+          source_url?: string | null
+          spa_year?: string | null
+          status?: string
+        }
+        Update: {
+          ai_actions?: Json | null
+          ai_causes?: Json | null
+          ai_diagnostic?: string | null
+          ai_recommend_call?: boolean | null
+          ai_urgency?: string | null
+          brand?: string
+          city?: string
+          consent?: boolean
+          created_at?: string
+          email?: string
+          error_code?: string | null
+          full_name?: string
+          heating?: string | null
+          id?: string
+          model?: string | null
+          phone?: string
+          problem_description?: string
+          pump_noise?: string | null
+          pump_works?: string | null
+          since?: string | null
+          source_url?: string | null
+          spa_year?: string | null
+          status?: string
+        }
+        Relationships: []
+      }
       service_requests: {
         Row: {
           city: string | null

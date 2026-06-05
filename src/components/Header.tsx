@@ -7,17 +7,14 @@ import logo from "@/assets/ocarina-logo.png";
 
 const nav = [
   { to: "/", label: "Accueil" },
-  { to: "/services", label: "Services" },
-  { to: "/codes-erreur", label: "Codes d'erreur" },
-  { to: "/diagnostic", label: "Diagnostic AI" },
-  { to: "/urgence-spa", label: "Urgence 24/7" },
+  { to: "/services", label: "Réparation Spa" },
   { to: "/marques", label: "Marques" },
+  { to: "/diagnostic", label: "Diagnostic AI" },
+  { to: "/codes-erreur", label: "Codes d'erreur" },
   { to: "/vente-spas", label: "Vente" },
   { to: "/pieces", label: "Pièces" },
-  { to: "/villes", label: "Villes" },
-  { to: "/succursales", label: "📍 Nous trouver" },
+  { to: "/urgence-spa", label: "Urgence 24/7" },
   { to: "/contact", label: "Contact" },
-  { to: "/en", label: "EN" },
 ] as const;
 
 export function Header() {
@@ -31,7 +28,7 @@ export function Header() {
           <span className="sr-only">Ocarina Spa Québec</span>
         </Link>
 
-        <nav className="hidden xl:flex items-center gap-5">
+        <nav className="hidden lg:flex items-center gap-5">
           {nav.map((n) => (
             <Link
               key={n.to}
@@ -53,7 +50,7 @@ export function Header() {
             <Phone className="w-4 h-4" /> {SITE.phone}
           </a>
           <button
-            className="xl:hidden p-2 text-foreground"
+            className="lg:hidden p-2 text-foreground"
             onClick={() => setOpen(!open)}
             aria-label="Menu"
           >
@@ -63,7 +60,7 @@ export function Header() {
       </div>
 
       {open && (
-        <div className="xl:hidden border-t border-border bg-background">
+        <div className="lg:hidden border-t border-border bg-background">
           <nav className="container mx-auto px-4 py-4 flex flex-col gap-1">
             {nav.map((n) => (
               <Link
@@ -75,6 +72,20 @@ export function Header() {
                 {n.label}
               </Link>
             ))}
+            <Link
+              to="/villes"
+              onClick={() => setOpen(false)}
+              className="py-2.5 px-2 text-foreground/80 text-sm rounded hover:bg-surface"
+            >
+              Zones desservies
+            </Link>
+            <Link
+              to="/en"
+              onClick={() => setOpen(false)}
+              className="py-2.5 px-2 text-foreground/80 text-sm rounded hover:bg-surface"
+            >
+              EN
+            </Link>
             <a
               href={`tel:${SITE.phoneTel}`}
               onClick={trackPhoneCall}

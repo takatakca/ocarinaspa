@@ -22,6 +22,84 @@ export type DiagnosticResult = {
   recommendCall: boolean;
 };
 
+const LeadInput = z.object({
+  full_name: z.string().trim().min(2).max(100),
+  phone: z.string().trim().min(7).max(30),
+  email: z.string().trim().email().max(255),
+  city: z.string().trim().min(2).max(80),
+  brand: z.string().trim().min(1).max(80),
+  model: z.string().trim().max(80).optional().nullable(),
+  spa_year: z.string().trim().max(10).optional().nullable(),
+  error_code: z.string().trim().max(20).optional().nullable(),
+  problem_description: z.string().trim().min(3).max(2000),
+  heating: z.string().max(20).optional().nullable(),
+  pump_works: z.string().max(20).optional().nullable(),
+  pump_noise: z.string().max(20).optional().nullable(),
+  since: z.string().max(80).optional().nullable(),
+  consent: z.literal(true),
+  source_url: z.string().max(500).optional().nullable(),
+});
+
+export const saveDiagnosticLead = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => LeadInput.parse(input))
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: inserted, error } = await supabaseAdmin
+      .from("diagnostic_leads")
+      .insert({
+        full_name: data.full_name,
+        phone: data.phone,
+        email: data.email,
+        city: data.city,
+        brand: data.brand,
+        model: data.model || null,
+        spa_year: data.spa_year || null,
+        error_code: data.error_code || null,
+        problem_description: data.problem_description,
+        heating: data.heating || null,
+        pump_works: data.pump_works || null,
+        pump_noise: data.pump_noise || null,
+        since: data.since || null,
+        consent: data.consent,
+        source_url: data.source_url || null,
+      })
+      .select("id")
+      .single();
+    if (error) {
+      console.error("diagnostic_leads insert error", error);
+      throw new Error("Impossible d'enregistrer votre demande. Réessayez ou appelez-nous.");
+    }
+    return { ok: true as const, id: inserted?.id as string | undefined };
+  });
+
+export const updateDiagnosticLeadAI = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) =>
+    z
+      .object({
+        id: z.string().uuid(),
+        ai_diagnostic: z.string().max(4000),
+        ai_causes: z.array(z.string()).max(10),
+        ai_actions: z.array(z.string()).max(10),
+        ai_urgency: z.string().max(20),
+        ai_recommend_call: z.boolean(),
+      })
+      .parse(input),
+  )
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    await supabaseAdmin
+      .from("diagnostic_leads")
+      .update({
+        ai_diagnostic: data.ai_diagnostic,
+        ai_causes: data.ai_causes,
+        ai_actions: data.ai_actions,
+        ai_urgency: data.ai_urgency,
+        ai_recommend_call: data.ai_recommend_call,
+      })
+      .eq("id", data.id);
+    return { ok: true as const };
+  });
+
 export const diagnoseSpaIssue = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => DiagnosticInput.parse(input))
   .handler(async ({ data }): Promise<DiagnosticResult> => {
