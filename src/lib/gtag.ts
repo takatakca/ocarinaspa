@@ -128,3 +128,28 @@ export function trackDiagnosticComplete() {
 export function trackDiagnosticLeadSubmit() {
   trackEvent("diagnostic_lead_submit", { dedupeKey: `diagnostic_lead_submit:${Date.now()}` });
 }
+
+/** Invoice portal — page view (once per page load) */
+export function trackInvoicePageView() {
+  trackEvent("invoice_payment_page_view", { dedupeKey: "invoice_payment_page_view" });
+}
+
+/** Invoice portal — user submitted lookup form */
+export function trackInvoiceLookup() {
+  trackEvent("invoice_lookup", { dedupeKey: `invoice_lookup:${Date.now()}` });
+}
+
+/** Invoice portal — a matching invoice was found */
+export function trackInvoiceFound() {
+  trackEvent("invoice_found", { dedupeKey: `invoice_found:${Date.now()}` });
+}
+
+/** Invoice portal — user clicked Pay Now (redirect to Stripe hosted page) */
+export function trackInvoicePayClick() {
+  trackEvent("invoice_pay_click", { dedupeKey: `invoice_pay_click:${Date.now()}` });
+}
+
+/** Invoice portal — Stripe confirmed payment via webhook (fire from server-confirmed flow if needed) */
+export function trackInvoicePaid() {
+  trackEvent("invoice_paid", { dedupeKey: `invoice_paid:${Date.now()}` });
+}
