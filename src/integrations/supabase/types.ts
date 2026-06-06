@@ -179,6 +179,63 @@ export type Database = {
         }
         Relationships: []
       }
+      stripe_invoices: {
+        Row: {
+          amount_cents: number
+          created_at: string
+          currency: string
+          customer_email: string | null
+          customer_name: string | null
+          customer_phone: string | null
+          description: string | null
+          hosted_invoice_url: string | null
+          id: string
+          invoice_number: string | null
+          invoice_pdf: string | null
+          paid_at: string | null
+          status: string
+          stripe_customer_id: string | null
+          stripe_invoice_id: string
+          updated_at: string
+        }
+        Insert: {
+          amount_cents?: number
+          created_at?: string
+          currency?: string
+          customer_email?: string | null
+          customer_name?: string | null
+          customer_phone?: string | null
+          description?: string | null
+          hosted_invoice_url?: string | null
+          id?: string
+          invoice_number?: string | null
+          invoice_pdf?: string | null
+          paid_at?: string | null
+          status?: string
+          stripe_customer_id?: string | null
+          stripe_invoice_id: string
+          updated_at?: string
+        }
+        Update: {
+          amount_cents?: number
+          created_at?: string
+          currency?: string
+          customer_email?: string | null
+          customer_name?: string | null
+          customer_phone?: string | null
+          description?: string | null
+          hosted_invoice_url?: string | null
+          id?: string
+          invoice_number?: string | null
+          invoice_pdf?: string | null
+          paid_at?: string | null
+          status?: string
+          stripe_customer_id?: string | null
+          stripe_invoice_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
