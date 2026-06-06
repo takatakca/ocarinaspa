@@ -18,6 +18,7 @@ import { Route as ServicesRouteImport } from './routes/services'
 import { Route as RegionsRouteImport } from './routes/regions'
 import { Route as PiscineRouteImport } from './routes/piscine'
 import { Route as PiecesRouteImport } from './routes/pieces'
+import { Route as PayerFactureRouteImport } from './routes/payer-facture'
 import { Route as MarquesRouteImport } from './routes/marques'
 import { Route as EnRouteImport } from './routes/en'
 import { Route as DiagnosticRouteImport } from './routes/diagnostic'
@@ -37,6 +38,7 @@ import { Route as FermetureSpaVilleRouteImport } from './routes/fermeture-spa.$v
 import { Route as FermeturePiscineVilleRouteImport } from './routes/fermeture-piscine.$ville'
 import { Route as EntretienSpaVilleRouteImport } from './routes/entretien-spa.$ville'
 import { Route as EntretienPiscineVilleRouteImport } from './routes/entretien-piscine.$ville'
+import { Route as ApiPublicStripeWebhookRouteImport } from './routes/api/public/stripe-webhook'
 import { Route as ApiPublicServiceRequestRouteImport } from './routes/api/public/service-request'
 
 const VillesRoute = VillesRouteImport.update({
@@ -82,6 +84,11 @@ const PiscineRoute = PiscineRouteImport.update({
 const PiecesRoute = PiecesRouteImport.update({
   id: '/pieces',
   path: '/pieces',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PayerFactureRoute = PayerFactureRouteImport.update({
+  id: '/payer-facture',
+  path: '/payer-facture',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MarquesRoute = MarquesRouteImport.update({
@@ -179,6 +186,11 @@ const EntretienPiscineVilleRoute = EntretienPiscineVilleRouteImport.update({
   path: '/entretien-piscine/$ville',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicStripeWebhookRoute = ApiPublicStripeWebhookRouteImport.update({
+  id: '/api/public/stripe-webhook',
+  path: '/api/public/stripe-webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicServiceRequestRoute = ApiPublicServiceRequestRouteImport.update({
   id: '/api/public/service-request',
   path: '/api/public/service-request',
@@ -192,6 +204,7 @@ export interface FileRoutesByFullPath {
   '/diagnostic': typeof DiagnosticRoute
   '/en': typeof EnRoute
   '/marques': typeof MarquesRoute
+  '/payer-facture': typeof PayerFactureRoute
   '/pieces': typeof PiecesRoute
   '/piscine': typeof PiscineRoute
   '/regions': typeof RegionsRoute
@@ -215,6 +228,7 @@ export interface FileRoutesByFullPath {
   '/reparation-spa/$ville': typeof ReparationSpaVilleRoute
   '/vente-spa/$ville': typeof VenteSpaVilleRoute
   '/api/public/service-request': typeof ApiPublicServiceRequestRoute
+  '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -223,6 +237,7 @@ export interface FileRoutesByTo {
   '/diagnostic': typeof DiagnosticRoute
   '/en': typeof EnRoute
   '/marques': typeof MarquesRoute
+  '/payer-facture': typeof PayerFactureRoute
   '/pieces': typeof PiecesRoute
   '/piscine': typeof PiscineRoute
   '/regions': typeof RegionsRoute
@@ -246,6 +261,7 @@ export interface FileRoutesByTo {
   '/reparation-spa/$ville': typeof ReparationSpaVilleRoute
   '/vente-spa/$ville': typeof VenteSpaVilleRoute
   '/api/public/service-request': typeof ApiPublicServiceRequestRoute
+  '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -255,6 +271,7 @@ export interface FileRoutesById {
   '/diagnostic': typeof DiagnosticRoute
   '/en': typeof EnRoute
   '/marques': typeof MarquesRoute
+  '/payer-facture': typeof PayerFactureRoute
   '/pieces': typeof PiecesRoute
   '/piscine': typeof PiscineRoute
   '/regions': typeof RegionsRoute
@@ -278,6 +295,7 @@ export interface FileRoutesById {
   '/reparation-spa/$ville': typeof ReparationSpaVilleRoute
   '/vente-spa/$ville': typeof VenteSpaVilleRoute
   '/api/public/service-request': typeof ApiPublicServiceRequestRoute
+  '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -288,6 +306,7 @@ export interface FileRouteTypes {
     | '/diagnostic'
     | '/en'
     | '/marques'
+    | '/payer-facture'
     | '/pieces'
     | '/piscine'
     | '/regions'
@@ -311,6 +330,7 @@ export interface FileRouteTypes {
     | '/reparation-spa/$ville'
     | '/vente-spa/$ville'
     | '/api/public/service-request'
+    | '/api/public/stripe-webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -319,6 +339,7 @@ export interface FileRouteTypes {
     | '/diagnostic'
     | '/en'
     | '/marques'
+    | '/payer-facture'
     | '/pieces'
     | '/piscine'
     | '/regions'
@@ -342,6 +363,7 @@ export interface FileRouteTypes {
     | '/reparation-spa/$ville'
     | '/vente-spa/$ville'
     | '/api/public/service-request'
+    | '/api/public/stripe-webhook'
   id:
     | '__root__'
     | '/'
@@ -350,6 +372,7 @@ export interface FileRouteTypes {
     | '/diagnostic'
     | '/en'
     | '/marques'
+    | '/payer-facture'
     | '/pieces'
     | '/piscine'
     | '/regions'
@@ -373,6 +396,7 @@ export interface FileRouteTypes {
     | '/reparation-spa/$ville'
     | '/vente-spa/$ville'
     | '/api/public/service-request'
+    | '/api/public/stripe-webhook'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -382,6 +406,7 @@ export interface RootRouteChildren {
   DiagnosticRoute: typeof DiagnosticRoute
   EnRoute: typeof EnRoute
   MarquesRoute: typeof MarquesRoute
+  PayerFactureRoute: typeof PayerFactureRoute
   PiecesRoute: typeof PiecesRoute
   PiscineRoute: typeof PiscineRoute
   RegionsRoute: typeof RegionsRoute
@@ -405,6 +430,7 @@ export interface RootRouteChildren {
   ReparationSpaVilleRoute: typeof ReparationSpaVilleRoute
   VenteSpaVilleRoute: typeof VenteSpaVilleRoute
   ApiPublicServiceRequestRoute: typeof ApiPublicServiceRequestRoute
+  ApiPublicStripeWebhookRoute: typeof ApiPublicStripeWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -470,6 +496,13 @@ declare module '@tanstack/react-router' {
       path: '/pieces'
       fullPath: '/pieces'
       preLoaderRoute: typeof PiecesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/payer-facture': {
+      id: '/payer-facture'
+      path: '/payer-facture'
+      fullPath: '/payer-facture'
+      preLoaderRoute: typeof PayerFactureRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/marques': {
@@ -605,6 +638,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EntretienPiscineVilleRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/stripe-webhook': {
+      id: '/api/public/stripe-webhook'
+      path: '/api/public/stripe-webhook'
+      fullPath: '/api/public/stripe-webhook'
+      preLoaderRoute: typeof ApiPublicStripeWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/service-request': {
       id: '/api/public/service-request'
       path: '/api/public/service-request'
@@ -622,6 +662,7 @@ const rootRouteChildren: RootRouteChildren = {
   DiagnosticRoute: DiagnosticRoute,
   EnRoute: EnRoute,
   MarquesRoute: MarquesRoute,
+  PayerFactureRoute: PayerFactureRoute,
   PiecesRoute: PiecesRoute,
   PiscineRoute: PiscineRoute,
   RegionsRoute: RegionsRoute,
@@ -645,16 +686,8 @@ const rootRouteChildren: RootRouteChildren = {
   ReparationSpaVilleRoute: ReparationSpaVilleRoute,
   VenteSpaVilleRoute: VenteSpaVilleRoute,
   ApiPublicServiceRequestRoute: ApiPublicServiceRequestRoute,
+  ApiPublicStripeWebhookRoute: ApiPublicStripeWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}

@@ -39,6 +39,7 @@ export function Footer() {
             <li><Link to="/pieces" className="hover:text-brand">Pièces</Link></li>
             <li><Link to="/urgence-spa" className="hover:text-brand inline-flex items-center gap-1.5"><AlertTriangle className="w-3.5 h-3.5 text-red-400" /> Urgence 24/7</Link></li>
             <li><Link to="/marques" className="hover:text-brand">Marques réparées</Link></li>
+            <li><Link to="/payer-facture" className="hover:text-brand">💳 Payer une facture</Link></li>
           </ul>
         </div>
 

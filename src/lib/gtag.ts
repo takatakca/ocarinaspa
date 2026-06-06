@@ -17,6 +17,11 @@ export const AW_LABELS: Record<EventName, string> = {
   quick_submission: "REMPLACER_LABEL_ICI",
   diagnostic_lead_submit: "REMPLACER_LABEL_ICI",
   diagnostic_complete: "REMPLACER_LABEL_ICI",
+  invoice_payment_page_view: "REMPLACER_LABEL_ICI",
+  invoice_lookup: "REMPLACER_LABEL_ICI",
+  invoice_found: "REMPLACER_LABEL_ICI",
+  invoice_pay_click: "REMPLACER_LABEL_ICI",
+  invoice_paid: "REMPLACER_LABEL_ICI",
 };
 
 export type EventName =
@@ -24,7 +29,12 @@ export type EventName =
   | "form_submit"
   | "quick_submission"
   | "diagnostic_lead_submit"
-  | "diagnostic_complete";
+  | "diagnostic_complete"
+  | "invoice_payment_page_view"
+  | "invoice_lookup"
+  | "invoice_found"
+  | "invoice_pay_click"
+  | "invoice_paid";
 
 const EVENT_LABELS: Record<EventName, string> = {
   phone_call: "Phone Click",
@@ -32,6 +42,11 @@ const EVENT_LABELS: Record<EventName, string> = {
   quick_submission: "Quick Submission",
   diagnostic_lead_submit: "Diagnostic Lead Submit",
   diagnostic_complete: "Diagnostic Complete",
+  invoice_payment_page_view: "Invoice Payment Page View",
+  invoice_lookup: "Invoice Lookup",
+  invoice_found: "Invoice Found",
+  invoice_pay_click: "Invoice Pay Click",
+  invoice_paid: "Invoice Paid",
 };
 
 declare global {
@@ -112,4 +127,29 @@ export function trackDiagnosticComplete() {
 /** Google Ads conversion — diagnostic lead form submitted (before AI runs) */
 export function trackDiagnosticLeadSubmit() {
   trackEvent("diagnostic_lead_submit", { dedupeKey: `diagnostic_lead_submit:${Date.now()}` });
+}
+
+/** Invoice portal — page view (once per page load) */
+export function trackInvoicePageView() {
+  trackEvent("invoice_payment_page_view", { dedupeKey: "invoice_payment_page_view" });
+}
+
+/** Invoice portal — user submitted lookup form */
+export function trackInvoiceLookup() {
+  trackEvent("invoice_lookup", { dedupeKey: `invoice_lookup:${Date.now()}` });
+}
+
+/** Invoice portal — a matching invoice was found */
+export function trackInvoiceFound() {
+  trackEvent("invoice_found", { dedupeKey: `invoice_found:${Date.now()}` });
+}
+
+/** Invoice portal — user clicked Pay Now (redirect to Stripe hosted page) */
+export function trackInvoicePayClick() {
+  trackEvent("invoice_pay_click", { dedupeKey: `invoice_pay_click:${Date.now()}` });
+}
+
+/** Invoice portal — Stripe confirmed payment via webhook (fire from server-confirmed flow if needed) */
+export function trackInvoicePaid() {
+  trackEvent("invoice_paid", { dedupeKey: `invoice_paid:${Date.now()}` });
 }
