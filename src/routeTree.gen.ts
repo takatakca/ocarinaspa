@@ -24,6 +24,8 @@ import { Route as EnRouteImport } from './routes/en'
 import { Route as DiagnosticRouteImport } from './routes/diagnostic'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CodesErreurRouteImport } from './routes/codes-erreur'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as VenteSpaVilleRouteImport } from './routes/vente-spa.$ville'
 import { Route as ReparationSpaVilleRouteImport } from './routes/reparation-spa.$ville'
@@ -40,6 +42,7 @@ import { Route as EntretienSpaVilleRouteImport } from './routes/entretien-spa.$v
 import { Route as EntretienPiscineVilleRouteImport } from './routes/entretien-piscine.$ville'
 import { Route as ApiPublicStripeWebhookRouteImport } from './routes/api/public/stripe-webhook'
 import { Route as ApiPublicServiceRequestRouteImport } from './routes/api/public/service-request'
+import { Route as AuthenticatedAdminFacturesRouteImport } from './routes/_authenticated/admin.factures'
 
 const VillesRoute = VillesRouteImport.update({
   id: '/villes',
@@ -114,6 +117,15 @@ const ContactRoute = ContactRouteImport.update({
 const CodesErreurRoute = CodesErreurRouteImport.update({
   id: '/codes-erreur',
   path: '/codes-erreur',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -196,9 +208,16 @@ const ApiPublicServiceRequestRoute = ApiPublicServiceRequestRouteImport.update({
   path: '/api/public/service-request',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedAdminFacturesRoute =
+  AuthenticatedAdminFacturesRouteImport.update({
+    id: '/admin/factures',
+    path: '/admin/factures',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/codes-erreur': typeof CodesErreurRoute
   '/contact': typeof ContactRoute
   '/diagnostic': typeof DiagnosticRoute
@@ -227,11 +246,13 @@ export interface FileRoutesByFullPath {
   '/pieces-spa/$ville': typeof PiecesSpaVilleRoute
   '/reparation-spa/$ville': typeof ReparationSpaVilleRoute
   '/vente-spa/$ville': typeof VenteSpaVilleRoute
+  '/admin/factures': typeof AuthenticatedAdminFacturesRoute
   '/api/public/service-request': typeof ApiPublicServiceRequestRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/codes-erreur': typeof CodesErreurRoute
   '/contact': typeof ContactRoute
   '/diagnostic': typeof DiagnosticRoute
@@ -260,12 +281,15 @@ export interface FileRoutesByTo {
   '/pieces-spa/$ville': typeof PiecesSpaVilleRoute
   '/reparation-spa/$ville': typeof ReparationSpaVilleRoute
   '/vente-spa/$ville': typeof VenteSpaVilleRoute
+  '/admin/factures': typeof AuthenticatedAdminFacturesRoute
   '/api/public/service-request': typeof ApiPublicServiceRequestRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/auth': typeof AuthRoute
   '/codes-erreur': typeof CodesErreurRoute
   '/contact': typeof ContactRoute
   '/diagnostic': typeof DiagnosticRoute
@@ -294,6 +318,7 @@ export interface FileRoutesById {
   '/pieces-spa/$ville': typeof PiecesSpaVilleRoute
   '/reparation-spa/$ville': typeof ReparationSpaVilleRoute
   '/vente-spa/$ville': typeof VenteSpaVilleRoute
+  '/_authenticated/admin/factures': typeof AuthenticatedAdminFacturesRoute
   '/api/public/service-request': typeof ApiPublicServiceRequestRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
 }
@@ -301,6 +326,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/auth'
     | '/codes-erreur'
     | '/contact'
     | '/diagnostic'
@@ -329,11 +355,13 @@ export interface FileRouteTypes {
     | '/pieces-spa/$ville'
     | '/reparation-spa/$ville'
     | '/vente-spa/$ville'
+    | '/admin/factures'
     | '/api/public/service-request'
     | '/api/public/stripe-webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/auth'
     | '/codes-erreur'
     | '/contact'
     | '/diagnostic'
@@ -362,11 +390,14 @@ export interface FileRouteTypes {
     | '/pieces-spa/$ville'
     | '/reparation-spa/$ville'
     | '/vente-spa/$ville'
+    | '/admin/factures'
     | '/api/public/service-request'
     | '/api/public/stripe-webhook'
   id:
     | '__root__'
     | '/'
+    | '/_authenticated'
+    | '/auth'
     | '/codes-erreur'
     | '/contact'
     | '/diagnostic'
@@ -395,12 +426,15 @@ export interface FileRouteTypes {
     | '/pieces-spa/$ville'
     | '/reparation-spa/$ville'
     | '/vente-spa/$ville'
+    | '/_authenticated/admin/factures'
     | '/api/public/service-request'
     | '/api/public/stripe-webhook'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AuthRoute: typeof AuthRoute
   CodesErreurRoute: typeof CodesErreurRoute
   ContactRoute: typeof ContactRoute
   DiagnosticRoute: typeof DiagnosticRoute
@@ -540,6 +574,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CodesErreurRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -652,11 +700,31 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicServiceRequestRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/admin/factures': {
+      id: '/_authenticated/admin/factures'
+      path: '/admin/factures'
+      fullPath: '/admin/factures'
+      preLoaderRoute: typeof AuthenticatedAdminFacturesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAdminFacturesRoute: typeof AuthenticatedAdminFacturesRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAdminFacturesRoute: AuthenticatedAdminFacturesRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AuthRoute: AuthRoute,
   CodesErreurRoute: CodesErreurRoute,
   ContactRoute: ContactRoute,
   DiagnosticRoute: DiagnosticRoute,
