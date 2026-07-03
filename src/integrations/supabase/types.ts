@@ -44,6 +44,143 @@ export type Database = {
         }
         Relationships: []
       }
+      customer_credits: {
+        Row: {
+          created_at: string
+          credit_code: string
+          credit_type: string
+          credit_value_cents: number | null
+          credit_value_percent: number
+          currency: string
+          customer_email: string | null
+          customer_name: string | null
+          customer_phone: string | null
+          expires_at: string
+          id: string
+          invoice_number: string | null
+          status: string
+          stripe_invoice_id: string | null
+          survey_id: string | null
+          updated_at: string
+          used_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          credit_code: string
+          credit_type?: string
+          credit_value_cents?: number | null
+          credit_value_percent?: number
+          currency?: string
+          customer_email?: string | null
+          customer_name?: string | null
+          customer_phone?: string | null
+          expires_at?: string
+          id?: string
+          invoice_number?: string | null
+          status?: string
+          stripe_invoice_id?: string | null
+          survey_id?: string | null
+          updated_at?: string
+          used_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          credit_code?: string
+          credit_type?: string
+          credit_value_cents?: number | null
+          credit_value_percent?: number
+          currency?: string
+          customer_email?: string | null
+          customer_name?: string | null
+          customer_phone?: string | null
+          expires_at?: string
+          id?: string
+          invoice_number?: string | null
+          status?: string
+          stripe_invoice_id?: string | null
+          survey_id?: string | null
+          updated_at?: string
+          used_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_credits_survey_id_fkey"
+            columns: ["survey_id"]
+            isOneToOne: false
+            referencedRelation: "customer_surveys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customer_surveys: {
+        Row: {
+          callback_time: string | null
+          created_at: string
+          customer_email: string | null
+          customer_name: string | null
+          customer_phone: string | null
+          delay_acceptable: string | null
+          id: string
+          improvement_comment: string | null
+          invoice_number: string | null
+          overall_rating: number | null
+          price_clear: string | null
+          problem_resolved: string | null
+          service_question: string | null
+          stripe_invoice_id: string | null
+          submitted_at: string | null
+          technician_professional: string | null
+          token: string
+          updated_at: string
+          wants_callback: boolean
+          would_recommend: string | null
+        }
+        Insert: {
+          callback_time?: string | null
+          created_at?: string
+          customer_email?: string | null
+          customer_name?: string | null
+          customer_phone?: string | null
+          delay_acceptable?: string | null
+          id?: string
+          improvement_comment?: string | null
+          invoice_number?: string | null
+          overall_rating?: number | null
+          price_clear?: string | null
+          problem_resolved?: string | null
+          service_question?: string | null
+          stripe_invoice_id?: string | null
+          submitted_at?: string | null
+          technician_professional?: string | null
+          token: string
+          updated_at?: string
+          wants_callback?: boolean
+          would_recommend?: string | null
+        }
+        Update: {
+          callback_time?: string | null
+          created_at?: string
+          customer_email?: string | null
+          customer_name?: string | null
+          customer_phone?: string | null
+          delay_acceptable?: string | null
+          id?: string
+          improvement_comment?: string | null
+          invoice_number?: string | null
+          overall_rating?: number | null
+          price_clear?: string | null
+          problem_resolved?: string | null
+          service_question?: string | null
+          stripe_invoice_id?: string | null
+          submitted_at?: string | null
+          technician_professional?: string | null
+          token?: string
+          updated_at?: string
+          wants_callback?: boolean
+          would_recommend?: string | null
+        }
+        Relationships: []
+      }
       diagnostic_leads: {
         Row: {
           ai_actions: Json | null
@@ -122,6 +259,48 @@ export type Database = {
         }
         Relationships: []
       }
+      service_questions: {
+        Row: {
+          answered_at: string | null
+          created_at: string
+          customer_email: string | null
+          customer_name: string | null
+          customer_phone: string | null
+          id: string
+          internal_note: string | null
+          invoice_number: string | null
+          question: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          answered_at?: string | null
+          created_at?: string
+          customer_email?: string | null
+          customer_name?: string | null
+          customer_phone?: string | null
+          id?: string
+          internal_note?: string | null
+          invoice_number?: string | null
+          question: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          answered_at?: string | null
+          created_at?: string
+          customer_email?: string | null
+          customer_name?: string | null
+          customer_phone?: string | null
+          id?: string
+          internal_note?: string | null
+          invoice_number?: string | null
+          question?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       service_requests: {
         Row: {
           city: string | null
@@ -187,12 +366,18 @@ export type Database = {
           customer_email: string | null
           customer_name: string | null
           customer_phone: string | null
+          customer_rating: number | null
+          customer_rating_at: string | null
           description: string | null
           hosted_invoice_url: string | null
           id: string
+          interac_received_at: string | null
+          internal_note: string | null
           invoice_number: string | null
           invoice_pdf: string | null
+          needs_followup: boolean
           paid_at: string | null
+          payment_method: string | null
           status: string
           stripe_customer_id: string | null
           stripe_invoice_id: string
@@ -205,12 +390,18 @@ export type Database = {
           customer_email?: string | null
           customer_name?: string | null
           customer_phone?: string | null
+          customer_rating?: number | null
+          customer_rating_at?: string | null
           description?: string | null
           hosted_invoice_url?: string | null
           id?: string
+          interac_received_at?: string | null
+          internal_note?: string | null
           invoice_number?: string | null
           invoice_pdf?: string | null
+          needs_followup?: boolean
           paid_at?: string | null
+          payment_method?: string | null
           status?: string
           stripe_customer_id?: string | null
           stripe_invoice_id: string
@@ -223,12 +414,18 @@ export type Database = {
           customer_email?: string | null
           customer_name?: string | null
           customer_phone?: string | null
+          customer_rating?: number | null
+          customer_rating_at?: string | null
           description?: string | null
           hosted_invoice_url?: string | null
           id?: string
+          interac_received_at?: string | null
+          internal_note?: string | null
           invoice_number?: string | null
           invoice_pdf?: string | null
+          needs_followup?: boolean
           paid_at?: string | null
+          payment_method?: string | null
           status?: string
           stripe_customer_id?: string | null
           stripe_invoice_id?: string
