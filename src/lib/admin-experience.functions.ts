@@ -174,7 +174,7 @@ export const setCreditStatus = createServerFn({ method: "POST" })
     if (data.status === "used") patch.used_at = new Date().toISOString();
     const { error } = await context.supabase
       .from("customer_credits")
-      .update(patch)
+      .update(patch as any)
       .eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
@@ -227,7 +227,7 @@ export const setServiceQuestionStatus = createServerFn({ method: "POST" })
     if (data.internalNote != null) patch.internal_note = data.internalNote;
     const { error } = await context.supabase
       .from("service_questions")
-      .update(patch)
+      .update(patch as any)
       .eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
@@ -274,7 +274,7 @@ export const resolveFollowup = createServerFn({ method: "POST" })
     if (data.note) patch.internal_note = data.note;
     const { error } = await context.supabase
       .from("stripe_invoices")
-      .update(patch)
+      .update(patch as any)
       .eq("stripe_invoice_id", data.invoiceId);
     if (error) throw new Error(error.message);
     return { ok: true };
