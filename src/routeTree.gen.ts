@@ -13,12 +13,14 @@ import { Route as VillesRouteImport } from './routes/villes'
 import { Route as VenteSpasRouteImport } from './routes/vente-spas'
 import { Route as UrgenceSpaRouteImport } from './routes/urgence-spa'
 import { Route as SuccursalesRouteImport } from './routes/succursales'
+import { Route as SondageRouteImport } from './routes/sondage'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ServicesRouteImport } from './routes/services'
 import { Route as RegionsRouteImport } from './routes/regions'
 import { Route as PiscineRouteImport } from './routes/piscine'
 import { Route as PiecesRouteImport } from './routes/pieces'
 import { Route as PayerFactureRouteImport } from './routes/payer-facture'
+import { Route as PaiementConfirmeRouteImport } from './routes/paiement-confirme'
 import { Route as MarquesRouteImport } from './routes/marques'
 import { Route as EnRouteImport } from './routes/en'
 import { Route as DiagnosticRouteImport } from './routes/diagnostic'
@@ -64,6 +66,11 @@ const SuccursalesRoute = SuccursalesRouteImport.update({
   path: '/succursales',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SondageRoute = SondageRouteImport.update({
+  id: '/sondage',
+  path: '/sondage',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
@@ -92,6 +99,11 @@ const PiecesRoute = PiecesRouteImport.update({
 const PayerFactureRoute = PayerFactureRouteImport.update({
   id: '/payer-facture',
   path: '/payer-facture',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PaiementConfirmeRoute = PaiementConfirmeRouteImport.update({
+  id: '/paiement-confirme',
+  path: '/paiement-confirme',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MarquesRoute = MarquesRouteImport.update({
@@ -223,12 +235,14 @@ export interface FileRoutesByFullPath {
   '/diagnostic': typeof DiagnosticRoute
   '/en': typeof EnRoute
   '/marques': typeof MarquesRoute
+  '/paiement-confirme': typeof PaiementConfirmeRoute
   '/payer-facture': typeof PayerFactureRoute
   '/pieces': typeof PiecesRoute
   '/piscine': typeof PiscineRoute
   '/regions': typeof RegionsRoute
   '/services': typeof ServicesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/sondage': typeof SondageRoute
   '/succursales': typeof SuccursalesRoute
   '/urgence-spa': typeof UrgenceSpaRoute
   '/vente-spas': typeof VenteSpasRoute
@@ -258,12 +272,14 @@ export interface FileRoutesByTo {
   '/diagnostic': typeof DiagnosticRoute
   '/en': typeof EnRoute
   '/marques': typeof MarquesRoute
+  '/paiement-confirme': typeof PaiementConfirmeRoute
   '/payer-facture': typeof PayerFactureRoute
   '/pieces': typeof PiecesRoute
   '/piscine': typeof PiscineRoute
   '/regions': typeof RegionsRoute
   '/services': typeof ServicesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/sondage': typeof SondageRoute
   '/succursales': typeof SuccursalesRoute
   '/urgence-spa': typeof UrgenceSpaRoute
   '/vente-spas': typeof VenteSpasRoute
@@ -295,12 +311,14 @@ export interface FileRoutesById {
   '/diagnostic': typeof DiagnosticRoute
   '/en': typeof EnRoute
   '/marques': typeof MarquesRoute
+  '/paiement-confirme': typeof PaiementConfirmeRoute
   '/payer-facture': typeof PayerFactureRoute
   '/pieces': typeof PiecesRoute
   '/piscine': typeof PiscineRoute
   '/regions': typeof RegionsRoute
   '/services': typeof ServicesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/sondage': typeof SondageRoute
   '/succursales': typeof SuccursalesRoute
   '/urgence-spa': typeof UrgenceSpaRoute
   '/vente-spas': typeof VenteSpasRoute
@@ -332,12 +350,14 @@ export interface FileRouteTypes {
     | '/diagnostic'
     | '/en'
     | '/marques'
+    | '/paiement-confirme'
     | '/payer-facture'
     | '/pieces'
     | '/piscine'
     | '/regions'
     | '/services'
     | '/sitemap.xml'
+    | '/sondage'
     | '/succursales'
     | '/urgence-spa'
     | '/vente-spas'
@@ -367,12 +387,14 @@ export interface FileRouteTypes {
     | '/diagnostic'
     | '/en'
     | '/marques'
+    | '/paiement-confirme'
     | '/payer-facture'
     | '/pieces'
     | '/piscine'
     | '/regions'
     | '/services'
     | '/sitemap.xml'
+    | '/sondage'
     | '/succursales'
     | '/urgence-spa'
     | '/vente-spas'
@@ -403,12 +425,14 @@ export interface FileRouteTypes {
     | '/diagnostic'
     | '/en'
     | '/marques'
+    | '/paiement-confirme'
     | '/payer-facture'
     | '/pieces'
     | '/piscine'
     | '/regions'
     | '/services'
     | '/sitemap.xml'
+    | '/sondage'
     | '/succursales'
     | '/urgence-spa'
     | '/vente-spas'
@@ -440,12 +464,14 @@ export interface RootRouteChildren {
   DiagnosticRoute: typeof DiagnosticRoute
   EnRoute: typeof EnRoute
   MarquesRoute: typeof MarquesRoute
+  PaiementConfirmeRoute: typeof PaiementConfirmeRoute
   PayerFactureRoute: typeof PayerFactureRoute
   PiecesRoute: typeof PiecesRoute
   PiscineRoute: typeof PiscineRoute
   RegionsRoute: typeof RegionsRoute
   ServicesRoute: typeof ServicesRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  SondageRoute: typeof SondageRoute
   SuccursalesRoute: typeof SuccursalesRoute
   UrgenceSpaRoute: typeof UrgenceSpaRoute
   VenteSpasRoute: typeof VenteSpasRoute
@@ -497,6 +523,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SuccursalesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/sondage': {
+      id: '/sondage'
+      path: '/sondage'
+      fullPath: '/sondage'
+      preLoaderRoute: typeof SondageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/sitemap.xml': {
       id: '/sitemap.xml'
       path: '/sitemap.xml'
@@ -537,6 +570,13 @@ declare module '@tanstack/react-router' {
       path: '/payer-facture'
       fullPath: '/payer-facture'
       preLoaderRoute: typeof PayerFactureRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/paiement-confirme': {
+      id: '/paiement-confirme'
+      path: '/paiement-confirme'
+      fullPath: '/paiement-confirme'
+      preLoaderRoute: typeof PaiementConfirmeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/marques': {
@@ -730,12 +770,14 @@ const rootRouteChildren: RootRouteChildren = {
   DiagnosticRoute: DiagnosticRoute,
   EnRoute: EnRoute,
   MarquesRoute: MarquesRoute,
+  PaiementConfirmeRoute: PaiementConfirmeRoute,
   PayerFactureRoute: PayerFactureRoute,
   PiecesRoute: PiecesRoute,
   PiscineRoute: PiscineRoute,
   RegionsRoute: RegionsRoute,
   ServicesRoute: ServicesRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  SondageRoute: SondageRoute,
   SuccursalesRoute: SuccursalesRoute,
   UrgenceSpaRoute: UrgenceSpaRoute,
   VenteSpasRoute: VenteSpasRoute,
