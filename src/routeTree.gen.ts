@@ -13,6 +13,7 @@ import { Route as VillesRouteImport } from './routes/villes'
 import { Route as VenteSpasRouteImport } from './routes/vente-spas'
 import { Route as UrgenceSpaRouteImport } from './routes/urgence-spa'
 import { Route as SuccursalesRouteImport } from './routes/succursales'
+import { Route as SondageRouteImport } from './routes/sondage'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ServicesRouteImport } from './routes/services'
 import { Route as RegionsRouteImport } from './routes/regions'
@@ -63,6 +64,11 @@ const UrgenceSpaRoute = UrgenceSpaRouteImport.update({
 const SuccursalesRoute = SuccursalesRouteImport.update({
   id: '/succursales',
   path: '/succursales',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SondageRoute = SondageRouteImport.update({
+  id: '/sondage',
+  path: '/sondage',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -236,6 +242,7 @@ export interface FileRoutesByFullPath {
   '/regions': typeof RegionsRoute
   '/services': typeof ServicesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/sondage': typeof SondageRoute
   '/succursales': typeof SuccursalesRoute
   '/urgence-spa': typeof UrgenceSpaRoute
   '/vente-spas': typeof VenteSpasRoute
@@ -272,6 +279,7 @@ export interface FileRoutesByTo {
   '/regions': typeof RegionsRoute
   '/services': typeof ServicesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/sondage': typeof SondageRoute
   '/succursales': typeof SuccursalesRoute
   '/urgence-spa': typeof UrgenceSpaRoute
   '/vente-spas': typeof VenteSpasRoute
@@ -310,6 +318,7 @@ export interface FileRoutesById {
   '/regions': typeof RegionsRoute
   '/services': typeof ServicesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/sondage': typeof SondageRoute
   '/succursales': typeof SuccursalesRoute
   '/urgence-spa': typeof UrgenceSpaRoute
   '/vente-spas': typeof VenteSpasRoute
@@ -348,6 +357,7 @@ export interface FileRouteTypes {
     | '/regions'
     | '/services'
     | '/sitemap.xml'
+    | '/sondage'
     | '/succursales'
     | '/urgence-spa'
     | '/vente-spas'
@@ -384,6 +394,7 @@ export interface FileRouteTypes {
     | '/regions'
     | '/services'
     | '/sitemap.xml'
+    | '/sondage'
     | '/succursales'
     | '/urgence-spa'
     | '/vente-spas'
@@ -421,6 +432,7 @@ export interface FileRouteTypes {
     | '/regions'
     | '/services'
     | '/sitemap.xml'
+    | '/sondage'
     | '/succursales'
     | '/urgence-spa'
     | '/vente-spas'
@@ -459,6 +471,7 @@ export interface RootRouteChildren {
   RegionsRoute: typeof RegionsRoute
   ServicesRoute: typeof ServicesRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  SondageRoute: typeof SondageRoute
   SuccursalesRoute: typeof SuccursalesRoute
   UrgenceSpaRoute: typeof UrgenceSpaRoute
   VenteSpasRoute: typeof VenteSpasRoute
@@ -508,6 +521,13 @@ declare module '@tanstack/react-router' {
       path: '/succursales'
       fullPath: '/succursales'
       preLoaderRoute: typeof SuccursalesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sondage': {
+      id: '/sondage'
+      path: '/sondage'
+      fullPath: '/sondage'
+      preLoaderRoute: typeof SondageRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sitemap.xml': {
@@ -757,6 +777,7 @@ const rootRouteChildren: RootRouteChildren = {
   RegionsRoute: RegionsRoute,
   ServicesRoute: ServicesRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  SondageRoute: SondageRoute,
   SuccursalesRoute: SuccursalesRoute,
   UrgenceSpaRoute: UrgenceSpaRoute,
   VenteSpasRoute: VenteSpasRoute,
@@ -780,3 +801,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
