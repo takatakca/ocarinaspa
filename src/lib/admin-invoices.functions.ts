@@ -192,9 +192,34 @@ export const sendAdminInvoice = createServerFn({ method: "POST" })
 export const checkIsAdmin = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { data } = await context.supabase.rpc("has_role", {
+    // 1) Existing role check
+    const { data: hasAdmin } = await context.supabase.rpc("has_role", {
       _user_id: context.userId,
       _role: "admin",
     });
-    return { isAdmin: !!data, userId: context.userId };
+    if (hasAdmin) return { isAdmin: true, userId: context.userId };
+
+    // 2) Bootstrap via ADMIN_EMAILS allow-list (server-side only)
+    const allow = (process.env.ADMIN_EMAILS ?? "")
+      .split(",")
+      .map((s) => s.trim().toLowerCase())
+      .filter(Boolean);
+    if (allow.length === 0) return { isAdmin: false, userId: context.userId };
+
+    const userEmail = (context.claims?.email ?? "").toLowerCase();
+    if (!userEmail || !allow.includes(userEmail)) {
+      return { isAdmin: false, userId: context.userId };
+    }
+
+    // Grant admin role using service role (bypasses RLS on user_roles).
+    // Safe: gated by verified session email + server-side env allow-list.
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error: insertErr } = await supabaseAdmin
+      .from("user_roles")
+      .insert({ user_id: context.userId, role: "admin" });
+    if (insertErr && !/duplicate|unique/i.test(insertErr.message)) {
+      console.error("[admin bootstrap] failed to grant role:", insertErr.message);
+      return { isAdmin: false, userId: context.userId };
+    }
+    return { isAdmin: true, userId: context.userId, bootstrapped: true };
   });
