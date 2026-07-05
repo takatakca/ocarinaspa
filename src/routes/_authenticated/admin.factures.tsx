@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
 import {
@@ -9,6 +9,10 @@ import {
   type AdminInvoiceCreated,
   type AdminInvoiceRow,
 } from "@/lib/admin-invoices.functions";
+import {
+  markInteracReceived,
+  ensureSurveyLink,
+} from "@/lib/admin-experience.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,9 +25,26 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { Copy, ExternalLink, FileText, Send, LogOut } from "lucide-react";
-import { gtag } from "@/lib/gtag";
+import {
+  Copy,
+  ExternalLink,
+  FileText,
+  Send,
+  LogOut,
+  CheckCircle2,
+  MessageSquare,
+  Sparkles,
+} from "lucide-react";
+import { gtag, trackInteracReceived } from "@/lib/gtag";
 
 export const Route = createFileRoute("/_authenticated/admin/factures")({
   component: AdminInvoicesPage,
@@ -35,7 +56,14 @@ export const Route = createFileRoute("/_authenticated/admin/factures")({
   }),
 });
 
-type FilterStatus = "all" | "open" | "paid" | "uncollectible" | "void";
+type FilterStatus =
+  | "all"
+  | "open"
+  | "paid"
+  | "failed"
+  | "void"
+  | "pending_interac"
+  | "interac_received";
 
 function money(cents: number, currency = "cad") {
   return new Intl.NumberFormat("fr-CA", {
@@ -44,18 +72,27 @@ function money(cents: number, currency = "cad") {
   }).format(cents / 100);
 }
 
+function surveyLink(token: string) {
+  if (typeof window === "undefined") return `/sondage?token=${token}`;
+  return `${window.location.origin}/sondage?token=${token}`;
+}
+
 function AdminInvoicesPage() {
   const navigate = useNavigate();
   const createFn = useServerFn(createAdminInvoice);
   const listFn = useServerFn(listAdminInvoices);
   const sendFn = useServerFn(sendAdminInvoice);
   const checkFn = useServerFn(checkIsAdmin);
+  const interacFn = useServerFn(markInteracReceived);
+  const surveyFn = useServerFn(ensureSurveyLink);
 
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [rows, setRows] = useState<AdminInvoiceRow[]>([]);
   const [filter, setFilter] = useState<FilterStatus>("all");
   const [last, setLast] = useState<AdminInvoiceCreated | null>(null);
   const [loading, setLoading] = useState(false);
+  const [interacTarget, setInteracTarget] = useState<AdminInvoiceRow | null>(null);
+  const [interacNote, setInteracNote] = useState("");
 
   const [form, setForm] = useState({
     customerName: "",
@@ -126,7 +163,7 @@ function AdminInvoicesPage() {
 
   async function copy(text: string) {
     await navigator.clipboard.writeText(text);
-    toast.success("Lien copié");
+    toast.success("Copié");
   }
 
   async function handleSend(invoiceId: string) {
@@ -135,6 +172,46 @@ function AdminInvoicesPage() {
       toast.success("Facture envoyée au client");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Erreur d'envoi");
+    }
+  }
+
+  async function confirmInterac() {
+    if (!interacTarget) return;
+    try {
+      await interacFn({
+        data: {
+          invoiceId: interacTarget.stripe_invoice_id,
+          note: interacNote || undefined,
+        },
+      });
+      trackInteracReceived();
+      toast.success("Paiement Interac marqué comme reçu");
+      const target = interacTarget;
+      setInteracTarget(null);
+      setInteracNote("");
+      await refresh();
+      // Offer to generate survey link right away
+      try {
+        const r = await surveyFn({ data: { invoiceId: target.stripe_invoice_id } });
+        const link = surveyLink(r.token);
+        await navigator.clipboard.writeText(link);
+        toast.success("Lien sondage copié dans le presse-papier");
+      } catch {
+        // silent
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Erreur");
+    }
+  }
+
+  async function handleGenerateSurvey(row: AdminInvoiceRow) {
+    try {
+      const r = await surveyFn({ data: { invoiceId: row.stripe_invoice_id } });
+      const link = surveyLink(r.token);
+      await navigator.clipboard.writeText(link);
+      toast.success("Lien sondage copié");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Erreur");
     }
   }
 
@@ -168,21 +245,30 @@ function AdminInvoicesPage() {
 
   const filtered = rows.filter((r) => {
     if (filter === "all") return true;
+    if (filter === "failed")
+      return r.status === "uncollectible" || r.status === "failed";
     return r.status === filter;
   });
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-8">
         <div>
-          <h1 className="text-3xl font-bold">Admin — Factures Stripe</h1>
+          <h1 className="text-3xl font-bold">Admin — Factures</h1>
           <p className="text-muted-foreground text-sm mt-1">
             Créez une facture puis donnez son numéro au client.
           </p>
         </div>
-        <Button onClick={handleSignOut} variant="outline" size="sm">
-          <LogOut className="w-4 h-4" /> Déconnexion
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button asChild variant="secondary" size="sm">
+            <Link to="/admin/experience">
+              <Sparkles className="w-4 h-4" /> Voir expérience client
+            </Link>
+          </Button>
+          <Button onClick={handleSignOut} variant="outline" size="sm">
+            <LogOut className="w-4 h-4" /> Déconnexion
+          </Button>
+        </div>
       </div>
 
       <Card className="mb-8">
@@ -277,9 +363,7 @@ function AdminInvoicesPage() {
       {last && (
         <Card className="mb-8 border-brand/40">
           <CardHeader>
-            <CardTitle>
-              Facture créée : {last.invoiceNumber ?? last.invoiceId}
-            </CardTitle>
+            <CardTitle>Facture créée : {last.invoiceNumber ?? last.invoiceId}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
@@ -317,25 +401,27 @@ function AdminInvoicesPage() {
       )}
 
       <Card>
-        <CardHeader className="flex-row items-center justify-between gap-4">
+        <CardHeader className="flex-row items-center justify-between gap-4 flex-wrap">
           <CardTitle>Toutes les factures ({rows.length})</CardTitle>
           <div className="flex flex-wrap gap-1">
-            {(["all", "open", "paid", "uncollectible", "void"] as const).map((s) => (
+            {(
+              [
+                "all",
+                "open",
+                "paid",
+                "pending_interac",
+                "interac_received",
+                "failed",
+                "void",
+              ] as const
+            ).map((s) => (
               <Button
                 key={s}
                 size="sm"
                 variant={filter === s ? "default" : "outline"}
                 onClick={() => setFilter(s)}
               >
-                {s === "all"
-                  ? "Toutes"
-                  : s === "open"
-                    ? "En attente"
-                    : s === "paid"
-                      ? "Payées"
-                      : s === "uncollectible"
-                        ? "Échec"
-                        : "Annulées"}
+                {statusFilterLabel(s)}
               </Button>
             ))}
           </div>
@@ -349,6 +435,7 @@ function AdminInvoicesPage() {
                 <TableHead>Client</TableHead>
                 <TableHead>Contact</TableHead>
                 <TableHead>Montant</TableHead>
+                <TableHead>Méthode</TableHead>
                 <TableHead>Statut</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
@@ -356,7 +443,7 @@ function AdminInvoicesPage() {
             <TableBody>
               {filtered.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
+                  <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
                     Aucune facture
                   </TableCell>
                 </TableRow>
@@ -376,21 +463,44 @@ function AdminInvoicesPage() {
                     {money(r.amount_cents, r.currency)}
                   </TableCell>
                   <TableCell>
+                    <MethodBadge method={r.payment_method} />
+                  </TableCell>
+                  <TableCell>
                     <StatusBadge status={r.status} />
                   </TableCell>
                   <TableCell>
-                    <div className="flex gap-1">
+                    <div className="flex flex-wrap gap-1">
+                      {r.status === "pending_interac" && (
+                        <Button
+                          size="sm"
+                          variant="default"
+                          title="Marquer Interac reçu"
+                          onClick={() => setInteracTarget(r)}
+                        >
+                          <CheckCircle2 className="w-4 h-4" /> Interac reçu
+                        </Button>
+                      )}
+                      {(r.status === "paid" || r.status === "interac_received") && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          title="Générer / copier lien sondage"
+                          onClick={() => handleGenerateSurvey(r)}
+                        >
+                          <MessageSquare className="w-4 h-4" /> Sondage
+                        </Button>
+                      )}
                       {r.hosted_invoice_url && (
                         <>
                           <Button
                             size="icon"
                             variant="ghost"
-                            title="Copier lien paiement"
+                            title="Copier lien paiement Stripe"
                             onClick={() => copy(r.hosted_invoice_url!)}
                           >
                             <Copy className="w-4 h-4" />
                           </Button>
-                          <Button size="icon" variant="ghost" title="Ouvrir Stripe invoice" asChild>
+                          <Button size="icon" variant="ghost" title="Ouvrir facture Stripe" asChild>
                             <a href={r.hosted_invoice_url} target="_blank" rel="noreferrer">
                               <ExternalLink className="w-4 h-4" />
                             </a>
@@ -404,6 +514,16 @@ function AdminInvoicesPage() {
                           </a>
                         </Button>
                       )}
+                      {r.status === "open" && r.hosted_invoice_url && (
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          title="Envoyer par courriel"
+                          onClick={() => handleSend(r.stripe_invoice_id)}
+                        >
+                          <Send className="w-4 h-4" />
+                        </Button>
+                      )}
                     </div>
                   </TableCell>
                 </TableRow>
@@ -412,8 +532,63 @@ function AdminInvoicesPage() {
           </Table>
         </CardContent>
       </Card>
+
+      <Dialog open={!!interacTarget} onOpenChange={(o) => !o && setInteracTarget(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              Marquer Interac reçu — {interacTarget?.invoice_number ?? ""}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2 text-sm">
+            <p className="text-muted-foreground">
+              Confirme que le virement Interac a été reçu de {interacTarget?.customer_name ?? "ce client"}
+              {" "}
+              ({interacTarget && money(interacTarget.amount_cents, interacTarget.currency)}).
+              Un lien sondage sera généré automatiquement.
+            </p>
+            <label className="block">
+              <span className="text-sm font-medium">Note interne (optionnel)</span>
+              <Textarea
+                className="mt-1"
+                rows={3}
+                value={interacNote}
+                onChange={(e) => setInteracNote(e.target.value)}
+                placeholder="Ex : reçu le 5 juillet, référence #123"
+              />
+            </label>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setInteracTarget(null)}>
+              Annuler
+            </Button>
+            <Button onClick={confirmInterac}>
+              <CheckCircle2 className="w-4 h-4" /> Confirmer réception
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
+}
+
+function statusFilterLabel(s: FilterStatus) {
+  switch (s) {
+    case "all":
+      return "Toutes";
+    case "open":
+      return "En attente";
+    case "paid":
+      return "Payées";
+    case "pending_interac":
+      return "Interac en attente";
+    case "interac_received":
+      return "Interac reçu";
+    case "failed":
+      return "Échec";
+    case "void":
+      return "Annulées";
+  }
 }
 
 function Field({
@@ -445,17 +620,23 @@ function Info({ label, value }: { label: string; value: string }) {
 function StatusBadge({ status }: { status: string }) {
   const map: Record<string, string> = {
     paid: "bg-green-100 text-green-800",
+    interac_received: "bg-green-100 text-green-800",
     open: "bg-yellow-100 text-yellow-800",
+    pending_interac: "bg-orange-100 text-orange-800",
     draft: "bg-gray-100 text-gray-800",
     void: "bg-gray-200 text-gray-600",
     uncollectible: "bg-red-100 text-red-800",
+    failed: "bg-red-100 text-red-800",
   };
   const label: Record<string, string> = {
     paid: "Payée",
+    interac_received: "Interac reçu",
     open: "En attente",
+    pending_interac: "Interac en attente",
     draft: "Brouillon",
     void: "Annulée",
     uncollectible: "Échec",
+    failed: "Échec",
   };
   return (
     <span
@@ -464,6 +645,29 @@ function StatusBadge({ status }: { status: string }) {
       }`}
     >
       {label[status] ?? status}
+    </span>
+  );
+}
+
+function MethodBadge({ method }: { method: string | null }) {
+  if (!method) return <span className="text-xs text-muted-foreground">—</span>;
+  const map: Record<string, string> = {
+    stripe: "bg-blue-100 text-blue-800",
+    card: "bg-blue-100 text-blue-800",
+    interac: "bg-purple-100 text-purple-800",
+  };
+  const label: Record<string, string> = {
+    stripe: "Stripe",
+    card: "Stripe",
+    interac: "Interac",
+  };
+  return (
+    <span
+      className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
+        map[method] ?? "bg-gray-100 text-gray-800"
+      }`}
+    >
+      {label[method] ?? method}
     </span>
   );
 }
