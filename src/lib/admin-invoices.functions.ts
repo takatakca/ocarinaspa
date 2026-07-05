@@ -161,6 +161,10 @@ export type AdminInvoiceRow = {
   invoice_pdf: string | null;
   paid_at: string | null;
   created_at: string;
+  payment_method: string | null;
+  interac_received_at: string | null;
+  customer_rating: number | null;
+  needs_followup: boolean | null;
 };
 
 export const listAdminInvoices = createServerFn({ method: "GET" })
@@ -170,13 +174,14 @@ export const listAdminInvoices = createServerFn({ method: "GET" })
     const { data, error } = await context.supabase
       .from("stripe_invoices")
       .select(
-        "id,stripe_invoice_id,invoice_number,customer_name,customer_email,customer_phone,description,amount_cents,currency,status,hosted_invoice_url,invoice_pdf,paid_at,created_at",
+        "id,stripe_invoice_id,invoice_number,customer_name,customer_email,customer_phone,description,amount_cents,currency,status,hosted_invoice_url,invoice_pdf,paid_at,created_at,payment_method,interac_received_at,customer_rating,needs_followup",
       )
       .order("created_at", { ascending: false })
       .limit(200);
     if (error) throw new Error(error.message);
     return (data ?? []) as AdminInvoiceRow[];
   });
+
 
 export const sendAdminInvoice = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
