@@ -137,19 +137,41 @@ function PayerFacturePage() {
       <Header />
       <main className="min-h-[70vh] bg-surface py-12 px-4">
         <div className="max-w-2xl mx-auto">
-          <div className="text-center mb-8">
+          <section className="text-center mb-8">
             <img src={logo} alt="Ocarina Spa" className="h-16 w-auto mx-auto mb-4" />
             <h1 className="font-display text-3xl md:text-4xl font-bold text-foreground">
-              Payer une facture Ocarina Spa
+              Paiement de facture Ocarina Spa
             </h1>
-            <p className="text-muted-foreground mt-3">
-              Payez par carte (Stripe) ou par virement Interac.
+            <p className="text-muted-foreground mt-3 max-w-xl mx-auto">
+              Entrez votre numéro de facture pour payer votre service de façon sécurisée.
             </p>
-            <div className="mt-4 inline-flex items-center gap-2 bg-background border border-border rounded-full px-4 py-1.5 text-sm">
-              <ShieldCheck className="w-4 h-4 text-brand" />
-              <span>Paiement sécurisé — aucune carte stockée sur ce site</span>
+            <p className="text-sm text-muted-foreground mt-2">
+              Paiement sécurisé par Stripe ou virement Interac — Québec / Canada.
+            </p>
+            <div className="mt-5 flex flex-wrap justify-center gap-2">
+              <span className="inline-flex items-center gap-1.5 bg-background border border-border rounded-full px-3 py-1 text-xs font-medium">
+                <ShieldCheck className="w-3.5 h-3.5 text-brand" /> Paiement sécurisé
+              </span>
+              <span className="inline-flex items-center gap-1.5 bg-background border border-border rounded-full px-3 py-1 text-xs font-medium">
+                <CreditCard className="w-3.5 h-3.5 text-brand" /> Stripe
+              </span>
+              <span className="inline-flex items-center gap-1.5 bg-background border border-border rounded-full px-3 py-1 text-xs font-medium">
+                <Send className="w-3.5 h-3.5 text-brand" /> Interac disponible
+              </span>
+              <span className="inline-flex items-center gap-1.5 bg-background border border-border rounded-full px-3 py-1 text-xs font-medium">
+                Service Québec / Canada
+              </span>
             </div>
-          </div>
+            <div className="mt-4">
+              <a
+                href={`tel:${SITE.phoneTel}`}
+                onClick={trackPhoneCall}
+                className="inline-flex items-center gap-2 text-sm font-medium text-brand hover:underline"
+              >
+                <Phone className="w-4 h-4" /> {SITE.phone}
+              </a>
+            </div>
+          </section>
 
           <div className="bg-background rounded-xl border border-border shadow-sm p-6 md:p-8">
             <form onSubmit={handleSubmit} className="space-y-4">
