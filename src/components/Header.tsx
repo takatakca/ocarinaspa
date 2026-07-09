@@ -79,6 +79,13 @@ export function Header() {
               </Link>
             ))}
             <Link
+              to="/payer-facture"
+              onClick={() => setOpen(false)}
+              className="mt-2 py-2.5 px-2 inline-flex items-center gap-2 border border-brand text-brand font-semibold rounded hover:bg-brand/10"
+            >
+              <CreditCard className="w-4 h-4" /> Payer une facture
+            </Link>
+            <Link
               to="/villes"
               onClick={() => setOpen(false)}
               className="py-2.5 px-2 text-foreground/80 text-sm rounded hover:bg-surface"
