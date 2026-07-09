@@ -202,17 +202,30 @@ function PayerFacturePage() {
                 </p>
               </div>
 
-              <Button type="submit" disabled={loading} className="w-full" size="lg">
-                {loading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" /> Recherche...
-                  </>
-                ) : (
-                  <>
-                    <Search className="w-4 h-4" /> Rechercher ma facture
-                  </>
-                )}
-              </Button>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <Button type="submit" disabled={loading} className="flex-1" size="lg">
+                  {loading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" /> Recherche...
+                    </>
+                  ) : (
+                    <>
+                      <Search className="w-4 h-4" /> Rechercher ma facture
+                    </>
+                  )}
+                </Button>
+                <Button
+                  asChild
+                  type="button"
+                  variant="outline"
+                  size="lg"
+                  className="sm:w-auto"
+                >
+                  <a href={`tel:${SITE.phoneTel}`} onClick={trackPhoneCall}>
+                    <Phone className="w-4 h-4" /> Appeler Ocarina Spa
+                  </a>
+                </Button>
+              </div>
             </form>
 
             {error && (
