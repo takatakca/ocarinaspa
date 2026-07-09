@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Phone, Menu, X } from "lucide-react";
+import { Phone, Menu, X, CreditCard } from "lucide-react";
 import { useState } from "react";
 import { SITE } from "@/lib/seo";
 import { trackPhoneCall } from "@/lib/gtag";
@@ -41,7 +41,13 @@ export function Header() {
           ))}
         </nav>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
+          <Link
+            to="/payer-facture"
+            className="hidden md:inline-flex items-center gap-2 border border-brand text-brand px-3 py-2 rounded-md text-sm font-semibold hover:bg-brand/10 transition-colors"
+          >
+            <CreditCard className="w-4 h-4" /> Payer facture
+          </Link>
           <a
             href={`tel:${SITE.phoneTel}`}
             onClick={trackPhoneCall}
@@ -72,6 +78,13 @@ export function Header() {
                 {n.label}
               </Link>
             ))}
+            <Link
+              to="/payer-facture"
+              onClick={() => setOpen(false)}
+              className="mt-2 py-2.5 px-2 inline-flex items-center gap-2 border border-brand text-brand font-semibold rounded hover:bg-brand/10"
+            >
+              <CreditCard className="w-4 h-4" /> Payer une facture
+            </Link>
             <Link
               to="/villes"
               onClick={() => setOpen(false)}
