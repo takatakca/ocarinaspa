@@ -41,7 +41,13 @@ export function Header() {
           ))}
         </nav>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
+          <Link
+            to="/payer-facture"
+            className="hidden md:inline-flex items-center gap-2 border border-brand text-brand px-3 py-2 rounded-md text-sm font-semibold hover:bg-brand/10 transition-colors"
+          >
+            <CreditCard className="w-4 h-4" /> Payer facture
+          </Link>
           <a
             href={`tel:${SITE.phoneTel}`}
             onClick={trackPhoneCall}
