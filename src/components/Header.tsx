@@ -8,13 +8,9 @@ import logo from "@/assets/ocarina-logo.png";
 const nav = [
   { to: "/", label: "Accueil" },
   { to: "/services", label: "Réparation Spa" },
-  { to: "/marques", label: "Marques" },
-  { to: "/diagnostic", label: "Diagnostic AI" },
-  { to: "/codes-erreur", label: "Codes d'erreur" },
-  { to: "/vente-spas", label: "Vente" },
+  { to: "/vente-spas", label: "Ventes" },
   { to: "/pieces", label: "Pièces" },
   { to: "/urgence-spa", label: "Urgence 24/7" },
-  { to: "/contact", label: "Contact" },
 ] as const;
 
 export function Header() {
