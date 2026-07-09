@@ -28,11 +28,16 @@ Guide pratique pour mettre le site en production et opérer les factures, l'exp�
 | `INTERAC_SECURITY_QUESTION` | **Laisser vide si autodépôt activé** |
 | `INTERAC_SECURITY_ANSWER` | **Laisser vide si autodépôt activé** |
 
-### Liens publics (VITE_ = exposés côté client, c'est OK)
-| Secret | Exemple |
+### Liens publics (à me fournir — je les mettrai dans `src/lib/seo.ts`)
+| Valeur | Exemple |
 |---|---|
-| `VITE_GOOGLE_REVIEW_URL` | `https://g.page/r/CXXXXXXX/review` |
-| `VITE_FACEBOOK_PAGE_URL` | `https://facebook.com/ocarinaspa` |
+| Google Review URL | `https://g.page/r/CXXXXXXX/review` |
+| Facebook Page URL | `https://facebook.com/ocarinaspa` |
+| Stripe publishable key | `pk_live_...` (safe côté client, hardcodé) |
+
+Le préfixe `VITE_*` est réservé sur Lovable Cloud. Ces valeurs publiques (non secrètes)
+seront simplement hardcodées dans le code une fois fournies.
+
 
 ⚠️ **Sécurité** :
 - `sk_live_`, `whsec_`, `SUPABASE_SERVICE_ROLE_KEY` : **jamais** côté frontend.
