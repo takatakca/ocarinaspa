@@ -265,6 +265,9 @@ function AdminInvoicesPage() {
               <Sparkles className="w-4 h-4" /> Voir expérience client
             </Link>
           </Button>
+          <Button asChild variant="secondary" size="sm">
+            <Link to="/admin/qa">Test paiement facture</Link>
+          </Button>
           <Button onClick={handleSignOut} variant="outline" size="sm">
             <LogOut className="w-4 h-4" /> Déconnexion
           </Button>
