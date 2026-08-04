@@ -191,3 +191,37 @@ Un seul `gtag.js` (chargé dans `src/routes/__root.tsx`).
 - Numéro d'urgence spa : voir footer du site
 - Stripe support : dashboard.stripe.com
 - Interac troubleshoot : contacter la banque émettrice du virement
+
+---
+
+## 12. QA manuel obligatoire avant production
+
+Outil intégré : **`/admin/qa` → « Test paiement facture »** (accessible depuis `/admin/factures`).
+La page affiche la checklist cochable (état sauvegardé localement) et un panneau **État système**
+qui indique uniquement « Configuré / Non configuré » — jamais les valeurs secrètes.
+
+### Checklist du flow complet
+1. Créer une facture test de 1 $ CAD (Stripe test mode)
+2. Copier le numéro de facture
+3. Aller sur `/payer-facture`
+4. Entrer le numéro de facture + email ou téléphone
+5. Vérifier que la facture apparaît avec le bon montant
+6. Cliquer « Payer par carte »
+7. Payer avec la carte test `4242 4242 4242 4242`
+8. Vérifier la réception du webhook `invoice.paid` (Stripe → Events)
+9. Vérifier le statut « Payée » dans `/admin/factures`
+10. Tester la note client (1-5 étoiles) sur `/paiement-confirme`
+11. Tester le sondage complet
+12. Vérifier la génération du crédit 10 % (`OCARINA10-XXXX`)
+13. Vérifier les données dans `/admin/experience`
+
+### Panneau « État système »
+- Google Ads tag détecté : `AW-18182973757`
+- GA4 tag détecté : `G-8YYZKVZBW0`
+- Stripe backend configuré : oui / non
+- Webhook secret configuré : oui / non
+- Interac configuré : oui / non
+- Google Review URL configuré : oui / non
+- Facebook URL configuré : oui / non
+
+⚠️ Aucune valeur secrète n'est jamais affichée dans l'interface admin.

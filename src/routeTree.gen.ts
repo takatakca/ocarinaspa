@@ -44,6 +44,7 @@ import { Route as EntretienSpaVilleRouteImport } from './routes/entretien-spa.$v
 import { Route as EntretienPiscineVilleRouteImport } from './routes/entretien-piscine.$ville'
 import { Route as ApiPublicStripeWebhookRouteImport } from './routes/api/public/stripe-webhook'
 import { Route as ApiPublicServiceRequestRouteImport } from './routes/api/public/service-request'
+import { Route as AuthenticatedAdminQaRouteImport } from './routes/_authenticated/admin.qa'
 import { Route as AuthenticatedAdminFacturesRouteImport } from './routes/_authenticated/admin.factures'
 import { Route as AuthenticatedAdminExperienceRouteImport } from './routes/_authenticated/admin.experience'
 
@@ -221,6 +222,11 @@ const ApiPublicServiceRequestRoute = ApiPublicServiceRequestRouteImport.update({
   path: '/api/public/service-request',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedAdminQaRoute = AuthenticatedAdminQaRouteImport.update({
+  id: '/admin/qa',
+  path: '/admin/qa',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedAdminFacturesRoute =
   AuthenticatedAdminFacturesRouteImport.update({
     id: '/admin/factures',
@@ -269,6 +275,7 @@ export interface FileRoutesByFullPath {
   '/vente-spa/$ville': typeof VenteSpaVilleRoute
   '/admin/experience': typeof AuthenticatedAdminExperienceRoute
   '/admin/factures': typeof AuthenticatedAdminFacturesRoute
+  '/admin/qa': typeof AuthenticatedAdminQaRoute
   '/api/public/service-request': typeof ApiPublicServiceRequestRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
 }
@@ -307,6 +314,7 @@ export interface FileRoutesByTo {
   '/vente-spa/$ville': typeof VenteSpaVilleRoute
   '/admin/experience': typeof AuthenticatedAdminExperienceRoute
   '/admin/factures': typeof AuthenticatedAdminFacturesRoute
+  '/admin/qa': typeof AuthenticatedAdminQaRoute
   '/api/public/service-request': typeof ApiPublicServiceRequestRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
 }
@@ -347,6 +355,7 @@ export interface FileRoutesById {
   '/vente-spa/$ville': typeof VenteSpaVilleRoute
   '/_authenticated/admin/experience': typeof AuthenticatedAdminExperienceRoute
   '/_authenticated/admin/factures': typeof AuthenticatedAdminFacturesRoute
+  '/_authenticated/admin/qa': typeof AuthenticatedAdminQaRoute
   '/api/public/service-request': typeof ApiPublicServiceRequestRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
 }
@@ -387,6 +396,7 @@ export interface FileRouteTypes {
     | '/vente-spa/$ville'
     | '/admin/experience'
     | '/admin/factures'
+    | '/admin/qa'
     | '/api/public/service-request'
     | '/api/public/stripe-webhook'
   fileRoutesByTo: FileRoutesByTo
@@ -425,6 +435,7 @@ export interface FileRouteTypes {
     | '/vente-spa/$ville'
     | '/admin/experience'
     | '/admin/factures'
+    | '/admin/qa'
     | '/api/public/service-request'
     | '/api/public/stripe-webhook'
   id:
@@ -464,6 +475,7 @@ export interface FileRouteTypes {
     | '/vente-spa/$ville'
     | '/_authenticated/admin/experience'
     | '/_authenticated/admin/factures'
+    | '/_authenticated/admin/qa'
     | '/api/public/service-request'
     | '/api/public/stripe-webhook'
   fileRoutesById: FileRoutesById
@@ -753,6 +765,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicServiceRequestRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/admin/qa': {
+      id: '/_authenticated/admin/qa'
+      path: '/admin/qa'
+      fullPath: '/admin/qa'
+      preLoaderRoute: typeof AuthenticatedAdminQaRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/factures': {
       id: '/_authenticated/admin/factures'
       path: '/admin/factures'
@@ -773,11 +792,13 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminExperienceRoute: typeof AuthenticatedAdminExperienceRoute
   AuthenticatedAdminFacturesRoute: typeof AuthenticatedAdminFacturesRoute
+  AuthenticatedAdminQaRoute: typeof AuthenticatedAdminQaRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminExperienceRoute: AuthenticatedAdminExperienceRoute,
   AuthenticatedAdminFacturesRoute: AuthenticatedAdminFacturesRoute,
+  AuthenticatedAdminQaRoute: AuthenticatedAdminQaRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
