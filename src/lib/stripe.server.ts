@@ -28,7 +28,7 @@ export async function assertStripeAccountMatches(options: { requireConfiguredInL
     if (expected && _accountCheck.actual !== expected) throw new Error("La clé Stripe active ne correspond pas au STRIPE_ACCOUNT_ID configuré.");
     return _accountCheck.actual;
   }
-  const account = await stripe.accounts.retrieve();
+  const account = await (stripe.accounts.retrieve as unknown as () => Promise<{ id: string }>)();
   const actual = account.id;
   _accountCheck = { expected, actual, checkedAt: Date.now() };
   if (expected && actual !== expected) {

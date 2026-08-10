@@ -51,7 +51,7 @@ export const getSystemStatus = createServerFn({ method: "GET" })
       try {
         const { getStripe } = await import("./stripe.server");
         const stripe = getStripe();
-        const account = await stripe.accounts.retrieve();
+        const account = await (stripe.accounts.retrieve as unknown as () => Promise<{ id: string }>)();
         stripeApiReachable = Boolean(account?.id);
         stripeAccountMatches = Boolean(expectedAccount && account?.id === expectedAccount);
 
