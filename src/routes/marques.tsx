@@ -22,7 +22,7 @@ export const Route = createFileRoute("/marques")({
       {
         property: "og:description",
         content:
-          "Réparation toutes marques : Jacuzzi, Hydropool, Arctic Spas, Beachcomber, Sundance, Maax, Bullfrog, systèmes Balboa et Gecko.",
+          "Réparation de plusieurs grandes marques : Jacuzzi, Hydropool, Arctic Spas, Beachcomber, Sundance, Maax, Bullfrog, systèmes Balboa et Gecko.",
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: SITE.domain + "/marques" },
@@ -75,7 +75,7 @@ function MarquesPage() {
               Marques de spas que nous réparons au Québec
             </h1>
             <p className="mt-5 text-lg text-muted-foreground">
-              Ocarina Spa répare la majorité des marques de spas présentes au Québec, incluant
+              Ocarina Spa intervient sur plusieurs grandes marques de spas présentes au Québec, incluant
               Jacuzzi, Hydropool, Arctic Spas, Beachcomber, Sundance Spas, Maax Spas, Vita Spa,
               Bullfrog Spas, Master Spas, Hot Spring, Caldera, Coast Spas et plusieurs autres.
               Même si les marques sont différentes, plusieurs spas utilisent des composantes
@@ -128,8 +128,8 @@ function MarquesPage() {
             </h2>
             <p className="mt-4 text-muted-foreground">
               Vous venez d'acheter un spa usagé sur Marketplace ou Kijiji ? Nous offrons un
-              service complet de diagnostic, remise en service et réparation — peu importe la
-              marque ou l'année.
+              service de diagnostic, remise en service et réparation selon la marque, le modèle,
+              l'état du spa et la disponibilité des composantes.
             </p>
             <p className="mt-3 text-muted-foreground">
               Service de réparation de spa à Montréal, Laval, Trois-Rivières, Québec et

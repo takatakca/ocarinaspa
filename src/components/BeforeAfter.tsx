@@ -4,10 +4,10 @@ import pompe from "@/assets/avant-apres-pompe.jpg";
 import hiver from "@/assets/avant-apres-hiver.jpg";
 
 const ITEMS = [
-  { src: fuite, title: "Fuite réparée", desc: "Joint et raccord PVC remplacés sous le spa." },
-  { src: pack, title: "Spa remis en service", desc: "Pack électronique Balboa changé, spa fonctionnel." },
-  { src: pompe, title: "Pompe changée", desc: "Pompe Waterway neuve installée." },
-  { src: hiver, title: "Spa enneigé sauvé", desc: "Intervention d'urgence en hiver, plomberie sauvée du gel." },
+  { src: fuite, title: "Fuites et raccords", desc: "Inspection des joints, raccords et sections de plomberie accessibles." },
+  { src: pack, title: "Pack de contrôle", desc: "Diagnostic du système de contrôle et remplacement lorsque la compatibilité est confirmée." },
+  { src: pompe, title: "Pompe et circulation", desc: "Diagnostic du débit, de la pompe et des composantes de circulation." },
+  { src: hiver, title: "Panne en période de gel", desc: "Priorité aux situations où une panne peut exposer la plomberie au gel." },
 ];
 
 export function BeforeAfter() {
@@ -16,26 +16,23 @@ export function BeforeAfter() {
       <div className="container mx-auto px-4 py-16 md:py-20">
         <div className="max-w-3xl">
           <p className="text-brand font-semibold uppercase text-sm tracking-wide">
-            Travaux réels
+            Interventions courantes
           </p>
           <h2 className="mt-3 font-display text-3xl md:text-4xl font-bold text-foreground">
-            Avant / après — spas réparés par notre équipe
+            Problèmes de spa que nous pouvons diagnostiquer
           </h2>
           <p className="mt-4 text-muted-foreground">
-            Aperçu de réparations effectuées chez des clients au Québec. Pompes, packs
-            électroniques, fuites et interventions d'urgence l'hiver.
+            Fuites, circulation, chauffage, commandes et pannes hivernales. Le diagnostic final
+            dépend toujours du modèle, de l'installation et de l'inspection sur place.
           </p>
         </div>
 
         <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {ITEMS.map((it) => (
-            <figure
-              key={it.title}
-              className="bg-card border border-border rounded-xl overflow-hidden"
-            >
+            <figure key={it.title} className="bg-card border border-border rounded-xl overflow-hidden">
               <img
                 src={it.src}
-                alt={`${it.title} — réparation de spa Ocarina Spa Québec`}
+                alt={`${it.title} — exemple visuel de service de spa`}
                 width={1280}
                 height={800}
                 loading="lazy"
@@ -48,6 +45,9 @@ export function BeforeAfter() {
             </figure>
           ))}
         </div>
+        <p className="mt-4 text-xs text-muted-foreground">
+          Visuels illustratifs. Les photos d'interventions clients seront ajoutées uniquement avec autorisation.
+        </p>
       </div>
     </section>
   );

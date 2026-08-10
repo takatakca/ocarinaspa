@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { getSurveyByToken, submitSurvey } from "@/lib/post-payment.functions";
+import { getPublicExperienceConfig } from "@/lib/public-experience.functions";
 import {
   trackSurveyStarted,
   trackSurveySubmitted,
@@ -17,10 +18,6 @@ import {
   trackFacebookFollowClick,
 } from "@/lib/gtag";
 import { toast } from "sonner";
-
-const FACEBOOK_URL =
-  (typeof import.meta !== "undefined" && (import.meta as any).env?.VITE_FACEBOOK_PAGE_URL) ||
-  "https://www.facebook.com/ocarinaspa";
 
 const searchSchema = z.object({ token: z.string().optional() });
 
@@ -39,8 +36,10 @@ function SondagePage() {
   const { token } = Route.useSearch();
   const getFn = useServerFn(getSurveyByToken);
   const submitFn = useServerFn(submitSurvey);
+  const configFn = useServerFn(getPublicExperienceConfig);
 
   const [loading, setLoading] = useState(true);
+  const [facebookUrl, setFacebookUrl] = useState<string | null>(null);
   const [surveyExists, setSurveyExists] = useState(false);
   const [alreadySubmitted, setAlreadySubmitted] = useState(false);
   const [submitted, setSubmitted] = useState<{
@@ -63,6 +62,7 @@ function SondagePage() {
   });
 
   useEffect(() => {
+    configFn().then((c) => setFacebookUrl(c.facebookPageUrl)).catch(() => undefined);
     if (!token) {
       setLoading(false);
       return;
@@ -140,7 +140,7 @@ function SondagePage() {
               <p className="text-muted-foreground mt-2">Merci pour votre retour !</p>
             </div>
           ) : submitted ? (
-            <SurveyThankYou {...submitted} />
+            <SurveyThankYou {...submitted} facebookUrl={facebookUrl} />
           ) : (
             <div className="bg-background rounded-xl border border-border shadow-sm p-6 md:p-8">
               <h1 className="font-display text-2xl md:text-3xl font-bold">
@@ -309,11 +309,13 @@ function SurveyThankYou({
   valueCents,
   currency,
   expiresAt,
+  facebookUrl,
 }: {
   code: string;
   valueCents: number | null;
   currency: string;
   expiresAt: string;
+  facebookUrl: string | null;
 }) {
   const value =
     valueCents != null
@@ -369,26 +371,28 @@ function SurveyThankYou({
         )}
       </div>
 
-      <div className="bg-background rounded-xl border border-border p-6">
-        <div className="flex items-start gap-3">
-          <Facebook className="w-6 h-6 text-brand mt-0.5" />
-          <div>
-            <h3 className="font-semibold">Suivez Ocarina Spa</h3>
-            <p className="text-sm text-muted-foreground mt-1">
-              Conseils d'entretien, promotions et rappels saisonniers.
-            </p>
-            <a
-              href={FACEBOOK_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => trackFacebookFollowClick()}
-              className="inline-flex items-center gap-2 mt-3 border border-border px-5 py-2 rounded-md font-semibold hover:bg-surface"
-            >
-              Facebook <ExternalLink className="w-4 h-4" />
-            </a>
+      {facebookUrl && (
+        <div className="bg-background rounded-xl border border-border p-6">
+          <div className="flex items-start gap-3">
+            <Facebook className="w-6 h-6 text-brand mt-0.5" />
+            <div>
+              <h3 className="font-semibold">Suivez Ocarina Spa</h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                Conseils d'entretien, promotions et rappels saisonniers.
+              </p>
+              <a
+                href={facebookUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => trackFacebookFollowClick()}
+                className="inline-flex items-center gap-2 mt-3 border border-border px-5 py-2 rounded-md font-semibold hover:bg-surface"
+              >
+                Facebook <ExternalLink className="w-4 h-4" />
+              </a>
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

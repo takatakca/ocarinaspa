@@ -18,7 +18,7 @@ export const Route = createFileRoute("/piscine")({
       { title: "Service de piscine au Québec — Ocarina Spa" },
       { name: "description", content: "Ouverture, fermeture, nettoyage et entretien de piscine résidentielle au Québec. Service professionnel à domicile. 819-913-7727." },
       { property: "og:title", content: "Service de piscine — Ocarina Spa Québec" },
-      { property: "og:description", content: "Ouverture, fermeture, nettoyage et entretien de piscine partout au Québec." },
+      { property: "og:description", content: "Ouverture, fermeture, nettoyage et entretien de piscine dans les zones desservies au Québec." },
     ],
     scripts: [{ type: "application/ld+json", children: JSON.stringify(localBusinessSchema()) }],
   }),
@@ -28,7 +28,7 @@ export const Route = createFileRoute("/piscine")({
         <div className="container mx-auto px-4">
           <h1 className="font-display text-4xl md:text-5xl font-bold text-foreground">Service de piscine au Québec</h1>
           <p className="mt-4 text-muted-foreground max-w-2xl">
-            Ouverture, fermeture, nettoyage et entretien de piscine résidentielle. Notre équipe se déplace partout au Québec.
+            Ouverture, fermeture, nettoyage et entretien de piscine résidentielle. Notre équipe se déplace dans les zones desservies au Québec.
           </p>
           <a href={`tel:${SITE.phoneTel}`} onClick={trackPhoneCall} className="mt-6 inline-flex items-center gap-2 bg-brand text-brand-foreground px-5 py-3 rounded-md font-semibold">
             <Phone className="w-4 h-4" /> {SITE.phone}

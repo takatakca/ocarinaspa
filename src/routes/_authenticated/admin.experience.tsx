@@ -339,7 +339,7 @@ function AdminExperiencePage() {
         <TabsContent value="credits">
           <Card>
             <CardHeader className="flex-row items-center justify-between gap-3 flex-wrap">
-              <CardTitle>Crédits clients (10%)</CardTitle>
+              <CardTitle>Crédits magasin (10 % du montant payé)</CardTitle>
               <div className="flex gap-1">
                 {(["all", "active", "used"] as const).map((v) => (
                   <Button

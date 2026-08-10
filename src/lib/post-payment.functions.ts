@@ -1,80 +1,18 @@
 /**
  * Public post-payment server functions.
- *
- * These functions are called from public routes (/payer-facture,
- * /paiement-confirme, /sondage). Identity checks always require BOTH an
- * invoice number and a contact (email or last-7-digits phone), verified
- * against Stripe. The admin service-role client is used only after that
- * check passes.
+ * Customer identity is verified before a payment access token is issued. The token, not PII,
+ * is then used for the post-payment experience. Credits are issued only for a Stripe-paid invoice.
  */
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
-// ------------------------------ Helpers ------------------------------
-
-function normalize(s: string) {
-  return s.trim().toLowerCase().replace(/\s+|[-().]/g, "");
-}
-
-function lastDigits(s: string, n: number) {
-  return s.replace(/\D/g, "").slice(-n);
-}
-
-async function verifyIdentityAndFetchInvoice(
-  invoiceNumber: string,
-  emailOrPhone: string,
-): Promise<{
-  ok: boolean;
-  invoice?: import("stripe").Stripe.Invoice;
-  customer?: import("stripe").Stripe.Customer | null;
-  reason?: "not_found" | "mismatch";
-}> {
-  const { getStripe } = await import("./stripe.server");
-  const stripe = getStripe();
-
-  let invoice: import("stripe").Stripe.Invoice | null = null;
-  if (invoiceNumber.startsWith("in_")) {
-    try {
-      invoice = await stripe.invoices.retrieve(invoiceNumber, { expand: ["customer"] });
-    } catch {
-      invoice = null;
-    }
-  } else {
-    const escaped = invoiceNumber.replace(/"/g, '\\"');
-    const res = await stripe.invoices.search({
-      query: `number:"${escaped}"`,
-      limit: 1,
-      expand: ["data.customer"],
-    });
-    invoice = res.data[0] ?? null;
-  }
-  if (!invoice) return { ok: false, reason: "not_found" };
-
-  const customer =
-    typeof invoice.customer === "object" && invoice.customer && !("deleted" in invoice.customer)
-      ? (invoice.customer as import("stripe").Stripe.Customer)
-      : null;
-
-  const candidateEmail = (customer?.email || invoice.customer_email || "").toLowerCase();
-  const candidatePhone = customer?.phone || "";
-  const looksLikeEmail = emailOrPhone.includes("@");
-
-  let ok = false;
-  if (looksLikeEmail) {
-    ok = candidateEmail !== "" && normalize(candidateEmail) === normalize(emailOrPhone);
-  } else {
-    const inputDigits = lastDigits(emailOrPhone, 7);
-    ok = inputDigits.length >= 7 && lastDigits(candidatePhone, 7) === inputDigits;
-  }
-  if (!ok) return { ok: false, reason: "mismatch" };
-  return { ok: true, invoice, customer };
-}
-
-function randomCode() {
+function secureCreditCode() {
+  const bytes = new Uint8Array(8);
+  crypto.getRandomValues(bytes);
   const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  let s = "";
-  for (let i = 0; i < 8; i++) s += alphabet[Math.floor(Math.random() * alphabet.length)];
-  return `OCARINA10-${s}`;
+  let suffix = "";
+  for (const b of bytes) suffix += alphabet[b % alphabet.length];
+  return `OCARINA10-${suffix}`;
 }
 
 // ------------------------------ Interac config ------------------------------
@@ -91,13 +29,11 @@ export const getInteracConfig = createServerFn({ method: "GET" }).handler(
     const email = process.env.INTERAC_RECIPIENT_EMAIL || null;
     const name = process.env.INTERAC_RECIPIENT_NAME || "Ocarina Spa";
     const question = process.env.INTERAC_SECURITY_QUESTION || null;
-    // Answer is NEVER returned to the client — Autodeposit means no question needed.
-    const autodeposit = !question;
     return {
       recipientEmail: email,
       recipientName: name,
       securityQuestion: question,
-      autodepositEnabled: autodeposit,
+      autodepositEnabled: !question,
     };
   },
 );
@@ -112,24 +48,30 @@ const SelectInteracInput = z.object({
 export const selectInteracPayment = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => SelectInteracInput.parse(d))
   .handler(async ({ data }) => {
-    const v = await verifyIdentityAndFetchInvoice(data.invoiceNumber, data.emailOrPhone);
-    if (!v.ok || !v.invoice) return { ok: false as const, reason: v.reason ?? "not_found" };
-
-    const invoice = v.invoice;
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-
-    // Only mark pending_interac if the invoice isn't already paid.
-    if (invoice.status === "paid") {
-      return { ok: false as const, reason: "already_paid" };
+    const { consumePublicRateLimit } = await import("./public-security.server");
+    if (!(await consumePublicRateLimit("interac_select", 6, 10 * 60, data.invoiceNumber))) {
+      return { ok: false as const, reason: "rate_limited" };
     }
 
-    await supabaseAdmin.from("stripe_invoices").upsert(
+    const { verifyInvoiceIdentity, customerFromInvoice } = await import("./invoice-security.server");
+    const verified = await verifyInvoiceIdentity(data.invoiceNumber, data.emailOrPhone);
+    if (!verified.ok) return { ok: false as const, reason: "not_found" };
+
+    const invoice = verified.invoice;
+    if (invoice.status === "paid") return { ok: false as const, reason: "already_paid" };
+    if (invoice.status !== "open") return { ok: false as const, reason: "not_payable" };
+
+    const customer = customerFromInvoice(invoice);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin.from("stripe_invoices").upsert(
       {
         stripe_invoice_id: invoice.id,
+        stripe_customer_id:
+          typeof invoice.customer === "string" ? invoice.customer : customer?.id ?? null,
         invoice_number: invoice.number ?? null,
-        customer_name: v.customer?.name ?? null,
-        customer_email: v.customer?.email ?? invoice.customer_email ?? null,
-        customer_phone: v.customer?.phone ?? null,
+        customer_name: customer?.name ?? null,
+        customer_email: customer?.email ?? invoice.customer_email ?? null,
+        customer_phone: customer?.phone ?? null,
         description: invoice.description ?? null,
         amount_cents: invoice.amount_due ?? 0,
         currency: invoice.currency ?? "cad",
@@ -140,6 +82,16 @@ export const selectInteracPayment = createServerFn({ method: "POST" })
       },
       { onConflict: "stripe_invoice_id" },
     );
+    if (error) throw new Error("Impossible d'enregistrer le choix Interac.");
+
+    const { appendBusinessEvent } = await import("./business-events.server");
+    await appendBusinessEvent({
+      entityType: "invoice",
+      entityId: invoice.id,
+      eventType: "invoice.interac_selected",
+      actorType: "customer",
+      payload: { invoiceNumber: invoice.number ?? invoice.id },
+    });
 
     return {
       ok: true as const,
@@ -149,37 +101,81 @@ export const selectInteracPayment = createServerFn({ method: "POST" })
     };
   });
 
+// ------------------------------ Post-payment status ------------------------------
+
+export const getPostPaymentStatus = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => z.object({ token: z.string().trim().min(32).max(180) }).parse(d))
+  .handler(async ({ data }) => {
+    const { consumePublicRateLimit } = await import("./public-security.server");
+    if (!(await consumePublicRateLimit("post_payment_status", 30, 60 * 60, data.token.slice(0, 16)))) {
+      return { ok: false as const, reason: "rate_limited" as const };
+    }
+    const { invoiceFromExperienceToken } = await import("./invoice-security.server");
+    const invoice = await invoiceFromExperienceToken(data.token);
+    if (!invoice) return { ok: false as const, reason: "invalid_token" as const };
+    return {
+      ok: true as const,
+      paid: invoice.status === "paid",
+      invoiceNumber: invoice.number ?? invoice.id,
+      amountPaidCents: invoice.amount_paid ?? 0,
+      currency: invoice.currency ?? "cad",
+    };
+  });
+
 // ------------------------------ Post-payment rating ------------------------------
 
 const RatingInput = z.object({
-  invoiceNumber: z.string().trim().min(1).max(120),
-  emailOrPhone: z.string().trim().min(3).max(255),
+  token: z.string().trim().min(32).max(180),
   rating: z.number().int().min(1).max(5),
 });
 
 export const submitPostPaymentRating = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => RatingInput.parse(d))
   .handler(async ({ data }) => {
-    const v = await verifyIdentityAndFetchInvoice(data.invoiceNumber, data.emailOrPhone);
-    if (!v.ok || !v.invoice) return { ok: false as const, reason: v.reason ?? "not_found" };
+    const { consumePublicRateLimit } = await import("./public-security.server");
+    if (!(await consumePublicRateLimit("post_payment_rating", 10, 60 * 60, data.token.slice(0, 16)))) {
+      return { ok: false as const, reason: "rate_limited" };
+    }
 
-    const invoice = v.invoice;
+    const { invoiceFromExperienceToken, customerFromInvoice } = await import(
+      "./invoice-security.server"
+    );
+    const invoice = await invoiceFromExperienceToken(data.token);
+    if (!invoice) return { ok: false as const, reason: "invalid_token" };
+    if (invoice.status !== "paid") return { ok: false as const, reason: "not_paid" };
+
+    const customer = customerFromInvoice(invoice);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const now = new Date().toISOString();
 
-    // Upsert rating on the invoice row
-    const needsFollowup = data.rating <= 3;
+    // One survey per invoice. Once submitted, the recorded experience is immutable so a
+    // replayed rating request cannot rewrite the customer's completed survey or follow-up state.
+    const { data: existing } = await supabaseAdmin
+      .from("customer_surveys" as any)
+      .select("id, token, submitted_at, overall_rating")
+      .eq("stripe_invoice_id", invoice.id)
+      .maybeSingle();
+
+    const effectiveRating =
+      existing && (existing as any).submitted_at && (existing as any).overall_rating
+        ? Number((existing as any).overall_rating)
+        : data.rating;
+    const needsFollowup = effectiveRating <= 3;
+
     await supabaseAdmin.from("stripe_invoices").upsert(
       {
         stripe_invoice_id: invoice.id,
+        stripe_customer_id:
+          typeof invoice.customer === "string" ? invoice.customer : customer?.id ?? null,
         invoice_number: invoice.number ?? null,
-        customer_name: v.customer?.name ?? null,
-        customer_email: v.customer?.email ?? invoice.customer_email ?? null,
-        customer_phone: v.customer?.phone ?? null,
-        amount_cents: invoice.amount_due ?? 0,
+        customer_name: customer?.name ?? null,
+        customer_email: customer?.email ?? invoice.customer_email ?? null,
+        customer_phone: customer?.phone ?? null,
+        amount_cents: invoice.amount_due ?? invoice.amount_paid ?? 0,
         currency: invoice.currency ?? "cad",
-        status: invoice.status ?? "open",
-        customer_rating: data.rating,
-        customer_rating_at: new Date().toISOString(),
+        status: "paid",
+        customer_rating: effectiveRating,
+        customer_rating_at: now,
         needs_followup: needsFollowup,
         hosted_invoice_url: invoice.hosted_invoice_url ?? null,
         invoice_pdf: invoice.invoice_pdf ?? null,
@@ -187,32 +183,58 @@ export const submitPostPaymentRating = createServerFn({ method: "POST" })
       { onConflict: "stripe_invoice_id" },
     );
 
-    // Create a survey token so the client can continue to the survey
-    const token = crypto.randomUUID().replace(/-/g, "") + Math.random().toString(36).slice(2, 8);
-    const { data: survey, error: surveyErr } = await supabaseAdmin
-      .from("customer_surveys" as any)
-      .insert({
-        invoice_number: invoice.number ?? null,
-        stripe_invoice_id: invoice.id,
-        customer_name: v.customer?.name ?? null,
-        customer_email: v.customer?.email ?? invoice.customer_email ?? null,
-        customer_phone: v.customer?.phone ?? null,
-        token,
-        overall_rating: data.rating,
-      } as any)
-      .select("id, token")
-      .single();
-
-    if (surveyErr) {
-      console.error("[submitPostPaymentRating] failed to create survey", surveyErr.message);
+    let surveyToken: string;
+    if (existing) {
+      surveyToken = (existing as any).token;
+      if (!(existing as any).submitted_at) {
+        await supabaseAdmin
+          .from("customer_surveys" as any)
+          .update({ overall_rating: effectiveRating })
+          .eq("id", (existing as any).id);
+      }
+    } else {
+      const token = `${crypto.randomUUID().replace(/-/g, "")}${crypto.randomUUID().replace(/-/g, "")}`;
+      const { data: survey, error } = await supabaseAdmin
+        .from("customer_surveys" as any)
+        .insert({
+          invoice_number: invoice.number ?? null,
+          stripe_invoice_id: invoice.id,
+          customer_name: customer?.name ?? null,
+          customer_email: customer?.email ?? invoice.customer_email ?? null,
+          customer_phone: customer?.phone ?? null,
+          token,
+          overall_rating: effectiveRating,
+        } as any)
+        .select("token")
+        .single();
+      if (error) {
+        const { data: concurrent } = await supabaseAdmin
+          .from("customer_surveys" as any)
+          .select("token, overall_rating")
+          .eq("stripe_invoice_id", invoice.id)
+          .single();
+        if (!concurrent) throw new Error("Impossible de préparer le sondage.");
+        surveyToken = (concurrent as any).token;
+      } else {
+        surveyToken = (survey as any).token;
+      }
     }
+
+    const { appendBusinessEvent } = await import("./business-events.server");
+    await appendBusinessEvent({
+      entityType: "invoice",
+      entityId: invoice.id,
+      eventType: "customer.rating_recorded",
+      actorType: "customer",
+      payload: { rating: effectiveRating, needsFollowup, replayProtected: effectiveRating !== data.rating },
+    });
 
     return {
       ok: true as const,
-      rating: data.rating,
+      rating: effectiveRating,
       needsFollowup,
-      surveyToken: (survey as any)?.token ?? token,
-      amountPaidCents: invoice.amount_paid ?? invoice.amount_due ?? 0,
+      surveyToken,
+      amountPaidCents: invoice.amount_paid ?? 0,
       currency: invoice.currency ?? "cad",
       invoiceNumber: invoice.number ?? invoice.id,
     };
@@ -221,22 +243,22 @@ export const submitPostPaymentRating = createServerFn({ method: "POST" })
 // ------------------------------ Survey ------------------------------
 
 export const getSurveyByToken = createServerFn({ method: "POST" })
-  .inputValidator((d: unknown) => z.object({ token: z.string().min(8).max(80) }).parse(d))
+  .inputValidator((d: unknown) => z.object({ token: z.string().min(32).max(180) }).parse(d))
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: row, error } = await supabaseAdmin
       .from("customer_surveys" as any)
-      .select(
-        "id, token, invoice_number, customer_name, customer_email, overall_rating, submitted_at",
-      )
+      .select("submitted_at")
       .eq("token", data.token)
       .maybeSingle();
     if (error || !row) return { found: false as const };
-    return { found: true as const, survey: row as any };
+    // Do not return customer PII to the browser. The opaque token is enough to render the
+    // survey state; all customer/invoice data remains server-side.
+    return { found: true as const, survey: { submitted_at: (row as any).submitted_at } };
   });
 
 const SurveyInput = z.object({
-  token: z.string().min(8).max(80),
+  token: z.string().min(32).max(180),
   overallRating: z.number().int().min(1).max(5).optional(),
   technicianProfessional: z.string().max(500).optional(),
   problemResolved: z.enum(["oui", "partiellement", "non"]).optional(),
@@ -252,9 +274,12 @@ const SurveyInput = z.object({
 export const submitSurvey = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => SurveyInput.parse(d))
   .handler(async ({ data }) => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { consumePublicRateLimit } = await import("./public-security.server");
+    if (!(await consumePublicRateLimit("survey_submit", 5, 60 * 60, data.token.slice(0, 16)))) {
+      return { ok: false as const, reason: "rate_limited" };
+    }
 
-    // Load the survey shell
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: survey, error: loadErr } = await supabaseAdmin
       .from("customer_surveys" as any)
       .select("*")
@@ -262,12 +287,25 @@ export const submitSurvey = createServerFn({ method: "POST" })
       .maybeSingle();
     if (loadErr || !survey) return { ok: false as const, reason: "invalid_token" };
 
-    if ((survey as any).submitted_at) {
-      return { ok: false as const, reason: "already_submitted" };
+    const invoiceId = (survey as any).stripe_invoice_id as string | null;
+    if (!invoiceId) return { ok: false as const, reason: "invoice_missing" };
+
+    // Verify settlement against Stripe before any reward is issued.
+    const { getStripe } = await import("./stripe.server");
+    const stripe = getStripe();
+    let invoice: import("stripe").Stripe.Invoice;
+    try {
+      invoice = await stripe.invoices.retrieve(invoiceId);
+    } catch {
+      return { ok: false as const, reason: "invoice_missing" };
+    }
+    if (invoice.status !== "paid" || (invoice.amount_paid ?? 0) <= 0) {
+      return { ok: false as const, reason: "not_paid" };
     }
 
     const now = new Date().toISOString();
-    const { error: updErr } = await supabaseAdmin
+    // Atomic claim: only the first request can change submitted_at from NULL.
+    const { data: claimed, error: updErr } = await supabaseAdmin
       .from("customer_surveys" as any)
       .update({
         overall_rating: data.overallRating ?? (survey as any).overall_rating ?? null,
@@ -282,52 +320,72 @@ export const submitSurvey = createServerFn({ method: "POST" })
         callback_time: data.callbackTime ?? null,
         submitted_at: now,
       })
-      .eq("token", data.token);
+      .eq("id", (survey as any).id)
+      .is("submitted_at", null)
+      .select("id")
+      .maybeSingle();
     if (updErr) return { ok: false as const, reason: "update_failed" };
+    if (!claimed) return { ok: false as const, reason: "already_submitted" };
 
-    // Compute credit value from the linked invoice (10% of paid amount)
-    let creditValueCents: number | null = null;
-    let currency = "cad";
-    const invoiceId = (survey as any).stripe_invoice_id as string | null;
-    if (invoiceId) {
-      const { data: inv } = await supabaseAdmin
-        .from("stripe_invoices")
-        .select("amount_cents, currency")
-        .eq("stripe_invoice_id", invoiceId)
-        .maybeSingle();
-      if (inv) {
-        creditValueCents = Math.round((inv as any).amount_cents * 0.1);
-        currency = (inv as any).currency ?? "cad";
+    const paidCents = invoice.amount_paid ?? 0;
+    const creditValueCents = Math.round(paidCents * 0.1);
+    const currency = invoice.currency ?? "cad";
+
+    // One fixed-value store credit equal to 10% of the amount actually paid.
+    let credit: any = null;
+    for (let attempt = 0; attempt < 3 && !credit; attempt++) {
+      const code = secureCreditCode();
+      const { data: created, error: credErr } = await supabaseAdmin
+        .from("customer_credits" as any)
+        .upsert(
+          {
+            customer_name: (survey as any).customer_name,
+            customer_email: (survey as any).customer_email,
+            customer_phone: (survey as any).customer_phone,
+            invoice_number: (survey as any).invoice_number,
+            stripe_invoice_id: invoiceId,
+            survey_id: (survey as any).id,
+            credit_code: code,
+            credit_type: "fixed_store_credit",
+            credit_value_percent: 10,
+            credit_value_cents: creditValueCents,
+            currency,
+            status: "active",
+          } as any,
+          { onConflict: "survey_id" },
+        )
+        .select("credit_code, credit_value_cents, currency, expires_at")
+        .single();
+      if (!credErr) credit = created;
+      else if (!/credit_code|unique/i.test(credErr.message)) {
+        console.error("[submitSurvey] credit creation failed", credErr.message);
+        break;
       }
     }
 
-    // Issue credit — 10% flat
-    const code = randomCode();
-    const { data: credit, error: credErr } = await supabaseAdmin
-      .from("customer_credits" as any)
-      .insert({
-        customer_name: (survey as any).customer_name,
-        customer_email: (survey as any).customer_email,
-        customer_phone: (survey as any).customer_phone,
-        invoice_number: (survey as any).invoice_number,
-        stripe_invoice_id: invoiceId,
-        survey_id: (survey as any).id,
-        credit_code: code,
-        credit_type: "percent",
-        credit_value_percent: 10,
-        credit_value_cents: creditValueCents,
-        currency,
-        status: "active",
-      } as any)
-      .select("credit_code, credit_value_cents, currency, expires_at")
-      .single();
-
-    if (credErr) {
-      console.error("[submitSurvey] credit creation failed", credErr.message);
+    if (!credit) {
+      // The customer completed the survey, so never silently lose the promised credit.
+      // Record a durable recovery task that an admin can retry/review without creating duplicates.
+      await supabaseAdmin.from("automation_tasks" as any).upsert(
+        {
+          task_type: "credit_recovery",
+          idempotency_key: `credit-recovery:${(survey as any).id}`,
+          status: "needs_attention",
+          instruction: "Créer le crédit client de 10 % promis après sondage.",
+          input: {
+            surveyId: (survey as any).id,
+            stripeInvoiceId: invoiceId,
+            invoiceNumber: (survey as any).invoice_number,
+            creditValueCents,
+            currency,
+          },
+          error_message: "La création automatique du crédit a échoué après la soumission du sondage.",
+        } as any,
+        { onConflict: "idempotency_key" },
+      );
     }
 
-    // If the customer had a service question, also create a service_questions record
-    if (data.serviceQuestion && data.serviceQuestion.trim().length > 0) {
+    if (data.serviceQuestion?.trim()) {
       await supabaseAdmin.from("service_questions" as any).insert({
         invoice_number: (survey as any).invoice_number,
         customer_name: (survey as any).customer_name,
@@ -338,10 +396,21 @@ export const submitSurvey = createServerFn({ method: "POST" })
       } as any);
     }
 
-    return {
-      ok: true as const,
-      credit: credit as any,
-    };
+    const { appendBusinessEvent } = await import("./business-events.server");
+    await appendBusinessEvent({
+      entityType: "invoice",
+      entityId: invoiceId,
+      eventType: "customer.survey_completed",
+      actorType: "customer",
+      payload: {
+        surveyId: (survey as any).id,
+        creditCode: credit?.credit_code ?? null,
+        creditValueCents,
+        wantsCallback: data.wantsCallback,
+      },
+    });
+
+    return { ok: true as const, credit };
   });
 
 // ------------------------------ Service question (standalone) ------------------------------
@@ -357,15 +426,33 @@ const ServiceQuestionInput = z.object({
 export const submitServiceQuestion = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => ServiceQuestionInput.parse(d))
   .handler(async ({ data }) => {
+    const { consumePublicRateLimit } = await import("./public-security.server");
+    if (!(await consumePublicRateLimit("service_question", 5, 60 * 60, data.customerEmail))) {
+      return { ok: false as const, error: "Trop de demandes. Réessayez plus tard." };
+    }
+
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin.from("service_questions" as any).insert({
-      invoice_number: data.invoiceNumber ?? null,
-      customer_name: data.customerName,
-      customer_email: data.customerEmail,
-      customer_phone: data.customerPhone ?? null,
-      question: data.question,
-      status: "new",
-    } as any);
-    if (error) return { ok: false as const, error: error.message };
+    const { data: created, error } = await supabaseAdmin
+      .from("service_questions" as any)
+      .insert({
+        invoice_number: data.invoiceNumber ?? null,
+        customer_name: data.customerName,
+        customer_email: data.customerEmail,
+        customer_phone: data.customerPhone ?? null,
+        question: data.question,
+        status: "new",
+      } as any)
+      .select("id")
+      .single();
+    if (error) return { ok: false as const, error: "Impossible d'envoyer la question." };
+
+    const { appendBusinessEvent } = await import("./business-events.server");
+    await appendBusinessEvent({
+      entityType: "service_question",
+      entityId: (created as any).id,
+      eventType: "service_question.created",
+      actorType: "customer",
+      payload: { invoiceNumber: data.invoiceNumber ?? null },
+    });
     return { ok: true as const };
   });

@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Phone, MapPin, Navigation, FileText, Wrench, ShoppingBag, Cog, Sparkles, Waves } from "lucide-react";
+import { Phone, MapPin, Navigation, FileText, Wrench, ShoppingBag, Cog, Waves } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { SITE } from "@/lib/seo";
 import { trackPhoneCall, trackQuickSubmission, gtag } from "@/lib/gtag";
@@ -129,7 +129,7 @@ export function StoreLocator() {
               <ServiceItem icon={ShoppingBag} label="Vente de spa" to="/vente-spas" />
               <ServiceItem icon={Cog} label="Pièces de spa" to="/pieces" />
               <ServiceItem icon={Waves} label="Ouverture / fermeture de piscine" to="/piscine" />
-              <ServiceItem icon={Sparkles} label="Diagnostic AI" to="/diagnostic" />
+              <ServiceItem icon={Wrench} label="Pré-diagnostic" to="/diagnostic" />
             </ul>
           </div>
         </div>

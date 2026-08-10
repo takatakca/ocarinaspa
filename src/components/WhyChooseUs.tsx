@@ -1,12 +1,12 @@
 import { Wrench, Snowflake, ShieldCheck, Clock, FileText, MapPin } from "lucide-react";
 
 const REASONS = [
-  { icon: Wrench, title: "Techniciens spécialisés", desc: "20+ ans d'expérience sur toutes les marques de spas et hot tubs." },
+  { icon: Wrench, title: "Techniciens spécialisés", desc: "Service spécialisé sur plusieurs grandes marques et systèmes de spas." },
   { icon: Snowflake, title: "Service hiver Québec", desc: "Interventions prioritaires contre le gel, ouverture et fermeture saisonnière." },
-  { icon: ShieldCheck, title: "Réparation toutes marques", desc: "Jacuzzi, Hydropool, Arctic, Sundance, Beachcomber, Bullfrog et plus." },
+  { icon: ShieldCheck, title: "Plusieurs grandes marques", desc: "Jacuzzi, Hydropool, Arctic, Sundance, Beachcomber, Bullfrog et plus." },
   { icon: Clock, title: "Urgence 24/7", desc: "Disponibles en tout temps pour les pannes critiques et les fuites." },
   { icon: FileText, title: "Soumission rapide", desc: "Réponse claire, prix transparent, rendez-vous fixé sans délai." },
-  { icon: MapPin, title: "Laval · Montréal · Rive-Nord", desc: "Service mobile dans le Grand Montréal et partout au Québec." },
+  { icon: MapPin, title: "Laval · Montréal · Rive-Nord", desc: "Service mobile dans le Grand Montréal et plusieurs secteurs du Québec." },
 ];
 
 export function WhyChooseUs() {

@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
-
-Sitemap: https://ocarinaspa.lovable.app/sitemap.xml
+Disallow: /admin/
+Disallow: /api/
+Sitemap: https://ocarinaspa.ca/sitemap.xml

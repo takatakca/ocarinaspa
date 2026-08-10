@@ -18,7 +18,7 @@ export const Route = createFileRoute("/codes-erreur")({
       {
         property: "og:description",
         content:
-          "Tous les codes d'erreur expliqués : FLO, OH, DR, SN, ICE, HL, LF, FLC. Réparation toutes marques au Québec.",
+          "Tous les codes d'erreur expliqués : FLO, OH, DR, SN, ICE, HL, LF, FLC. Diagnostic de plusieurs grandes marques au Québec.",
       },
       { property: "og:url", content: SITE.domain + "/codes-erreur" },
     ],
@@ -77,7 +77,7 @@ function CodesErreurPage() {
               to="/diagnostic"
               className="inline-flex items-center gap-2 border-2 border-brand text-brand px-6 py-3 rounded-md font-semibold hover:bg-brand hover:text-brand-foreground"
             >
-              Diagnostic AI gratuit
+              Pré-diagnostic technique
             </Link>
           </div>
         </div>
@@ -121,8 +121,7 @@ function CodesErreurPage() {
             Votre code n'est pas dans la liste ?
           </h3>
           <p className="mt-2 text-muted-foreground">
-            Appelez-nous ou essayez notre diagnostiqueur AI — vous obtenez une piste en moins
-            d'une minute.
+            Appelez-nous ou utilisez notre pré-diagnostic en ligne pour mieux orienter le suivi avant l’intervention.
           </p>
           <div className="mt-4 flex flex-wrap justify-center gap-3">
             <a
@@ -136,7 +135,7 @@ function CodesErreurPage() {
               to="/diagnostic"
               className="inline-flex items-center gap-2 border-2 border-brand text-brand px-5 py-2.5 rounded-md font-semibold"
             >
-              Lancer le diagnostic AI
+              Démarrer le pré-diagnostic
             </Link>
           </div>
         </div>

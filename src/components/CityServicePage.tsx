@@ -1,7 +1,7 @@
 import { Link, notFound } from "@tanstack/react-router";
 import { Layout } from "@/components/Layout";
 import { ServiceRequestForm } from "@/components/ServiceRequestForm";
-import { findMunicipalityBySlug, findServiceBySlug, SERVICE_TYPES, type ServiceSlug } from "@/data/quebecMunicipalities";
+import { findMunicipalityBySlug, findServiceBySlug, isSeoIndexedServicePage, SERVICE_TYPES, type ServiceSlug } from "@/data/quebecMunicipalities";
 import { Phone, CheckCircle2, MapPin } from "lucide-react";
 import { SITE, serviceSchema, faqSchema, localBusinessSchema, breadcrumbSchema, altLinks } from "@/lib/seo";
 import { trackPhoneCall, trackQuickSubmission } from "@/lib/gtag";
@@ -26,11 +26,11 @@ const COPY: Record<string, {
 }> = {
   spa: {
     intro: (svc, city, region) =>
-      `Service de ${svc.toLowerCase()} à domicile à ${city} et partout dans la région ${region}. Plus de 20 ans d'expertise. Service rapide, professionnel et garanti sur tous les modèles de spas et bains à remous.`,
+      `Service de ${svc.toLowerCase()} à domicile à ${city} et dans la région ${region}. Intervention professionnelle selon la marque, le modèle, l'installation et les composantes du spa.`,
     benefits: (city) => [
       `Service à domicile à ${city}`,
-      "Plus de 20 ans d'expertise",
-      "Toutes marques de spas (Sundance, Jacuzzi, Coast, Vita, Beachcomber, etc.)",
+      "Techniciens spécialisés",
+      "Plusieurs grandes marques (Hydropool, Arctic Spas, Beachcomber, Jacuzzi, Sundance, etc.)",
       "Pièces fournies sur place",
       "Soumission rapide et sans frais",
       "Diagnostic professionnel",
@@ -39,16 +39,16 @@ const COPY: Record<string, {
     faq: (svc, verb, city, region) => [
       { q: `Offrez-vous le service de ${verb.toLowerCase()} de spa à ${city} ?`, a: `Oui, nous nous déplaçons à ${city} et dans toute la région ${region} pour le service de ${svc.toLowerCase()}.` },
       { q: `Combien coûte ${svc.toLowerCase()} à ${city} ?`, a: `Le prix dépend du modèle et du travail requis. Appelez-nous au ${SITE.phone} pour une soumission rapide et sans engagement.` },
-      { q: `Quelles marques de spas réparez-vous ?`, a: `Nous travaillons sur toutes les marques et tous les modèles de spas et bains à remous au Québec.` },
+      { q: `Quelles marques de spas réparez-vous ?`, a: `Nous travaillons sur plusieurs grandes marques présentes au Québec; la compatibilité est confirmée selon le modèle et les composantes.` },
     ],
   },
   "spa-en": {
     intro: (svc, city) =>
-      `Professional ${svc.toLowerCase()} service at your home in ${city}, Quebec. Over 20 years of experience. Fast, reliable service on all hot tub brands and models.`,
+      `Professional ${svc.toLowerCase()} service at your home in ${city}, Quebec. Compatibility is confirmed by brand, model, installation and components before service.`,
     benefits: (city) => [
       `On-site service in ${city}`,
-      "20+ years of experience",
-      "All hot tub brands serviced",
+      "Mobile spa service",
+      "Major hot tub brands serviced",
       "Parts available on site",
       "Free, fast quote",
       "Expert diagnostics",
@@ -57,12 +57,12 @@ const COPY: Record<string, {
     faq: (svc, _verb, city) => [
       { q: `Do you offer ${svc.toLowerCase()} in ${city}?`, a: `Yes, we serve ${city} and the surrounding area for ${svc.toLowerCase()}.` },
       { q: `How much does ${svc.toLowerCase()} cost in ${city}?`, a: `Price depends on the model and work needed. Call ${SITE.phone} for a free quote.` },
-      { q: `Which hot tub brands do you service?`, a: `We service all hot tub brands and models throughout Quebec.` },
+      { q: `Which hot tub brands do you service?`, a: `We service several major hot tub brands found in Quebec and confirm compatibility by model and components.` },
     ],
   },
   piscine: {
     intro: (svc, city, region) =>
-      `Service de ${svc.toLowerCase()} à domicile à ${city} et dans toute la région ${region}. Spécialistes piscines creusées et hors-terre. Service professionnel, rapide et garanti.`,
+      `Service de ${svc.toLowerCase()} à domicile à ${city} et dans la région ${region}. Intervention sur les principales configurations de piscines résidentielles, selon l'équipement et l'accès.`,
     benefits: (city) => [
       `Service à domicile à ${city}`,
       "Piscines creusées et hors-terre",
@@ -75,7 +75,7 @@ const COPY: Record<string, {
     faq: (svc, verb, city, region) => [
       { q: `Offrez-vous le service de ${verb.toLowerCase()} de piscine à ${city} ?`, a: `Oui, nous offrons le service de ${svc.toLowerCase()} à ${city} et toute la région ${region}.` },
       { q: `Quel est le prix pour ${svc.toLowerCase()} à ${city} ?`, a: `Appelez-nous au ${SITE.phone} pour une soumission rapide et sans engagement.` },
-      { q: `Travaillez-vous sur tous les types de piscines ?`, a: `Oui, piscines creusées, semi-creusées et hors-terre, toutes marques.` },
+      { q: `Travaillez-vous sur tous les types de piscines ?`, a: `Nous intervenons sur les principales configurations de piscines creusées, semi-creusées et hors-terre; la compatibilité des équipements est confirmée avant le service.` },
     ],
   },
 };
@@ -197,8 +197,8 @@ export const cityServiceHead = (serviceSlug: ServiceSlug, villeSlug: string) => 
     ? `${service.label} in ${muni.name} — Ocarina Spa Quebec`
     : `${service.label} à ${muni.name} — Ocarina Spa Québec`;
   const description = isEn
-    ? `${service.label} in ${muni.name}, Quebec. 20+ years of experience. Call ${SITE.phone}.`
-    : `Service de ${service.label.toLowerCase()} à ${muni.name}, ${region}. Expert depuis 20 ans. Appelez le ${SITE.phone}.`;
+    ? `${service.label} in ${muni.name}, Quebec. Mobile spa service. Call ${SITE.phone}.`
+    : `Service de ${service.label.toLowerCase()} à ${muni.name}, ${region}. Service mobile Ocarina Spa. Appelez le ${SITE.phone}.`;
   const url = `${SITE.domain}/${service.slug}/${muni.slug}`;
   const counterpart = FR_EN_MAP[service.slug];
   const counterpartPath = counterpart ? `/${counterpart}/${muni.slug}` : null;
@@ -227,10 +227,12 @@ export const cityServiceHead = (serviceSlug: ServiceSlug, villeSlug: string) => 
         { q: `Offrez-vous le service de ${service.verb.toLowerCase()} à ${muni.name} ?`, a: `Oui, nous offrons ce service à ${muni.name} et toute la région ${region}.` },
         { q: `Quel est le prix ?`, a: `Appelez le ${SITE.phone} pour une soumission gratuite.` },
       ];
+  const indexable = isSeoIndexedServicePage(service.slug, muni.slug);
   return {
     meta: [
       { title },
       { name: "description", content: description },
+      ...(!indexable ? [{ name: "robots", content: "noindex,follow" }] : []),
       { property: "og:title", content: title },
       { property: "og:description", content: description },
       { property: "og:type", content: "website" },

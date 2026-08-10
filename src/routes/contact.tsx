@@ -11,7 +11,7 @@ export const Route = createFileRoute("/contact")({
       { title: "Contact — Ocarina Spa Québec | (819) 913-7727" },
       { name: "description", content: "Contactez Ocarina Spa Québec pour tout service de spa : réparation, installation, ouverture, fermeture, entretien. Appelez le (819) 913-7727." },
       { property: "og:title", content: "Contact — Ocarina Spa Québec" },
-      { property: "og:description", content: "Demandez un service de spa partout au Québec. Réponse rapide." },
+      { property: "og:description", content: "Demandez un service de spa dans nos zones desservies au Québec. Réponse rapide." },
     ],
   }),
   component: Contact,
@@ -36,7 +36,7 @@ function Contact() {
             title="Adresse"
             value={`${SITE.address.street}, ${SITE.address.city}, ${SITE.address.region} ${SITE.address.postalCode}`}
           />
-          <InfoCard icon={Clock} title="Heures d'ouverture" value="Ouvert 24h sur 24, 7 jours sur 7" />
+          <InfoCard icon={Clock} title="Disponibilité" value="Urgences téléphoniques 24/7 · rendez-vous sur demande" />
         </div>
         <ServiceRequestForm />
       </section>

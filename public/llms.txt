@@ -1,6 +1,6 @@
 # Ocarina Spa Québec
 
-> Réparation, vente, installation et entretien de spas et piscines partout au Québec. Plus de 20 ans d'expertise. Service mobile dans toutes les régions. Téléphone : 819-913-7727.
+> Réparation, vente, installation et entretien de spas et piscines dans les zones desservies au Québec. Service mobile sur rendez-vous. Téléphone : 819-913-7727.
 
 ## Pages principales
 
@@ -10,16 +10,16 @@
 - [Vente de spas](/vente-spas): Vente de spas neufs et usagés au Québec.
 - [Marques réparées](/marques): Liste des marques de spas réparées (Jacuzzi, Hydropool, Arctic Spas, Beachcomber, etc.).
 - [Codes d'erreur de spa](/codes-erreur): FLO, OH, DR, SN, ICE, HL, LF, FLC — significations et solutions.
-- [Diagnostiqueur AI](/diagnostic): Outil AI gratuit pour identifier un problème de spa.
+- [Pré-diagnostic](/diagnostic): Formulaire technique pour orienter un problème de spa avant le suivi par un technicien.
 - [Urgence Spa 24/7](/urgence-spa): Service d'urgence pour spa arrêté en hiver, gel de plomberie.
 - [Pièces et accessoires](/pieces): Pompes, chauffe-eau, panneaux de contrôle, jets, filtres.
-- [Régions desservies](/regions): Toutes les régions administratives du Québec couvertes.
-- [Villes desservies](/villes): Liste des villes et municipalités où nous offrons le service.
+- [Régions desservies](/regions): Principaux secteurs actuellement desservis; disponibilité à confirmer selon l’adresse.
+- [Villes desservies](/villes): Principales villes desservies et vérification de disponibilité locale.
 - [Contact](/contact): Formulaire de demande de service et coordonnées.
 
 ## English
 
-- [Home (EN)](/en): Hot tub repair, maintenance and spa service across Quebec.
+- [Home (EN)](/en): English overview of hot tub repair and spa service in supported Quebec areas.
 
 ## Optional
 

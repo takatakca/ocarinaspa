@@ -1,227 +1,227 @@
-# OcarinaSpa.ca — Checklist de lancement
+# OcarinaSpa.ca — Go-live checklist
 
-Guide pratique pour mettre le site en production et opérer les factures, l'expérience client et le suivi.
+This checklist is the release gate. Do not switch production traffic until every **BLOCKER** is green.
 
----
+## 1. Runtime and deployment
 
-## 1. Secrets requis
+- Use Node.js 22 for build/runtime.
+- The uploaded lockfile was stale and has been removed. On the real deployment registry, run `npm install` once to generate a fresh `package-lock.json`, review/commit it, then use `npm ci` for repeatable CI builds.
+- Build: `npm run build:node`.
+- Start: `npm start` → `.output/server/index.mjs`.
+- Run `npm run prelive:check` before the build.
+- The repository intentionally does not ship a stale Bun lockfile; npm is the single package-manager source of truth.
 
-À configurer dans **Backend → Secrets** (jamais dans le code, jamais dans GitHub) :
+## 2. Required migrations — BLOCKER
 
-### Admin
-| Secret | Description |
-|---|---|
-| `ADMIN_EMAILS` | Emails admin séparés par virgules (ex. `owner@ocarinaspa.ca`) |
+Apply all Supabase migrations, including:
 
-### Stripe (mode live pour production)
-| Secret | Où le trouver |
-|---|---|
-| `STRIPE_SECRET_KEY` | Stripe Dashboard → Developers → API keys → `sk_live_...` |
-| `STRIPE_WEBHOOK_SECRET` | Stripe Dashboard → Developers → Webhooks → endpoint `whsec_...` |
-| `VITE_STRIPE_PUBLISHABLE_KEY` | `pk_live_...` (safe côté client) |
+`supabase/migrations/20260809090000_pre_live_hardening.sql`  
+`supabase/migrations/20260809120000_credit_redemption.sql`  
+`supabase/migrations/20260809133000_public_write_lockdown.sql`  
+`supabase/migrations/20260809134500_refund_reconciliation.sql`
 
-### Interac
-| Secret | Notes |
-|---|---|
-| `INTERAC_RECIPIENT_EMAIL` | Courriel Interac officiel Ocarina Spa |
-| `INTERAC_RECIPIENT_NAME` | `Ocarina Spa` |
-| `INTERAC_SECURITY_QUESTION` | **Laisser vide si autodépôt activé** |
-| `INTERAC_SECURITY_ANSWER` | **Laisser vide si autodépôt activé** |
+These migrations add the durable controls used by production:
+- opaque payment-experience tokens,
+- Stripe webhook event ledger,
+- immutable business event history,
+- automation/checkpoint tasks,
+- public rate-limit buckets,
+- uniqueness for one survey and one reward per invoice/survey,
+- removal of direct public writes that bypass server validation,
+- atomic reservation/consumption of the 10% store credit,
+- explicit lock-down of service requests/contact/diagnostic/service-question tables so public submissions must pass the server validation + rate limit.
 
-### Liens publics (à me fournir — je les mettrai dans `src/lib/seo.ts`)
-| Valeur | Exemple |
-|---|---|
-| Google Review URL | `https://g.page/r/CXXXXXXX/review` |
-| Facebook Page URL | `https://facebook.com/ocarinaspa` |
-| Stripe publishable key | `pk_live_...` (safe côté client, hardcodé) |
+Confirm `/admin/qa` reports the hardening migration as applied.
 
-Le préfixe `VITE_*` est réservé sur Lovable Cloud. Ces valeurs publiques (non secrètes)
-seront simplement hardcodées dans le code une fois fournies.
+## 3. Server secrets — BLOCKER
 
+Configure in the backend/host secret manager only:
 
-⚠️ **Sécurité** :
-- `sk_live_`, `whsec_`, `SUPABASE_SERVICE_ROLE_KEY` : **jamais** côté frontend.
-- Révoquer toute clé partagée dans un chat, email ou repo public.
-- Rotation recommandée à chaque changement d'équipe.
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `STRIPE_SECRET_KEY`
+- `STRIPE_WEBHOOK_SECRET`
+- `STRIPE_ACCOUNT_ID`
+- `STRIPE_PUBLISHABLE_KEY`
+- `ADMIN_EMAILS`
+- `PUBLIC_SITE_URL=https://ocarinaspa.ca`
+- `LOVABLE_API_KEY` if backend diagnostic/operations assistant is enabled
 
----
+Never expose `sk_*`, `whsec_*`, or the Supabase service-role key to the browser or Git repository.
 
-## 2. Configuration Stripe
+Any Stripe secret previously shared in chat or another non-secret channel must be rotated before live mode.
 
-### Webhook
-1. Stripe Dashboard → Developers → **Webhooks** → Add endpoint
-2. URL : `https://ocarinaspa.ca/api/public/stripe-webhook`
-3. Événements à sélectionner :
+## 4. Stripe live account — BLOCKER
+
+In live mode:
+
+1. Configure `STRIPE_SECRET_KEY` with the new live secret.
+2. Configure `STRIPE_ACCOUNT_ID` with the account the site is expected to use.
+3. Configure `STRIPE_PUBLISHABLE_KEY` from the same Stripe account.
+4. Create a live webhook endpoint:
+   `https://ocarinaspa.ca/api/public/stripe-webhook`
+5. Subscribe at minimum to:
    - `invoice.paid`
    - `invoice.payment_failed`
    - `invoice.voided`
-4. Copier `whsec_...` → mettre dans `STRIPE_WEBHOOK_SECRET`
+   - `invoice.finalized`
+   - `charge.refunded`
+6. Put that endpoint's live `whsec_...` in `STRIPE_WEBHOOK_SECRET`.
+7. Configure `AUTOMATION_CRON_SECRET` and schedule an hourly authenticated POST to `/api/internal/automation-reconcile`. This reconciles Stripe/local status, retries pending follow-up delivery, expires credits, and flags recovery work.
+8. Confirm `/admin/qa` says the Stripe API is reachable and the returned account matches `STRIPE_ACCOUNT_ID`.
 
-### Mode test → live
-1. Basculer le toggle **Test / Live** dans Stripe
-2. Régénérer `sk_...` et `pk_...` en mode live
-3. Recréer le webhook côté live (le webhook secret est différent)
-4. Mettre à jour les secrets dans Backend
-5. Faire une facture réelle de 1 $ pour valider le flow complet
+### Card payment flow
 
----
+The preferred invoice-card flow is the Stripe **Payment Element** using the invoice's `confirmation_secret` and a return URL to `/paiement-confirme` with an opaque experience token. The Hosted Invoice Page remains a fallback if the Payment Element cannot be initialized.
 
-## 3. Configuration Interac
+The webhook `invoice.paid` is the server-side source of truth. Browser return pages must never be treated as proof of payment.
 
-Si **autodépôt activé** (recommandé) :
-- Renseigner uniquement `INTERAC_RECIPIENT_EMAIL` et `INTERAC_RECIPIENT_NAME`
-- Laisser `INTERAC_SECURITY_QUESTION` **vide**
-- Le panneau client affichera automatiquement « Autodépôt activé, aucune question requise »
+### Interac flow
 
-Sinon :
-- Renseigner la question ET la réponse
-- La réponse n'est **jamais** montrée au client — Ocarina Spa la communique séparément (SMS, appel)
+`J'ai envoyé le virement` only means `pending_interac`.
 
----
+After the bank transfer is actually received, an admin uses **Marquer Interac reçu**. The backend then marks the Stripe invoice as paid out-of-band and records the same outcome locally. This prevents an already-paid Interac invoice from remaining collectible in Stripe.
 
-## 4. Comment créer une facture (admin)
+## 5. Québec taxes — BLOCKER for taxable live invoices
 
-1. Se connecter avec un email listé dans `ADMIN_EMAILS`
-2. Aller sur `/admin/factures`
-3. Cliquer **Créer une facture**
-4. Renseigner :
-   - Nom / courriel / téléphone du client
-   - Description du service
-   - Montant (CAD)
-5. Copier le **numéro de facture** (ex. `OCAR-0042`)
-6. Le communiquer au client (SMS, courriel, appel) avec le lien `ocarinaspa.ca/payer-facture`
+Before a taxable live invoice can be created, configure:
 
----
+- `GST_REGISTRATION_NUMBER`
+- `QST_REGISTRATION_NUMBER`
+- `STRIPE_TAX_RATE_GST_ID` — active Stripe Tax Rate at 5%
+- `STRIPE_TAX_RATE_QST_ID` — active Stripe Tax Rate at 9.975%
 
-## 5. Comment un client paie
+`/admin/qa` validates that both Stripe Tax Rates exist, are active, and match the expected percentages. The backend intentionally blocks taxable live invoice creation when required tax configuration is incomplete.
 
-1. Client va sur `/payer-facture`
-2. Entre son **numéro de facture** + son **email OU téléphone** (vérification d'identité)
-3. Voit sa facture et choisit :
-   - **Carte** → redirection Stripe hosted invoice
-   - **Interac** → coordonnées de virement affichées
-4. Après paiement → `/paiement-confirme` :
-   - Note 1-5 étoiles
-   - 4-5 étoiles : proposition avis Google + sondage
-   - 1-3 étoiles : alerte admin + recueil du problème
+The business owner/accountant remains responsible for confirming that Ocarina Spa is registered and that the tax treatment of each sale is correct.
 
----
+## 6. Payment and post-payment memory
 
-## 6. Gérer les paiements Interac
+The production flow is auditable:
 
-1. Client clique « J'ai envoyé le virement » → facture passe en `pending_interac`
-2. Ocarina Spa reçoit le virement dans sa banque
-3. Admin va sur `/admin/factures`, filtre `pending_interac`
-4. Clique **Interac reçu** sur la facture correspondante
-5. La facture passe à `interac_received` (puis `paid`) et le lien de sondage est copié dans le presse-papiers
-6. Envoyer ce lien au client pour l'inviter à laisser un avis
+- `stripe_webhook_events` prevents duplicate webhook processing.
+- `business_events` keeps an operational timeline for invoices, ratings, surveys, questions, credits and automation.
+- `automation_tasks` stores checkpoints and delivery/recovery work.
+- survey submission is single-use per invoice.
+- store credit is single-use issuance per survey and is calculated as a fixed amount equal to 10% of the amount actually paid.
+- if automatic credit creation fails after a completed survey, a durable `credit_recovery` task is created instead of silently losing the promised reward.
 
----
+Admin views:
+- `/admin/factures`
+- `/admin/experience`
+- `/admin/historique`
+- `/admin/automation`
+- `/admin/qa`
 
-## 7. Gérer les crédits 10%
+## 7. Backend AI / automation policy
 
-`/admin/experience` → onglet **Crédits**
+The AI assistant lives server-side. It may prepare an invoice draft from an admin instruction, identify missing information, and record the task/history.
 
-- Chaque sondage complété génère un code `OCARINA10-XXXX` (10 % de la facture, valide 90 jours)
-- Applicable **en magasin Ocarina Spa uniquement**
-- Action **Marquer utilisé** quand le client réclame le crédit
-- Filtres : actifs / utilisés / expirés
+**Financial writes require an authenticated admin checkpoint.** The assistant must not invent a client, amount, tax status or silently send a financial document. A request ID/idempotency key protects approved invoice creation from double-click/network retries.
 
----
+This is intentional production control, not a missing automation feature.
 
-## 8. Consulter `/admin/experience`
+## 8. Post-payment customer follow-through
 
-Sections disponibles :
-- **Vue d'ensemble** : note moyenne, crédits actifs, suivis en attente
-- **Sondages** : filtrer par note (1-3 = insatisfaits, 4-5 = ambassadeurs)
-- **Crédits** : suivi complet des `OCARINA10-XXXX`
-- **Questions service** : questions techniques envoyées après paiement
-- **Suivis à faire** : clients 1-3 étoiles à rappeler → action **Résoudre**
+For a paid invoice:
 
----
+1. Stripe webhook records payment.
+2. The backend prepares an opaque `/paiement-confirme?t=...` experience link.
+3. If transactional email infrastructure is available and a recipient exists, the follow-up is queued automatically.
+4. Otherwise a durable task remains visible as `needs_delivery` for admin follow-up.
+5. Internal rating → recovery for low ratings + optional public review link for every paid customer.
+6. Survey → fixed store credit equal to 10% of the amount paid, independent of the Google review.
+7. Optional Facebook follow and service question.
 
-## 9. Tracking Google Ads / GA4
+Google review and Facebook URLs must be the real official business destinations:
+- `GOOGLE_REVIEW_URL`
+- `FACEBOOK_PAGE_URL`
 
-IDs actifs :
-- Google Ads : `AW-18182973757`
-- GA4 : `G-8YYZKVZBW0`
+Do not use guessed/fallback social URLs in production.
 
-Un seul `gtag.js` (chargé dans `src/routes/__root.tsx`).
+## 9. Google Ads / GA4
 
-Événements clés à surveiller dans Tag Assistant / GA4 :
-- `invoice_payment_page_view`, `invoice_lookup`, `invoice_found`
-- `invoice_pay_click`, `invoice_paid`
-- `invoice_interac_selected`, `invoice_interac_received`
-- `post_payment_rating_submitted`
-- `google_review_click`, `survey_submitted`, `credit_issued`
-- `facebook_follow_click`, `service_question_submitted`
+Global IDs:
+- Google Ads: `AW-18182973757`
+- GA4: `G-8YYZKVZBW0`
 
----
+There must be one `gtag.js` loader only.
 
-## 10. Sécurité — vérifications finales
+GA4 named events can run with the global tag. Dedicated Google Ads conversions only fire when the real conversion-action label is configured in the matching `VITE_AW_LABEL_*` variable. Placeholder labels are not accepted.
 
-- [x] `/admin/factures` protégé (auth + `has_role('admin')`)
-- [x] `/admin/experience` protégé (auth + `has_role('admin')`)
-- [x] `/payer-facture` public mais protégé par numéro + email/téléphone
-- [x] Aucun accès public aux listes de factures / crédits / sondages complets
-- [x] Aucune clé secrète Stripe côté frontend
-- [x] RLS actif sur toutes les tables (`stripe_invoices`, `customer_surveys`, `customer_credits`, `service_questions`, `user_roles`)
-- [x] Webhook Stripe vérifie la signature (`stripe.webhooks.constructEvent`)
-- [x] Rôle admin stocké dans table dédiée `user_roles` (jamais sur profile)
+Validate with Tag Assistant / GA4 DebugView using a real browser session.
 
----
+## 10. Interac configuration
 
-## 11. Passage test → live (dernière étape)
+Configure:
+- `INTERAC_RECIPIENT_EMAIL`
+- `INTERAC_RECIPIENT_NAME`
 
-1. Configurer tous les secrets `sk_live` / `whsec_` / `pk_live` en mode live
-2. Créer une **vraie facture** de petit montant (1-5 $)
-3. Se payer soi-même avec une vraie carte
-4. Vérifier :
-   - Redirection `/paiement-confirme`
-   - Événement `invoice.paid` reçu par le webhook (Stripe Dashboard → Events)
-   - Statut passé à `paid` dans `/admin/factures`
-   - Événements GA4 déclenchés
-5. Rembourser la facture test depuis Stripe Dashboard
-6. **Prêt pour production réelle.**
+If Autodeposit is enabled, leave security question/answer blank. Never display a security answer publicly.
 
----
+## 11. Brand/content integrity
 
-## Support
+Public brand claims are conservative:
+- Canadian manufacturing is only claimed for brands where it was verified.
+- International/US brands are described as brands present in the Canadian market, not as Canadian manufacturers.
+- A brand card may only use that brand's own configured image; no cross-brand image fallback.
+- Compatibility is confirmed by model/components rather than claiming every brand/model is repairable.
 
-- Numéro d'urgence spa : voir footer du site
-- Stripe support : dashboard.stripe.com
-- Interac troubleshoot : contacter la banque émettrice du virement
+**Visual blocker:** generated technician imagery is still synthetic. If the release requirement is “real human/company photography,” replace the hero/service technician asset with a genuine Ocarina Spa employee photo before launch. Do not label an AI-generated person as an actual employee.
 
----
+## 12. Manual end-to-end QA — BLOCKER
 
-## 12. QA manuel obligatoire avant production
+Use `/admin/qa` and complete at least these tests in the exact live candidate build:
 
-Outil intégré : **`/admin/qa` → « Test paiement facture »** (accessible depuis `/admin/factures`).
-La page affiche la checklist cochable (état sauvegardé localement) et un panneau **État système**
-qui indique uniquement « Configuré / Non configuré » — jamais les valeurs secrètes.
+### Stripe test mode
+- Create test invoice.
+- Find it from `/payer-facture` using invoice number + matching email/phone.
+- Confirm wrong identity gets the same generic not-found response.
+- Pay via Payment Element.
+- Confirm Stripe webhook receives `invoice.paid` and local status becomes paid.
+- Confirm `/paiement-confirme` only works with the opaque token and verifies the canonical Stripe invoice is paid.
+- Submit rating/survey twice and confirm no duplicate survey or credit is created.
 
-### Checklist du flow complet
-1. Créer une facture test de 1 $ CAD (Stripe test mode)
-2. Copier le numéro de facture
-3. Aller sur `/payer-facture`
-4. Entrer le numéro de facture + email ou téléphone
-5. Vérifier que la facture apparaît avec le bon montant
-6. Cliquer « Payer par carte »
-7. Payer avec la carte test `4242 4242 4242 4242`
-8. Vérifier la réception du webhook `invoice.paid` (Stripe → Events)
-9. Vérifier le statut « Payée » dans `/admin/factures`
-10. Tester la note client (1-5 étoiles) sur `/paiement-confirme`
-11. Tester le sondage complet
-12. Vérifier la génération du crédit 10 % (`OCARINA10-XXXX`)
-13. Vérifier les données dans `/admin/experience`
+### Interac
+- Mark transfer sent → `pending_interac` only.
+- Admin marks money actually received.
+- Confirm Stripe invoice is also paid out-of-band and can no longer be paid again.
 
-### Panneau « État système »
-- Google Ads tag détecté : `AW-18182973757`
-- GA4 tag détecté : `G-8YYZKVZBW0`
-- Stripe backend configuré : oui / non
-- Webhook secret configuré : oui / non
-- Interac configuré : oui / non
-- Google Review URL configuré : oui / non
-- Facebook URL configuré : oui / non
+### Admin
+- Confirm a non-admin cannot access admin routes.
+- Confirm `/admin/historique` shows the event timeline.
+- Confirm `/admin/automation` shows invoice/checkpoint and recovery/delivery tasks.
 
-⚠️ Aucune valeur secrète n'est jamais affichée dans l'interface admin.
+### Browser/UX
+- Desktop and mobile header.
+- `/payer-facture` above-the-fold form.
+- FR/EN/ES language selector.
+- No raw technical errors or secret names shown publicly.
+- No broken images/links.
+
+## 13. Refunds / credit notes — OPERATING PROCEDURE
+
+The webhook now reconciles `charge.refunded`: it records refunded cents on the local invoice, cancels unused store credit after a full refund, and creates a durable `refund_credit_review` task after a partial refund so the business does not guess how much promotional credit should remain.
+
+The Ocarina admin still does **not** originate refunds itself. Process refunds and credit notes from Stripe Dashboard until a dedicated authenticated refund UI is designed and tested. Stripe credit notes remain the accounting mechanism for adjusting finalized invoices. Verify one test refund before live.
+
+## 14. Language scope — BLOCKER IF MARKETED AS FULLY TRILINGUAL
+
+`/en` and `/es` are language landing pages, but the entire application is not yet localized route-by-route. The language dropdown must not be represented as a complete translator until invoice, diagnostic, survey, legal/privacy and all service flows are actually localized. Either complete full i18n before launch or label EN/ES as language assistance/overview pages.
+
+## 15. Automated follow-up delivery — BLOCKER FOR “fully automatic” claim
+
+Configure and test the transactional-email provider used by `email-queue.server.ts`. The webhook creates durable `needs_delivery` work if email is unavailable, so payment is safe, but customer follow-up is not fully automatic until a live email has been received end-to-end.
+
+## 16. Release decision
+
+Press live only when:
+
+- `npm run prelive:check` passes,
+- a fresh `package-lock.json` has been generated from this `package.json`, and `npm ci` passes on the real deployment runner,
+- `npm run build:node` passes,
+- all Supabase migrations are applied,
+- `/admin/qa` production checks are green,
+- the live webhook has been tested,
+- the correct Google/Facebook destinations are configured,
+- tax registration/rates are confirmed if taxable invoices are enabled,
+- and the final visual photography decision is accepted.

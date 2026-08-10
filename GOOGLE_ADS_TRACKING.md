@@ -78,9 +78,9 @@ continuent à remonter dans GA4 (Temps réel > Événements) et dans Google Tag 
    ```ts
    export const AW_LABELS: Record<EventName, string> = {
      phone_call: "abcDEF123_XYZ",
-     form_submit: "REMPLACER_LABEL_ICI",
-     quick_submission: "REMPLACER_LABEL_ICI",
-     diagnostic_complete: "REMPLACER_LABEL_ICI",
+     form_submit: "<configured via VITE_AW_LABEL_…>",
+     quick_submission: "<configured via VITE_AW_LABEL_…>",
+     diagnostic_complete: "<configured via VITE_AW_LABEL_…>",
    };
    ```
 
@@ -120,3 +120,6 @@ Dans Google Ads → **Outils → Diagnostics du tag** : confirmer que la balise
 - Le script configure les deux destinations : `AW-18182973757` et `G-8YYZKVZBW0`.
 - Aucune clé Google Maps fournie par le snippet Locator Plus n'est hardcodée dans le code source. La carte utilise `VITE_GOOGLE_MAPS_API_KEY` si disponible, sinon un embed public sans clé.
 - `.env` et `.env.*` sont maintenant ignorés par Git; garder seulement `.env.example` dans le dépôt.
+
+
+> Pré-live 2026: Google Ads/GA4 are consent-gated. The tag is not loaded until the visitor activates analytics and/or marketing in the privacy banner.

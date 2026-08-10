@@ -17,71 +17,86 @@ export type InvoiceLookupResult =
       payable: boolean;
       customerName: string | null;
       description: string | null;
+      experienceToken: string | null;
+      paymentClientSecret: string | null;
+      stripePublishableKey: string | null;
+      paymentElementReady: boolean;
     }
-  | { found: false; reason: "not_found" | "mismatch" | "not_payable" };
-
-function normalize(s: string) {
-  return s.trim().toLowerCase().replace(/\s+|[-().]/g, "");
-}
-
-function lastDigits(s: string, n: number) {
-  const d = s.replace(/\D/g, "");
-  return d.slice(-n);
-}
+  | { found: false; reason: "not_found" | "not_payable" | "rate_limited" };
 
 export const findInvoice = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => FindInvoiceInput.parse(data))
   .handler(async ({ data }): Promise<InvoiceLookupResult> => {
-    const { getStripe } = await import("./stripe.server");
-    const stripe = getStripe();
+    const { consumePublicRateLimit } = await import("./public-security.server");
+    // Two independent buckets: a global client fingerprint limit prevents broad invoice-number
+    // enumeration, while the per-invoice bucket slows repeated guessing against one invoice.
+    const [globalAllowed, invoiceAllowed] = await Promise.all([
+      consumePublicRateLimit("invoice_lookup_global", 40, 10 * 60),
+      consumePublicRateLimit(
+        "invoice_lookup_invoice",
+        12,
+        10 * 60,
+        data.invoiceNumber.toLowerCase(),
+      ),
+    ]);
+    if (!globalAllowed || !invoiceAllowed) return { found: false, reason: "rate_limited" };
 
-    // Stripe invoice "number" (e.g. OCAR-0001) is searchable via the search API.
-    // Fall back to retrieve by id if user pasted an in_... id.
-    let invoice: import("stripe").Stripe.Invoice | null = null;
+    const { verifyInvoiceIdentity, ensurePaymentExperienceToken, customerFromInvoice } =
+      await import("./invoice-security.server");
+    const verified = await verifyInvoiceIdentity(data.invoiceNumber, data.emailOrPhone);
+    if (!verified.ok) return { found: false, reason: "not_found" };
 
-    if (data.invoiceNumber.startsWith("in_")) {
-      try {
-        invoice = await stripe.invoices.retrieve(data.invoiceNumber, {
-          expand: ["customer"],
-        });
-      } catch {
-        invoice = null;
-      }
-    } else {
-      const escaped = data.invoiceNumber.replace(/"/g, '\\"');
-      const res = await stripe.invoices.search({
-        query: `number:"${escaped}"`,
-        limit: 1,
-        expand: ["data.customer"],
-      });
-      invoice = res.data[0] ?? null;
-    }
-
-    if (!invoice) return { found: false, reason: "not_found" };
-
-    // Validate identity: customer email or phone must match
-    const customer =
-      typeof invoice.customer === "object" && invoice.customer && !("deleted" in invoice.customer)
-        ? (invoice.customer as import("stripe").Stripe.Customer)
-        : null;
-
-    const candidateEmail = (customer?.email || invoice.customer_email || "").toLowerCase();
-    const candidatePhone = customer?.phone || "";
-
-    const input = normalize(data.emailOrPhone);
-    const looksLikeEmail = data.emailOrPhone.includes("@");
-
-    let identityOk = false;
-    if (looksLikeEmail) {
-      identityOk = candidateEmail !== "" && normalize(candidateEmail) === input;
-    } else {
-      const inputDigits = lastDigits(data.emailOrPhone, 7);
-      identityOk = inputDigits.length >= 7 && lastDigits(candidatePhone, 7) === inputDigits;
-    }
-
-    if (!identityOk) return { found: false, reason: "mismatch" };
-
+    const invoice = verified.invoice;
+    const customer = customerFromInvoice(invoice);
     const payable = invoice.status === "open" && !!invoice.hosted_invoice_url;
+    // Prepare an opaque return token for both open and paid invoices. It contains no PII, and
+    // the post-payment endpoint re-checks Stripe before allowing any rating/reward action.
+    const experienceToken =
+      invoice.status === "open" || invoice.status === "paid"
+        ? await ensurePaymentExperienceToken(invoice.id)
+        : null;
+    const paymentClientSecret =
+      invoice.status === "open"
+        ? (((invoice as any).confirmation_secret?.client_secret as string | undefined) ?? null)
+        : null;
+    // Publishable keys are designed for browser use; the secret key remains server-only.
+    const { stripeModesMatch } = await import("./stripe.server");
+    const configuredPublishableKey =
+      (process.env.STRIPE_PUBLISHABLE_KEY || process.env.VITE_STRIPE_PUBLISHABLE_KEY || "").trim() || null;
+    const stripePublishableKey = stripeModesMatch() ? configuredPublishableKey : null;
+    const paymentElementReady = Boolean(
+      payable && paymentClientSecret && stripePublishableKey && experienceToken,
+    );
+
+    // Keep the local index synchronized even for invoices created directly in Stripe Dashboard.
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    await supabaseAdmin.from("stripe_invoices").upsert(
+      {
+        stripe_invoice_id: invoice.id,
+        stripe_customer_id:
+          typeof invoice.customer === "string" ? invoice.customer : customer?.id ?? null,
+        invoice_number: invoice.number ?? null,
+        customer_name: customer?.name ?? null,
+        customer_email: customer?.email ?? invoice.customer_email ?? null,
+        customer_phone: customer?.phone ?? null,
+        description: invoice.description ?? null,
+        amount_cents: invoice.amount_due ?? 0,
+        currency: invoice.currency ?? "cad",
+        status: invoice.status ?? "unknown",
+        hosted_invoice_url: invoice.hosted_invoice_url ?? null,
+        invoice_pdf: invoice.invoice_pdf ?? null,
+      },
+      { onConflict: "stripe_invoice_id" },
+    );
+
+    const { appendBusinessEvent } = await import("./business-events.server");
+    await appendBusinessEvent({
+      entityType: "invoice",
+      entityId: invoice.id,
+      eventType: "invoice.lookup_verified",
+      actorType: "customer",
+      payload: { invoiceNumber: invoice.number ?? invoice.id, status: invoice.status ?? "unknown" },
+    });
 
     return {
       found: true,
@@ -93,5 +108,9 @@ export const findInvoice = createServerFn({ method: "POST" })
       payable,
       customerName: customer?.name ?? null,
       description: invoice.description ?? null,
+      experienceToken,
+      paymentClientSecret,
+      stripePublishableKey,
+      paymentElementReady,
     };
   });

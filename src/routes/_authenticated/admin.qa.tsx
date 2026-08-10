@@ -2,11 +2,12 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
 import { checkIsAdmin } from "@/lib/admin-invoices.functions";
-import { getSystemStatus, type SystemStatus } from "@/lib/admin-status.functions";
+import { getSystemStatus, runAdminReconciliation, type SystemStatus } from "@/lib/admin-status.functions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { CheckCircle2, XCircle, FileText, Sparkles } from "lucide-react";
+import { CheckCircle2, XCircle, FileText, Activity, RefreshCw } from "lucide-react";
+import { AW_LABELS } from "@/lib/gtag";
 
 export const Route = createFileRoute("/_authenticated/admin/qa")({
   component: AdminQaPage,
@@ -59,11 +60,14 @@ function StatusRow({ label, ok, note }: { label: string; ok: boolean; note?: str
 function AdminQaPage() {
   const checkFn = useServerFn(checkIsAdmin);
   const statusFn = useServerFn(getSystemStatus);
+  const reconcileFn = useServerFn(runAdminReconciliation);
 
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [status, setStatus] = useState<SystemStatus | null>(null);
   const [done, setDone] = useState<Record<string, boolean>>({});
   const [tags, setTags] = useState({ ads: false, ga4: false });
+  const [reconcileBusy, setReconcileBusy] = useState(false);
+  const [reconcileReport, setReconcileReport] = useState<any>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -111,6 +115,16 @@ function AdminQaPage() {
     });
   }
 
+  async function runReconcile() {
+    setReconcileBusy(true);
+    try {
+      setReconcileReport(await reconcileFn());
+      setStatus(await statusFn());
+    } finally {
+      setReconcileBusy(false);
+    }
+  }
+
   if (isAdmin === null) {
     return <div className="container py-20 text-center text-muted-foreground">Vérification de l'accès…</div>;
   }
@@ -141,7 +155,7 @@ function AdminQaPage() {
           </Button>
           <Button asChild variant="outline" size="sm">
             <Link to="/admin/experience">
-              <Sparkles className="mr-2 h-4 w-4" /> Expérience
+              <Activity className="mr-2 h-4 w-4" /> Expérience
             </Link>
           </Button>
         </div>
@@ -174,6 +188,21 @@ function AdminQaPage() {
         </CardContent>
       </Card>
 
+      <Card className="mb-6">
+        <CardHeader className="flex-row items-center justify-between gap-3">
+          <div><CardTitle>Contrôle backend</CardTitle><p className="mt-1 text-sm text-muted-foreground">Réconcilie Stripe, crédits expirés/réservés et suivis post-paiement sans créer de nouvelle opération financière.</p></div>
+          <Button type="button" variant="outline" onClick={runReconcile} disabled={reconcileBusy}><RefreshCw className={`mr-2 h-4 w-4 ${reconcileBusy ? "animate-spin" : ""}`} />{reconcileBusy ? "Contrôle…" : "Lancer le contrôle"}</Button>
+        </CardHeader>
+        {reconcileReport && <CardContent className="grid gap-2 text-sm sm:grid-cols-2 lg:grid-cols-5">
+          <div className="rounded-md border p-3"><strong>{reconcileReport.checkedInvoices}</strong><br />factures vérifiées</div>
+          <div className="rounded-md border p-3"><strong>{reconcileReport.repairedInvoices}</strong><br />statuts réparés</div>
+          <div className="rounded-md border p-3"><strong>{reconcileReport.expiredCredits}</strong><br />crédits expirés</div>
+          <div className="rounded-md border p-3"><strong>{reconcileReport.flaggedCreditReservations}</strong><br />crédits à contrôler</div>
+          <div className="rounded-md border p-3"><strong>{reconcileReport.deliveredFollowups}</strong><br />suivis relivrés</div>
+          {reconcileReport.warnings?.length > 0 && <div className="sm:col-span-2 lg:col-span-5 rounded-md border border-amber-300 bg-amber-50 p-3 text-amber-900"><strong>Avertissements :</strong><ul className="mt-1 list-disc pl-5">{reconcileReport.warnings.map((w: string) => <li key={w}>{w}</li>)}</ul></div>}
+        </CardContent>}
+      </Card>
+
       <Card>
         <CardHeader>
           <CardTitle>État système</CardTitle>
@@ -184,8 +213,17 @@ function AdminQaPage() {
           </p>
           <StatusRow label="Google Ads tag" ok={tags.ads} note={GOOGLE_ADS_ID} />
           <StatusRow label="GA4 tag" ok={tags.ga4} note={GA4_ID} />
+          <StatusRow label="Google Ads conversion labels" ok={Object.values(AW_LABELS).some(Boolean)} note="Les events GA4 fonctionnent sans labels; les conversions Google Ads dédiées exigent leurs labels AW-.../XXXX." />
           <StatusRow label="Stripe backend" ok={!!status?.stripeSecret} note="Clé secrète Stripe (server-only)" />
+          <StatusRow label="Stripe API joignable" ok={!!status?.stripeApiReachable} note="Lecture seule de l’état du compte Stripe." />
+          <StatusRow label="Compte Stripe attendu" ok={!!status?.stripeAccountMatches} note="STRIPE_ACCOUNT_ID doit correspondre au compte de la clé active." />
+          <StatusRow label="Clé publique Stripe" ok={!!status?.stripePublishableKey} note="Requise pour le Payment Element intégré." />
+          <StatusRow label="Modes des clés Stripe cohérents" ok={!!status?.stripeKeyModesMatch} note="La clé secrète et la clé publique doivent être toutes les deux test ou toutes les deux live." />
           <StatusRow label="Webhook Stripe" ok={!!status?.stripeWebhookSecret} note="Signing secret du webhook" />
+          <StatusRow label="Migration pré-production" ok={!!status?.hardeningMigrationApplied} note="Mémoire, idempotence, tokens et ledger webhook disponibles." />
+          <StatusRow label="Crédits magasin transactionnels" ok={!!status?.creditRedemptionMigrationApplied} note="Réservation atomique et protection contre le double usage." />
+          <StatusRow label="Réconciliation remboursements" ok={!!status?.refundReconciliationMigrationApplied} note="Colonnes de remboursement + webhook charge.refunded disponibles." />
+          <StatusRow label="Watchdog automatique" ok={!!status?.automationCronSecret} note="AUTOMATION_CRON_SECRET — à appeler périodiquement via /api/internal/automation-reconcile." />
           <StatusRow label="Interac" ok={!!status?.interacEmail} note="Courriel de virement Interac" />
           <StatusRow
             label="Question de sécurité Interac"
@@ -193,16 +231,16 @@ function AdminQaPage() {
             note="Optionnel si autodépôt activé"
           />
           <StatusRow label="Allow-list admin" ok={!!status?.adminEmails} note="ADMIN_EMAILS" />
-          <StatusRow
-            label="Google Review URL"
-            ok={Boolean((import.meta as any).env?.VITE_GOOGLE_REVIEW_URL)}
-            note="Lien officiel d'avis Google"
-          />
-          <StatusRow
-            label="Facebook URL"
-            ok={Boolean((import.meta as any).env?.VITE_FACEBOOK_PAGE_URL)}
-            note="Page Facebook Ocarina Spa"
-          />
+          <StatusRow label="Mode Stripe live" ok={!!status?.stripeLiveMode} note="Doit rester test jusqu’à validation finale, puis passer live." />
+          <StatusRow label="No TPS" ok={!!status?.gstRegistration} note="Requis pour les factures taxables en production." />
+          <StatusRow label="No TVQ" ok={!!status?.qstRegistration} note="Requis pour les factures taxables en production." />
+          <StatusRow label="Stripe Tax Rate TPS" ok={!!status?.stripeGstTaxRate} note="STRIPE_TAX_RATE_GST_ID" />
+          <StatusRow label="Stripe Tax Rate TVQ" ok={!!status?.stripeQstTaxRate} note="STRIPE_TAX_RATE_QST_ID" />
+          <StatusRow label="Taux Stripe validés" ok={!!status?.stripeTaxRatesValid} note="TPS 5 % et TVQ 9,975 %, actifs dans Stripe." />
+          <StatusRow label="Assistant backend" ok={!!status?.lovableAi} note="LOVABLE_API_KEY" />
+          <StatusRow label="URL publique du site" ok={!!status?.publicSiteUrl} note="PUBLIC_SITE_URL pour les liens automatiques post-paiement." />
+          <StatusRow label="Google Review URL" ok={!!status?.googleReviewUrl} note="Lien officiel d'avis Google" />
+          <StatusRow label="Facebook URL" ok={!!status?.facebookPageUrl} note="Page Facebook Ocarina Spa" />
         </CardContent>
       </Card>
     </div>

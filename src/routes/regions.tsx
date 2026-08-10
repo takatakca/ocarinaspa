@@ -1,55 +1,72 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Layout } from "@/components/Layout";
-import { quebecMunicipalities, quebecRegions } from "@/data/quebecMunicipalities";
+import { quebecMunicipalities, SEO_INDEXED_CITY_SLUGS } from "@/data/quebecMunicipalities";
 import { MapPin } from "lucide-react";
+
+const priorityCities = SEO_INDEXED_CITY_SLUGS
+  .map((slug) => quebecMunicipalities.find((m) => m.slug === slug))
+  .filter(Boolean) as typeof quebecMunicipalities;
+
+const grouped = Array.from(
+  priorityCities.reduce((map, city) => {
+    const list = map.get(city.region) ?? [];
+    list.push(city);
+    map.set(city.region, list);
+    return map;
+  }, new Map<string, typeof quebecMunicipalities>()),
+).sort(([a], [b]) => a.localeCompare(b, "fr"));
 
 export const Route = createFileRoute("/regions")({
   head: () => ({
     meta: [
-      { title: "Régions desservies au Québec — Ocarina Spa" },
-      { name: "description", content: "Service de spa et piscine dans toutes les régions administratives du Québec : Montréal, Laval, Montérégie, Laurentides, Lanaudière, Mauricie, Estrie, Capitale-Nationale et plus." },
-      { property: "og:title", content: "Régions desservies au Québec — Ocarina Spa" },
-      { property: "og:description", content: "17 régions administratives du Québec couvertes par notre service mobile." },
+      { title: "Secteurs de service au Québec — Ocarina Spa" },
+      {
+        name: "description",
+        content:
+          "Principaux secteurs régionaux desservis par Ocarina Spa. La disponibilité est confirmée avant chaque intervention.",
+      },
+      { property: "og:title", content: "Secteurs de service — Ocarina Spa" },
+      {
+        property: "og:description",
+        content: "Consultez les principaux secteurs où le service mobile Ocarina Spa est offert.",
+      },
     ],
   }),
-  component: () => {
-    const grouped = quebecRegions.map((r) => ({
-      region: r,
-      cities: quebecMunicipalities.filter((m) => m.region === r),
-    }));
-    return (
-      <Layout>
-        <section className="bg-surface py-14">
-          <div className="container mx-auto px-4">
-            <h1 className="font-display text-4xl md:text-5xl font-bold text-foreground">Régions desservies au Québec</h1>
-            <p className="mt-4 text-muted-foreground max-w-2xl">
-              Notre service mobile couvre les 17 régions administratives du Québec, soit {quebecMunicipalities.length} municipalités et arrondissements.
-            </p>
+  component: () => (
+    <Layout>
+      <section className="bg-surface py-14">
+        <div className="container mx-auto px-4 max-w-4xl">
+          <p className="text-brand font-semibold uppercase text-sm tracking-wide">Couverture</p>
+          <h1 className="mt-3 font-display text-4xl md:text-5xl font-bold text-foreground">
+            Secteurs de service au Québec
+          </h1>
+          <p className="mt-4 text-muted-foreground max-w-2xl">
+            Nous concentrons le service mobile sur les secteurs ci-dessous. Pour une autre
+            municipalité, communiquez avec nous : le déplacement est confirmé selon la distance,
+            le type de réparation et la disponibilité.
+          </p>
+        </div>
+      </section>
+      <section className="container mx-auto px-4 py-12 grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl">
+        {grouped.map(([region, cities]) => (
+          <div key={region} className="bg-card border border-border rounded-xl p-5">
+            <h2 className="font-display text-xl font-bold text-brand">{region}</h2>
+            <ul className="mt-4 space-y-2 text-sm">
+              {cities.map((city) => (
+                <li key={city.slug}>
+                  <Link
+                    to="/reparation-spa/$ville"
+                    params={{ ville: city.slug }}
+                    className="text-foreground hover:text-brand inline-flex items-center gap-1.5"
+                  >
+                    <MapPin className="w-3.5 h-3.5 text-brand/70" /> {city.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </div>
-        </section>
-        <section className="container mx-auto px-4 py-12 grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {grouped.map((g) => (
-            <div key={g.region} className="bg-card border border-border rounded-xl p-5">
-              <h2 className="font-display text-xl font-bold text-brand">{g.region}</h2>
-              <p className="text-sm text-muted-foreground mt-1">{g.cities.length} municipalités</p>
-              <ul className="mt-3 space-y-1 text-sm">
-                {g.cities.slice(0, 8).map((c) => (
-                  <li key={c.slug}>
-                    <Link to="/reparation-spa/$ville" params={{ ville: c.slug }} className="text-foreground hover:text-brand inline-flex items-center gap-1.5">
-                      <MapPin className="w-3 h-3 text-brand/60" /> {c.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-              {g.cities.length > 8 && (
-                <Link to="/villes" className="inline-block mt-3 text-sm text-brand hover:underline">
-                  + {g.cities.length - 8} autres villes →
-                </Link>
-              )}
-            </div>
-          ))}
-        </section>
-      </Layout>
-    );
-  },
+        ))}
+      </section>
+    </Layout>
+  ),
 });

@@ -19,7 +19,7 @@ export const Route = createFileRoute("/urgence-spa")({
       {
         property: "og:description",
         content:
-          "Intervention rapide pour spa arrêté l'hiver, gel de plomberie, fuite ou panne électrique. Service partout au Québec.",
+          "Intervention rapide pour spa arrêté l'hiver, gel de plomberie, fuite ou panne électrique. Service dans nos zones desservies au Québec.",
       },
       { property: "og:url", content: SITE.domain + "/urgence-spa" },
     ],

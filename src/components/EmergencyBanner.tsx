@@ -11,7 +11,7 @@ export function EmergencyBanner() {
           <Siren className="w-4 h-4" /> Urgence Spa 24/7
         </span>
         <p className="text-sm md:text-base text-white/90">
-          Spa arrêté en hiver ? Risque de gel de la plomberie — intervention rapide partout au Québec.
+          Spa arrêté en hiver ? Risque de gel de la plomberie — intervention rapide dans nos zones desservies au Québec.
         </p>
         <a
           href={`tel:${SITE.phoneTel}`}

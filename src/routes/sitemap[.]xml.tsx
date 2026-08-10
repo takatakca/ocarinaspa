@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { quebecMunicipalities, SERVICE_TYPES } from "@/data/quebecMunicipalities";
+import { quebecMunicipalities, SERVICE_TYPES, isSeoIndexedServicePage } from "@/data/quebecMunicipalities";
+import { SITE } from "@/lib/seo";
 
-const BASE = "https://ocarinaspa.lovable.app";
+const BASE = SITE.domain;
 
 export const Route = createFileRoute("/sitemap.xml")({
   server: {
@@ -10,6 +11,7 @@ export const Route = createFileRoute("/sitemap.xml")({
         const urls: string[] = [
           `${BASE}/`,
           `${BASE}/en`,
+          `${BASE}/es`,
           `${BASE}/services`,
           `${BASE}/piscine`,
           `${BASE}/vente-spas`,
@@ -22,10 +24,11 @@ export const Route = createFileRoute("/sitemap.xml")({
           `${BASE}/villes`,
           `${BASE}/contact`,
           `${BASE}/succursales`,
+          `${BASE}/confidentialite`,
         ];
         for (const s of SERVICE_TYPES) {
           for (const m of quebecMunicipalities) {
-            urls.push(`${BASE}/${s.slug}/${m.slug}`);
+            if (isSeoIndexedServicePage(s.slug, m.slug)) urls.push(`${BASE}/${s.slug}/${m.slug}`);
           }
         }
         const xml =

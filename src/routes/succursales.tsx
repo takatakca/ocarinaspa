@@ -12,12 +12,12 @@ export const Route = createFileRoute("/succursales")({
       {
         name: "description",
         content:
-          "Réparation de spa, vente de spas, pièces et service partout au Québec. Contactez Ocarina Spa au 819-913-7727.",
+          "Réparation de spa, vente de spas, pièces et service dans les zones desservies au Québec. Contactez Ocarina Spa au 819-913-7727.",
       },
       { property: "og:title", content: "Ocarina Spa Québec — Nous trouver" },
       {
         property: "og:description",
-        content: "Succursale de Bécancour. Réparation, vente et entretien de spas partout au Québec.",
+        content: "Succursale de Bécancour. Réparation, vente et entretien de spas dans les zones desservies au Québec.",
       },
       { property: "og:url", content: PAGE_URL },
     ],
@@ -49,7 +49,7 @@ function SuccursalesPage() {
             Nous trouver
           </h1>
           <p className="mt-4 text-muted-foreground max-w-2xl">
-            Notre succursale est située à Bécancour. Nous desservons toutes les régions du Québec
+            Notre succursale est située à Bécancour. Nous desservons plusieurs régions du Québec
             pour la réparation, l'entretien et la vente de spas.
           </p>
         </div>
