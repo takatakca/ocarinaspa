@@ -1,59 +1,68 @@
-# OcarinaSpa.ca — Google Tag / Maps Verification Report
+# OcarinaSpa.ca — Current verification report
 
-## Fixed
+## Google measurement
 
-- Google Ads ID remains: `AW-18182973757`.
-- GA4 Measurement ID remains: `G-8YYZKVZBW0`.
-- `src/routes/__root.tsx` now loads **one** Google tag loader and configures **both** Google Ads and GA4 in the same `gtag` instance.
-- Google Tag script has a stable ID: `ocarina-google-tag`.
-- Google Maps API key is **not hardcoded** in the source. The Store Locator uses `VITE_GOOGLE_MAPS_API_KEY` from environment variables, with a safe no-key fallback embed.
-- `.env` and `.env.*` are now ignored in `.gitignore`; only `.env.example` should be committed.
-- Tracking documentation updated in `GOOGLE_ADS_TRACKING.md`.
+- Google Ads global ID: `AW-18182973757`.
+- GA4 Measurement ID: `G-8YYZKVZBW0`.
+- There is one `gtag.js` loader in `src/lib/gtag.ts`.
+- The root route does **not** load Google tracking before the visitor's privacy choice.
+- `PrivacyConsentBanner` is mounted globally and analytics/marketing consent can be changed later.
+- Dedicated Google Ads conversions require their real `AW-.../label` values; fake placeholder labels are not accepted.
 
-## Static verification performed
+## Stripe / invoices
 
-Commands/checks used:
+- Stripe secret operations are server-side.
+- Live writes are guarded by `STRIPE_ACCOUNT_ID`.
+- Invoice creation uses a durable request UUID + Stripe idempotency keys.
+- Public invoice lookup requires invoice number + matching email/phone and uses generic failure responses.
+- Payment confirmation uses an opaque token and verifies the canonical Stripe invoice state server-side.
+- Stripe webhook processing has a durable event ledger, canonical object rereads, post-payment follow-up tasks, and refund reconciliation.
+- Interac is not treated as paid until an admin confirms receipt; Stripe is then marked paid out-of-band.
 
-```bash
-grep -R "googletagmanager.com/gtag/js" -n src
-grep -R "gtag('config'" -n src GOOGLE_ADS_TRACKING.md
-grep -R "AW-18182973757\|G-8YYZKVZBW0" -n src
-grep -R "GOOGLE_MAPS_KEY_PATTERN|mapsApiKey" -n . --exclude-dir=node_modules
-```
+## Operational memory / automation
 
-Results:
+- `business_events`: immutable operational history.
+- `automation_tasks`: checkpoints, recovery work, delivery work, and admin-approved invoice automation.
+- `/admin/historique`: search invoices, service requests, diagnostics, tasks and related events.
+- `/admin/automation`: backend AI drafting with explicit approval before financial writes.
+- `/api/internal/automation-reconcile`: authenticated deterministic reconciliation endpoint for a scheduler/cron.
 
-- Exactly one `gtag.js` loader found in `src/routes/__root.tsx`.
-- Both Google destinations are configured:
-  - `AW-18182973757`
-  - `G-8YYZKVZBW0`
-- No hardcoded Google Maps browser key was present in the source after verification.
+## Static verification performed in this audit
 
-## Build note
+- `node scripts/prelive-check.mjs`: PASS, with one expected warning that a fresh `package-lock.json` must be generated in the real npm registry.
+- TypeScript/TSX syntax transpile: 139 files, 0 syntax errors.
+- Local/external import scan: 138 source files, 0 missing local imports, 0 undeclared package roots.
+- No Stripe secret/webhook/service-role secret values found in `src/` or `public/`.
+- No hardcoded Google Maps API key found in `src/` or `public/`.
+- No Lovable preview domain found in public production URLs.
+- No broad “all Quebec / every region” coverage claims remain in public source text.
 
-I attempted to run the local build, but dependencies were not installed in the uploaded ZIP. `npm ci` could not run because `package-lock.json` is not synchronized with `package.json`. `npm install`/lock regeneration was blocked in this environment by package registry download issues. On your deployment machine, run:
+## Build limitation in this audit environment
+
+A real dependency install/build could not be completed because the sandbox npm registry returned HTTP 404 for a declared package (`@eslint/js`). This is an environment/registry limitation, not evidence that the production build passes.
+
+Before live, use the real Lovable/production registry:
 
 ```bash
 npm install
-npm run build
+npm run prelive:check
+npm run build:node
+npm test
 ```
 
-If your deployment uses `npm ci`, regenerate and commit a fresh `package-lock.json` first:
+Then commit the regenerated `package-lock.json` and use `npm ci` for repeatable deployment builds.
 
-```bash
-rm package-lock.json
-npm install
-npm run build
-```
+## Runtime checks still mandatory
 
-## Live verification to do after deploy
+Use `/admin/qa` in the exact live-candidate environment and validate:
 
-- Open Google Tag Assistant.
-- Test `https://ocarinaspa.ca`.
-- Confirm `AW-18182973757` loads.
-- Confirm `G-8YYZKVZBW0` is receiving events in GA4 Realtime.
-- Test these actions:
-  - phone click = `phone_call`
-  - service form success = `form_submit`
-  - quick submission click = `quick_submission`
-  - diagnostic result = `diagnostic_complete`
+- expected Stripe account matches active key,
+- secret/public keys are both live,
+- live webhook signature works,
+- required Supabase migrations are applied,
+- TPS/TVQ registration and Stripe Tax Rates are correct if taxable invoices are enabled,
+- Interac recipient values are correct,
+- official Google Review and Facebook destinations are configured,
+- automation cron secret/scheduler is active,
+- transactional email follow-up is actually delivered,
+- one Stripe refund is reconciled correctly.

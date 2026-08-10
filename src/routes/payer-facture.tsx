@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { InvoiceStripePayment } from "@/components/InvoiceStripePayment";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -98,11 +99,6 @@ function PayerFacturePage() {
     } finally {
       setLoading(false);
     }
-  }
-
-  function handleCardPay(url: string) {
-    trackInvoicePayClick();
-    window.location.href = url;
   }
 
   async function handleInteracConfirm() {
@@ -241,9 +237,9 @@ function PayerFacturePage() {
                 <div>
                   <p className="font-semibold">Facture introuvable</p>
                   <p className="mt-1">
-                    {result.reason === "mismatch"
-                      ? "Le numéro de facture existe mais l'email ou téléphone fourni ne correspond pas."
-                      : "Aucune facture ne correspond. Vérifiez auprès d'Ocarina Spa."}
+                    {result.reason === "rate_limited"
+                      ? "Trop de tentatives. Attendez quelques minutes ou appelez Ocarina Spa."
+                      : "Facture ou coordonnées introuvables. Vérifiez vos informations ou appelez Ocarina Spa."}
                   </p>
                 </div>
               </div>
@@ -292,7 +288,7 @@ function PayerFacturePage() {
                         </p>
                         <Link
                           to="/paiement-confirme"
-                          search={{ n: result.invoiceNumber, c: emailOrPhone }}
+                          search={{ t: result.experienceToken ?? undefined }}
                           className="inline-block mt-3 underline font-medium"
                         >
                           Évaluer mon expérience →
@@ -328,19 +324,35 @@ function PayerFacturePage() {
                   </div>
                 )}
 
-                {/* Card box */}
-                {showCardBox && result.hostedInvoiceUrl && (
+                {/* Card payment — Stripe Payment Element first, Hosted Invoice Page as fallback. */}
+                {showCardBox &&
+                  result.paymentElementReady &&
+                  result.paymentClientSecret &&
+                  result.stripePublishableKey &&
+                  result.experienceToken && (
+                    <InvoiceStripePayment
+                      publishableKey={result.stripePublishableKey}
+                      clientSecret={result.paymentClientSecret}
+                      experienceToken={result.experienceToken}
+                      fallbackUrl={result.hostedInvoiceUrl}
+                      onBack={() => setMethod(null)}
+                    />
+                  )}
+
+                {showCardBox && !result.paymentElementReady && result.hostedInvoiceUrl && (
                   <div className="mt-5 rounded-md border border-border bg-background p-4">
                     <div className="flex items-center gap-2 mb-3">
                       <CreditCard className="w-5 h-5 text-brand" />
                       <p className="font-semibold">Paiement par carte (Stripe)</p>
                     </div>
                     <p className="text-sm text-muted-foreground mb-4">
-                      Vous serez redirigé vers la page de paiement sécurisée Stripe.
+                      Le paiement intégré n'est pas encore configuré sur cet environnement. La page Stripe sécurisée reste disponible.
                     </p>
                     <div className="flex gap-2 flex-wrap">
-                      <Button onClick={() => handleCardPay(result.hostedInvoiceUrl!)} size="lg">
-                        Payer maintenant <ExternalLink className="w-4 h-4" />
+                      <Button asChild size="lg">
+                        <a href={result.hostedInvoiceUrl} onClick={trackInvoicePayClick}>
+                          Payer sur Stripe <ExternalLink className="w-4 h-4" />
+                        </a>
                       </Button>
                       <Button variant="outline" size="lg" onClick={() => setMethod(null)}>
                         Changer de méthode

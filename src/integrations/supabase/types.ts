@@ -14,6 +14,96 @@ export type Database = {
   }
   public: {
     Tables: {
+      automation_tasks: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          completed_at: string | null
+          created_at: string
+          error_message: string | null
+          id: string
+          idempotency_key: string | null
+          input: Json
+          instruction: string | null
+          output: Json | null
+          requested_by: string | null
+          started_at: string | null
+          status: string
+          task_type: string
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          idempotency_key?: string | null
+          input?: Json
+          instruction?: string | null
+          output?: Json | null
+          requested_by?: string | null
+          started_at?: string | null
+          status?: string
+          task_type: string
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          idempotency_key?: string | null
+          input?: Json
+          instruction?: string | null
+          output?: Json | null
+          requested_by?: string | null
+          started_at?: string | null
+          status?: string
+          task_type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      business_events: {
+        Row: {
+          actor_id: string | null
+          actor_type: string
+          correlation_id: string | null
+          created_at: string
+          entity_id: string
+          entity_type: string
+          event_type: string
+          id: string
+          payload: Json
+        }
+        Insert: {
+          actor_id?: string | null
+          actor_type?: string
+          correlation_id?: string | null
+          created_at?: string
+          entity_id: string
+          entity_type: string
+          event_type: string
+          id?: string
+          payload?: Json
+        }
+        Update: {
+          actor_id?: string | null
+          actor_type?: string
+          correlation_id?: string | null
+          created_at?: string
+          entity_id?: string
+          entity_type?: string
+          event_type?: string
+          id?: string
+          payload?: Json
+        }
+        Relationships: []
+      }
       contact_messages: {
         Row: {
           created_at: string
@@ -58,11 +148,14 @@ export type Database = {
           expires_at: string
           id: string
           invoice_number: string | null
+          reserved_at: string | null
+          reserved_request_id: string | null
           status: string
           stripe_invoice_id: string | null
           survey_id: string | null
           updated_at: string
           used_at: string | null
+          used_request_id: string | null
         }
         Insert: {
           created_at?: string
@@ -77,11 +170,14 @@ export type Database = {
           expires_at?: string
           id?: string
           invoice_number?: string | null
+          reserved_at?: string | null
+          reserved_request_id?: string | null
           status?: string
           stripe_invoice_id?: string | null
           survey_id?: string | null
           updated_at?: string
           used_at?: string | null
+          used_request_id?: string | null
         }
         Update: {
           created_at?: string
@@ -96,11 +192,14 @@ export type Database = {
           expires_at?: string
           id?: string
           invoice_number?: string | null
+          reserved_at?: string | null
+          reserved_request_id?: string | null
           status?: string
           stripe_invoice_id?: string | null
           survey_id?: string | null
           updated_at?: string
           used_at?: string | null
+          used_request_id?: string | null
         }
         Relationships: [
           {
@@ -259,6 +358,54 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_experience_tokens: {
+        Row: {
+          created_at: string
+          expires_at: string
+          id: string
+          last_used_at: string | null
+          stripe_invoice_id: string
+          token: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          last_used_at?: string | null
+          stripe_invoice_id: string
+          token: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          last_used_at?: string | null
+          stripe_invoice_id?: string
+          token?: string
+        }
+        Relationships: []
+      }
+      rate_limit_buckets: {
+        Row: {
+          bucket_key: string
+          count: number
+          updated_at: string
+          window_started_at: string
+        }
+        Insert: {
+          bucket_key: string
+          count?: number
+          updated_at?: string
+          window_started_at?: string
+        }
+        Update: {
+          bucket_key?: string
+          count?: number
+          updated_at?: string
+          window_started_at?: string
+        }
+        Relationships: []
+      }
       service_questions: {
         Row: {
           answered_at: string | null
@@ -378,6 +525,9 @@ export type Database = {
           needs_followup: boolean
           paid_at: string | null
           payment_method: string | null
+          refund_status: string | null
+          refunded_at: string | null
+          refunded_cents: number
           status: string
           stripe_customer_id: string | null
           stripe_invoice_id: string
@@ -402,6 +552,9 @@ export type Database = {
           needs_followup?: boolean
           paid_at?: string | null
           payment_method?: string | null
+          refund_status?: string | null
+          refunded_at?: string | null
+          refunded_cents?: number
           status?: string
           stripe_customer_id?: string | null
           stripe_invoice_id: string
@@ -426,10 +579,43 @@ export type Database = {
           needs_followup?: boolean
           paid_at?: string | null
           payment_method?: string | null
+          refund_status?: string | null
+          refunded_at?: string | null
+          refunded_cents?: number
           status?: string
           stripe_customer_id?: string | null
           stripe_invoice_id?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      stripe_webhook_events: {
+        Row: {
+          error_message: string | null
+          event_id: string
+          event_type: string
+          processed_at: string | null
+          received_at: string
+          status: string
+          stripe_object_id: string | null
+        }
+        Insert: {
+          error_message?: string | null
+          event_id: string
+          event_type: string
+          processed_at?: string | null
+          received_at?: string
+          status?: string
+          stripe_object_id?: string | null
+        }
+        Update: {
+          error_message?: string | null
+          event_id?: string
+          event_type?: string
+          processed_at?: string | null
+          received_at?: string
+          status?: string
+          stripe_object_id?: string | null
         }
         Relationships: []
       }
@@ -459,11 +645,41 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      claim_customer_credit: {
+        Args: {
+          p_credit_code: string
+          p_customer_email: string
+          p_request_id: string
+        }
+        Returns: {
+          credit_code: string
+          credit_value_cents: number
+          currency: string
+          expires_at: string
+          id: string
+        }[]
+      }
+      consume_customer_credit: {
+        Args: { p_credit_id: string; p_request_id: string }
+        Returns: boolean
+      }
+      consume_rate_limit: {
+        Args: {
+          p_bucket_key: string
+          p_limit: number
+          p_window_seconds: number
+        }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      release_customer_credit: {
+        Args: { p_credit_id: string; p_request_id: string }
         Returns: boolean
       }
     }

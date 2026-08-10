@@ -35,6 +35,11 @@ export const Route = createFileRoute("/api/public/service-request")({
           );
         }
         const data = parsed.data;
+        const { consumePublicRateLimit } = await import("@/lib/public-security.server");
+        const allowed = await consumePublicRateLimit("service_request", 8, 15 * 60, data.email.toLowerCase());
+        if (!allowed) {
+          return Response.json({ error: "Trop de demandes. Réessayez plus tard." }, { status: 429 });
+        }
         const payload = {
           ...data,
           preferred_date: data.preferred_date || null,
@@ -49,12 +54,48 @@ export const Route = createFileRoute("/api/public/service-request")({
           return Response.json({ error: "DB error" }, { status: 500 });
         }
         const id = inserted?.id as string | undefined;
+        if (id) {
+          const { appendBusinessEvent } = await import("@/lib/business-events.server");
+          await appendBusinessEvent({
+            entityType: "service_request",
+            entityId: id,
+            eventType: "service_request.created",
+            actorType: "customer",
+            payload: { city: data.city, serviceType: data.service_type, spaBrand: data.spa_brand ?? null, urgency: data.urgency ?? null },
+          });
+        }
 
         // Best-effort email dispatch — succeeds silently if email infra not yet configured.
         try {
           await dispatchEmails({ id, ...data });
         } catch (e) {
           console.error("Email dispatch failed (non-blocking)", e);
+          if (id) {
+            const message = e instanceof Error ? e.message : String(e);
+            await supabaseAdmin.from("automation_tasks" as any).upsert({
+              task_type: "service_request_delivery",
+              idempotency_key: `service-request-delivery:${id}`,
+              status: "needs_delivery",
+              instruction: "Notifier l'équipe et confirmer la réception de la demande client.",
+              input: {
+                serviceRequestId: id,
+                customerName: data.full_name,
+                customerEmail: data.email,
+                customerPhone: data.phone,
+                city: data.city,
+                serviceType: data.service_type,
+              },
+              error_message: message.slice(0, 2000),
+            } as any, { onConflict: "idempotency_key", ignoreDuplicates: false });
+            const { appendBusinessEvent } = await import("@/lib/business-events.server");
+            await appendBusinessEvent({
+              entityType: "service_request",
+              entityId: id,
+              eventType: "service_request.notification_pending",
+              actorType: "system",
+              payload: { reason: message.slice(0, 300) },
+            });
+          }
         }
 
         return Response.json({ ok: true, id }, { status: 200 });

@@ -46,7 +46,7 @@ export function CityLinks() {
         <p className="mt-6 text-sm text-muted-foreground">
           Voir{" "}
           <Link to="/villes" className="text-brand underline">
-            toutes les villes desservies
+            les principales zones desservies
           </Link>
           .
         </p>

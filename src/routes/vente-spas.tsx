@@ -12,7 +12,7 @@ export const Route = createFileRoute("/vente-spas")({
       { title: "Vente de spas au Québec — Ocarina Spa" },
       { name: "description", content: "Vente de spas neufs et accessoires au Québec. Conseil personnalisé, livraison et installation. Appelez le 819-913-7727." },
       { property: "og:title", content: "Vente de spas — Ocarina Spa Québec" },
-      { property: "og:description", content: "Spas neufs, accessoires, livraison et installation partout au Québec." },
+      { property: "og:description", content: "Spas neufs, accessoires, livraison et installation dans les zones desservies au Québec." },
     ],
     scripts: [{ type: "application/ld+json", children: JSON.stringify(localBusinessSchema()) }],
   }),
@@ -35,7 +35,7 @@ export const Route = createFileRoute("/vente-spas")({
           <h2 className="font-display text-2xl font-bold pt-4">Pourquoi acheter chez Ocarina Spa ?</h2>
           <ul className="space-y-2 text-muted-foreground">
             <li>• Conseil par des techniciens experts (et non de simples vendeurs)</li>
-            <li>• Livraison et installation partout au Québec</li>
+            <li>• Livraison et installation dans les zones desservies au Québec</li>
             <li>• Service après-vente, entretien et pièces disponibles</li>
             <li>• Prix compétitifs et financement possible</li>
           </ul>

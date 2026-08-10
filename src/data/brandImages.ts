@@ -9,36 +9,29 @@ import hotspring from "@/assets/brand-hotspring.jpg";
 import caldera from "@/assets/brand-caldera.jpg";
 import master from "@/assets/brand-master-spas.jpg";
 
+// Only map a brand to its own asset. Never use another manufacturer's photo as a fallback.
 export const BRAND_IMAGES: Record<string, string> = {
-  "Jacuzzi": jacuzzi,
-  "Hydropool": hydropool,
+  Jacuzzi: jacuzzi,
+  Hydropool: hydropool,
   "Arctic Spas": arctic,
-  "Beachcomber": beachcomber,
+  Beachcomber: beachcomber,
   "Maax Spas": maax,
   "Sundance Spas": sundance,
   "Bullfrog Spas": bullfrog,
   "Hot Spring": hotspring,
   "Caldera Spas": caldera,
   "Master Spas": master,
-  "Vita Spa": beachcomber,
-  "Coast Spas": maax,
-  "Wellis": sundance,
-  "Passion Spas": bullfrog,
 };
 
 export const FEATURED_BRANDS: { name: string; img: string; tag: string }[] = [
-  { name: "Jacuzzi", img: jacuzzi, tag: "Marque iconique" },
-  { name: "Hydropool", img: hydropool, tag: "Auto-nettoyant" },
-  { name: "Arctic Spas", img: arctic, tag: "Conçu pour l'hiver" },
-  { name: "Beachcomber", img: beachcomber, tag: "Fabriqué au Canada" },
-  { name: "Maax Spas", img: maax, tag: "Marque québécoise" },
-  { name: "Sundance Spas", img: sundance, tag: "Haut de gamme" },
-  { name: "Bullfrog Spas", img: bullfrog, tag: "Jets modulables" },
-  { name: "Hot Spring", img: hotspring, tag: "Confort premium" },
-  { name: "Caldera Spas", img: caldera, tag: "Design moderne" },
-  { name: "Master Spas", img: master, tag: "Spas de nage" },
-  { name: "Vita Spa", img: beachcomber, tag: "Confort accessible" },
-  { name: "Coast Spas", img: maax, tag: "Bord-infini" },
-  { name: "Wellis", img: sundance, tag: "Design européen" },
-  { name: "Passion Spas", img: bullfrog, tag: "Spas hollandais" },
+  { name: "Hydropool", img: hydropool, tag: "Fabriqué en Ontario" },
+  { name: "Arctic Spas", img: arctic, tag: "Fabrication canadienne" },
+  { name: "Beachcomber", img: beachcomber, tag: "Fabriqué en Colombie-Britannique" },
+  { name: "Jacuzzi", img: jacuzzi, tag: "Marque largement distribuée" },
+  { name: "Sundance Spas", img: sundance, tag: "Gamme nord-américaine" },
+  { name: "Hot Spring", img: hotspring, tag: "Gamme nord-américaine" },
+  { name: "Caldera Spas", img: caldera, tag: "Gamme nord-américaine" },
+  { name: "Bullfrog Spas", img: bullfrog, tag: "Système de jets modulaires" },
+  { name: "Master Spas", img: master, tag: "Spas et spas de nage" },
+  { name: "Maax Spas", img: maax, tag: "Marque courante en service" },
 ];

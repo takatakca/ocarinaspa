@@ -32,56 +32,108 @@ export const markInteracReceived = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: local, error: localErr } = await supabaseAdmin
+      .from("stripe_invoices")
+      .select("status,payment_method,interac_received_at")
+      .eq("stripe_invoice_id", data.invoiceId)
+      .maybeSingle();
+    if (localErr || !local) throw new Error("Facture locale introuvable.");
+
+    // Idempotent retry after the Interac payment has already been confirmed.
+    if ((local as any).status === "paid" && (local as any).payment_method === "interac" && (local as any).interac_received_at) {
+      return { ok: true, receivedAt: (local as any).interac_received_at as string, stripeStatus: "paid" };
+    }
+
+    // Selecting Interac is not the same as receiving it. Only a pending Interac invoice can be
+    // manually confirmed; this prevents accidentally relabelling an actual card payment.
+    if ((local as any).status !== "pending_interac" || (local as any).payment_method !== "interac") {
+      throw new Error("Cette facture n'est pas en attente d'un virement Interac.");
+    }
+
+    const { getStripe, assertStripeAccountMatches } = await import("./stripe.server");
+    const stripe = getStripe();
+    await assertStripeAccountMatches();
+    const invoice = await stripe.invoices.retrieve(data.invoiceId);
+    if (invoice.status === "paid") {
+      // Stripe already considers it paid before an admin Interac confirmation. Treat Stripe as
+      // canonical and refuse to overwrite the payment method; the reconciler will mark it Stripe.
+      throw new Error("Stripe indique déjà cette facture comme payée. Vérifiez le paiement avant de confirmer Interac.");
+    }
+    if (invoice.status !== "open") {
+      throw new Error(`La facture Stripe n'est pas payable (statut: ${invoice.status ?? "inconnu"}).`);
+    }
+
+    // Record the external Interac payment in Stripe as paid out of band. This closes the invoice
+    // and prevents a second card payment through the hosted page.
+    const paidInvoice = await stripe.invoices.pay(
+      data.invoiceId,
+      { paid_out_of_band: true },
+      { idempotencyKey: `ocarina-interac-paid:${data.invoiceId}` },
+    );
+
     const now = new Date().toISOString();
     const { error } = await supabaseAdmin
       .from("stripe_invoices")
       .update({
-        status: "interac_received",
+        status: "paid",
         payment_method: "interac",
         interac_received_at: now,
         paid_at: now,
         internal_note: data.note ?? null,
+        hosted_invoice_url: paidInvoice.hosted_invoice_url ?? null,
+        invoice_pdf: paidInvoice.invoice_pdf ?? null,
       } as any)
-      .eq("stripe_invoice_id", data.invoiceId);
+      .eq("stripe_invoice_id", data.invoiceId)
+      .in("status", ["pending_interac", "paid"]);
     if (error) throw new Error(error.message);
-    return { ok: true, receivedAt: now };
+
+    const { appendBusinessEvent } = await import("./business-events.server");
+    await appendBusinessEvent({
+      entityType: "invoice",
+      entityId: data.invoiceId,
+      eventType: "invoice.interac_received",
+      actorType: "admin",
+      actorId: context.userId,
+      payload: { stripeStatus: paidInvoice.status, note: data.note ?? null },
+    });
+
+    return { ok: true, receivedAt: now, stripeStatus: paidInvoice.status };
   });
 
 // -------- Generate / fetch a survey link for an invoice --------
 
 export const ensureSurveyLink = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
-    z.object({ invoiceId: z.string().min(1) }).parse(d),
-  )
+  .inputValidator((d: unknown) => z.object({ invoiceId: z.string().min(1) }).parse(d))
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { getStripe } = await import("./stripe.server");
+    const stripe = getStripe();
+    const stripeInvoice = await stripe.invoices.retrieve(data.invoiceId, { expand: ["customer"] });
+    if (stripeInvoice.status !== "paid") {
+      throw new Error("Le sondage post-paiement est disponible seulement après confirmation du paiement.");
+    }
 
-    // Load invoice
     const { data: inv, error } = await supabaseAdmin
       .from("stripe_invoices")
-      .select(
-        "stripe_invoice_id, invoice_number, customer_name, customer_email, customer_phone",
-      )
+      .select("stripe_invoice_id, invoice_number, customer_name, customer_email, customer_phone")
       .eq("stripe_invoice_id", data.invoiceId)
       .maybeSingle();
     if (error || !inv) throw new Error("Invoice not found");
 
-    // Reuse existing token if one already exists for this invoice
     const { data: existing } = await supabaseAdmin
       .from("customer_surveys" as any)
       .select("token")
       .eq("stripe_invoice_id", data.invoiceId)
       .maybeSingle();
-
     if (existing && (existing as any).token) {
+      const { appendBusinessEvent } = await import("./business-events.server");
+      await appendBusinessEvent({ entityType: "invoice", entityId: data.invoiceId, eventType: "survey.link_requested", actorType: "admin", actorId: context.userId, payload: { reused: true } });
       return { ok: true, token: (existing as any).token as string };
     }
 
-    const token =
-      crypto.randomUUID().replace(/-/g, "") + Math.random().toString(36).slice(2, 8);
-
+    const token = `${crypto.randomUUID().replace(/-/g, "")}${crypto.randomUUID().replace(/-/g, "")}`;
     const { error: insErr } = await supabaseAdmin.from("customer_surveys" as any).insert({
       invoice_number: (inv as any).invoice_number,
       stripe_invoice_id: (inv as any).stripe_invoice_id,
@@ -90,7 +142,17 @@ export const ensureSurveyLink = createServerFn({ method: "POST" })
       customer_phone: (inv as any).customer_phone,
       token,
     } as any);
-    if (insErr) throw new Error(insErr.message);
+    if (insErr) {
+      const { data: concurrent } = await supabaseAdmin
+        .from("customer_surveys" as any)
+        .select("token")
+        .eq("stripe_invoice_id", data.invoiceId)
+        .maybeSingle();
+      if (concurrent) return { ok: true, token: (concurrent as any).token as string };
+      throw new Error(insErr.message);
+    }
+    const { appendBusinessEvent } = await import("./business-events.server");
+    await appendBusinessEvent({ entityType: "invoice", entityId: data.invoiceId, eventType: "survey.link_created", actorType: "admin", actorId: context.userId, payload: {} });
     return { ok: true, token };
   });
 
@@ -177,6 +239,8 @@ export const setCreditStatus = createServerFn({ method: "POST" })
       .update(patch as any)
       .eq("id", data.id);
     if (error) throw new Error(error.message);
+    const { appendBusinessEvent } = await import("./business-events.server");
+    await appendBusinessEvent({ entityType: "customer_credit", entityId: data.id, eventType: `credit.${data.status}`, actorType: "admin", actorId: context.userId, payload: {} });
     return { ok: true };
   });
 
@@ -230,6 +294,8 @@ export const setServiceQuestionStatus = createServerFn({ method: "POST" })
       .update(patch as any)
       .eq("id", data.id);
     if (error) throw new Error(error.message);
+    const { appendBusinessEvent } = await import("./business-events.server");
+    await appendBusinessEvent({ entityType: "service_question", entityId: data.id, eventType: `service_question.${data.status}`, actorType: "admin", actorId: context.userId, payload: { hasInternalNote: data.internalNote != null } });
     return { ok: true };
   });
 
@@ -277,5 +343,7 @@ export const resolveFollowup = createServerFn({ method: "POST" })
       .update(patch as any)
       .eq("stripe_invoice_id", data.invoiceId);
     if (error) throw new Error(error.message);
+    const { appendBusinessEvent } = await import("./business-events.server");
+    await appendBusinessEvent({ entityType: "invoice", entityId: data.invoiceId, eventType: "customer_followup.resolved", actorType: "admin", actorId: context.userId, payload: { note: data.note ?? null } });
     return { ok: true };
   });

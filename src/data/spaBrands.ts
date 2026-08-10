@@ -5,149 +5,78 @@ export type BrandCategory = {
   brands: string[];
 };
 
+/**
+ * Public brand copy is intentionally conservative. Canadian-made brands are separated from
+ * other common Canadian-market brands so the site doesn't invent origin claims.
+ */
 export const SPA_BRAND_CATEGORIES: BrandCategory[] = [
   {
-    slug: "premium",
-    title: "Marques premium / haut de gamme",
+    slug: "canadiennes",
+    title: "Marques fabriquées au Canada",
     description:
-      "Spas reconnus pour leur qualité de fabrication, leur isolation et leurs composantes durables.",
+      "Priorité aux marques ayant une fabrication canadienne confirmée et adaptées à notre climat.",
+    brands: ["Hydropool", "Arctic Spas", "Beachcomber", "Coast Spas", "Sunrise Spas"],
+  },
+  {
+    slug: "courantes-canada",
+    title: "Autres grandes marques présentes au Canada",
+    description:
+      "Nous diagnostiquons aussi de nombreuses marques nord-américaines courantes selon les pièces et systèmes installés.",
     brands: [
-      "Hydropool",
-      "Arctic Spas",
-      "Beachcomber",
       "Jacuzzi",
       "Sundance Spas",
-      "Bullfrog Spas",
-      "Master Spas",
       "Hot Spring",
       "Caldera Spas",
-      "Dimension One Spas",
+      "Bullfrog Spas",
+      "Master Spas",
+      "Maax Spas",
+      "Vita Spa",
+      "Nordic Hot Tubs",
       "Artesian Spas",
       "Marquis Spas",
+      "Dimension One Spas",
     ],
   },
   {
-    slug: "repandues",
-    title: "Marques très répandues au Québec",
-    description: "Marques populaires que nos techniciens voient régulièrement à domicile.",
+    slug: "autres",
+    title: "Autres marques rencontrées en service",
+    description:
+      "Pour une marque plus rare, envoyez le modèle et une photo de la plaque signalétique : nous confirmons la compatibilité avant le déplacement.",
     brands: [
-      "Vita Spa",
-      "Coast Spas",
-      "Maax Spas",
-      "Sunray Spas",
-      "Sunrise Spas",
-      "Wellis",
-      "Passion Spas",
-      "Tuff Spas",
-      "LA Spas",
+      "Canadian Spa Company",
       "Catalina Spas",
       "PDC Spas",
-      "Nordic Hot Tubs",
       "Dynasty Spas",
-      "Emerald Spas",
-      "Blue Falls",
-      "Coyote Spas",
-    ],
-  },
-  {
-    slug: "usagees",
-    title: "Marques souvent vues usagées / Marketplace",
-    description:
-      "Spas usagés achetés sur Marketplace ou Kijiji — nous diagnostiquons et remettons en service.",
-    brands: [
-      "Infinity Spas",
-      "AquaRest",
+      "Viking Spas",
       "Strong Spas",
-      "Evolution Spas",
-      "Platinum Spas",
-      "Canadian Spa Company",
-      "Elite Spas",
+      "AquaRest",
       "Dream Maker Spas",
-      "Phoenix Spas",
-      "Coleman Spas",
-      "Leisure Bay Spas",
-      "Morgan Spas",
-      "QCA Spas",
-      "Signature Spas",
-      "Softub",
       "Freeflow Spas",
-      "Fantasy Spas",
-      "Tropic Seas Spas",
-      "Island Spas",
-      "Superior Spas",
-      "Pacific Spas",
-      "Mirage Spas",
-      "Royal Spas",
-      "Canspa",
+      "Softub",
     ],
-  },
-  {
-    slug: "gonflables",
-    title: "Spas gonflables et économiques",
-    description: "Spas portatifs et gonflables — chauffage, moteur et entretien.",
-    brands: ["Bestway SaluSpa", "Intex PureSpa", "MSpa"],
   },
   {
     slug: "swim-spas",
     title: "Spas de nage / Swim Spas",
-    description: "Grands bassins de nage à contre-courant.",
-    brands: [
-      "Michael Phelps Swim Spas",
-      "Endless Pools",
-      "Hydropool Swim Spas",
-      "H2X Swim Spa",
-      "Infinity Swim Spas",
-    ],
-  },
-  {
-    slug: "internationales",
-    title: "Marques européennes / internationales",
-    description: "Marques importées ou plus rares au Québec — diagnostic possible.",
-    brands: [
-      "Aquavia Spa",
-      "USSPA",
-      "Peipsi",
-      "Kirami",
-      "RotoSpa",
-      "Clearwater Spas",
-      "ThermoSpas",
-      "Atera Spas",
-      "Barefoot Spas",
-      "Down East Spas",
-      "Four Winds Spas",
-      "Garden Leisure Spas",
-      "Great Lakes Spas",
-      "Sunbelt Spas",
-      "Reflections Spas",
-      "Legacy Whirlpool",
-      "Apollo Spas",
-      "Aegean Spas",
-      "Saratoga Spas",
-      "Viking Spas",
-    ],
+    description: "Diagnostic de grands bassins de nage à contre-courant selon l'installation et l'accès technique.",
+    brands: ["Hydropool Swim Spas", "H2X Swim Spa", "Michael Phelps Swim Spas", "Endless Pools"],
   },
 ];
 
 export const TOP_BRANDS_QC = [
   "Hydropool",
-  "Jacuzzi",
-  "Sundance Spas",
   "Arctic Spas",
-  "Beachcomber",
-  "Maax Spas",
-  "Vita Spa",
-  "Bullfrog Spas",
-  "Master Spas",
-  "Hot Spring",
-];
-
-export const WINTER_BRANDS = [
-  "Arctic Spas",
-  "Hydropool",
   "Beachcomber",
   "Coast Spas",
-  "Maax Spas",
+  "Sunrise Spas",
+  "Jacuzzi",
+  "Sundance Spas",
+  "Hot Spring",
+  "Caldera Spas",
+  "Bullfrog Spas",
 ];
+
+export const WINTER_BRANDS = ["Hydropool", "Arctic Spas", "Beachcomber", "Coast Spas", "Sunrise Spas"];
 
 export const REPAIRED_SYSTEMS = [
   "Systèmes Balboa",
@@ -161,11 +90,10 @@ export const REPAIRED_SYSTEMS = [
   "Fuites d'eau",
   "Ozonateurs",
   "Capteurs",
-  "Problèmes de filtration",
-  "Problèmes de chauffage",
-  "Problèmes électriques liés au spa",
+  "Filtration",
+  "Chauffage",
 ];
 
-export const ALL_BRANDS = Array.from(
-  new Set(SPA_BRAND_CATEGORIES.flatMap((c) => c.brands)),
-).sort((a, b) => a.localeCompare(b, "fr"));
+export const ALL_BRANDS = Array.from(new Set(SPA_BRAND_CATEGORIES.flatMap((c) => c.brands))).sort(
+  (a, b) => a.localeCompare(b, "fr"),
+);

@@ -1,15 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useState, type FormEvent } from "react";
-import { Phone, Sparkles, AlertTriangle, CheckCircle2, Loader2, Calendar, ShieldCheck } from "lucide-react";
+import { Phone, Wrench, AlertTriangle, CheckCircle2, Loader2, Calendar, ShieldCheck } from "lucide-react";
 import { Layout } from "@/components/Layout";
 import { SITE, altLinks, breadcrumbSchema } from "@/lib/seo";
-import {
-  diagnoseSpaIssue,
-  saveDiagnosticLead,
-  updateDiagnosticLeadAI,
-  type DiagnosticResult,
-} from "@/lib/diagnostic.functions";
+import { submitDiagnosticLead, type DiagnosticResult } from "@/lib/diagnostic.functions";
 import {
   trackPhoneCall,
   trackDiagnosticComplete,
@@ -20,17 +15,17 @@ import {
 export const Route = createFileRoute("/diagnostic")({
   head: () => ({
     meta: [
-      { title: "Diagnostiqueur de spa AI — Ocarina Spa Québec" },
+      { title: "Pré-diagnostic de spa — Ocarina Spa Québec" },
       {
         name: "description",
         content:
-          "Diagnostiquez votre problème de spa grâce à notre outil AI. Un technicien Ocarina Spa vous rappelle pour planifier une visite.",
+          "Décrivez le problème de votre spa et obtenez un pré-diagnostic technique. Un technicien Ocarina Spa peut ensuite vous rappeler.",
       },
-      { property: "og:title", content: "Diagnostiqueur de spa AI — Ocarina Spa" },
+      { property: "og:title", content: "Pré-diagnostic de spa — Ocarina Spa" },
       {
         property: "og:description",
         content:
-          "Remplissez le formulaire, recevez un diagnostic AI et un rappel d'un technicien Ocarina Spa.",
+          "Remplissez le formulaire, recevez un pré-diagnostic technique et demandez le rappel d'un technicien Ocarina Spa.",
       },
       { property: "og:url", content: SITE.domain + "/diagnostic" },
     ],
@@ -41,7 +36,7 @@ export const Route = createFileRoute("/diagnostic")({
         children: JSON.stringify(
           breadcrumbSchema([
             { name: "Accueil", url: SITE.domain + "/" },
-            { name: "Diagnostic AI", url: SITE.domain + "/diagnostic" },
+            { name: "Pré-diagnostic", url: SITE.domain + "/diagnostic" },
           ]),
         ),
       },
@@ -51,13 +46,11 @@ export const Route = createFileRoute("/diagnostic")({
 });
 
 function DiagnosticPage() {
-  const diagnose = useServerFn(diagnoseSpaIssue);
-  const saveLead = useServerFn(saveDiagnosticLead);
-  const updateLead = useServerFn(updateDiagnosticLeadAI);
+  const submitDiagnostic = useServerFn(submitDiagnosticLead);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<DiagnosticResult | null>(null);
-  const [leadId, setLeadId] = useState<string | null>(null);
+  const [leadSaved, setLeadSaved] = useState(false);
   const [consent, setConsent] = useState(false);
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
@@ -75,8 +68,7 @@ function DiagnosticPage() {
     const get = (k: string) => String(fd.get(k) || "").trim();
 
     try {
-      // 1) Save lead first — guarantees we capture the contact even if AI fails.
-      const lead = await saveLead({
+      const response = await submitDiagnostic({
         data: {
           full_name: get("full_name"),
           phone: get("phone"),
@@ -87,51 +79,21 @@ function DiagnosticPage() {
           spa_year: get("year") || null,
           error_code: get("errorCode") || null,
           problem_description: get("symptoms"),
-          heating: get("heating") || null,
-          pump_works: get("pumpWorks") || null,
-          pump_noise: get("pumpNoise") || null,
+          heating: (get("heating") as "oui" | "non" | "intermittent" | "inconnu") || null,
+          pump_works: (get("pumpWorks") as "oui" | "non" | "inconnu") || null,
+          pump_noise: (get("pumpNoise") as "oui" | "non" | "inconnu") || null,
           since: get("since") || null,
           consent: true,
           source_url: typeof window !== "undefined" ? window.location.href : null,
         },
       });
-      setLeadId(lead.id ?? null);
+      setLeadSaved(response.leadSaved);
       trackDiagnosticLeadSubmit();
-
-      // 2) Run AI diagnostic
-      const res = await diagnose({
-        data: {
-          errorCode: get("errorCode") || undefined,
-          brand: get("brand") || undefined,
-          model: get("model") || undefined,
-          year: get("year") || undefined,
-          symptoms: get("symptoms"),
-          heating: (get("heating") as "oui" | "non" | "intermittent" | "inconnu") || undefined,
-          pumpWorks: (get("pumpWorks") as "oui" | "non" | "inconnu") || undefined,
-          pumpNoise: (get("pumpNoise") as "oui" | "non" | "inconnu") || undefined,
-          since: get("since") || undefined,
-          city: get("city") || undefined,
-        },
-      });
-      setResult(res);
-      trackDiagnosticComplete();
-
-      // 3) Best-effort: enrich the lead with AI output for follow-up
-      if (lead.id) {
-        try {
-          await updateLead({
-            data: {
-              id: lead.id,
-              ai_diagnostic: res.diagnostic,
-              ai_causes: res.likelyCauses,
-              ai_actions: res.actions,
-              ai_urgency: res.urgency,
-              ai_recommend_call: res.recommendCall,
-            },
-          });
-        } catch (e) {
-          console.warn("updateDiagnosticLeadAI failed", e);
-        }
+      if (response.result) {
+        setResult(response.result);
+        trackDiagnosticComplete();
+      } else {
+        setError(response.diagnosticError ?? "Demande enregistrée. Un technicien vous contactera.");
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erreur inconnue");
@@ -145,14 +107,14 @@ function DiagnosticPage() {
       <section className="bg-surface">
         <div className="container mx-auto px-4 py-14 md:py-20 max-w-3xl">
           <div className="inline-flex items-center gap-2 bg-brand/10 border border-brand/30 px-3 py-1.5 rounded-full text-sm text-brand font-semibold">
-            <Sparkles className="w-4 h-4" /> Outil AI + rappel d'un technicien
+            <Wrench className="w-4 h-4" /> Pré-diagnostic + rappel d'un technicien
           </div>
           <h1 className="mt-4 font-display text-4xl md:text-5xl font-bold text-foreground">
-            Diagnostiqueur de spa Ocarina Spa
+            Pré-diagnostic de spa Ocarina Spa
           </h1>
           <p className="mt-4 text-lg text-muted-foreground">
-            Remplis le formulaire ci-dessous. Tu reçois immédiatement un diagnostic AI et un
-            technicien Ocarina Spa te rappelle pour planifier une visite. Pour une urgence,
+            Décrivez votre problème de spa. Notre système prépare un pré-diagnostic technique pour orienter le suivi, puis un
+            technicien Ocarina Spa peut vous rappeler pour planifier une visite. Pour une urgence,
             appelle directement le{" "}
             <a href={`tel:${SITE.phoneTel}`} onClick={trackPhoneCall} className="text-brand font-semibold">
               {SITE.phone}
@@ -167,7 +129,7 @@ function DiagnosticPage() {
           onSubmit={handleSubmit}
           className="bg-card border border-border rounded-xl p-6 grid gap-5"
         >
-          {/* === Coordonnées (obligatoire avant l'IA) === */}
+          {/* Coordonnées obligatoires avant le pré-diagnostic */}
           <div>
             <h2 className="font-display text-xl font-semibold text-foreground">Vos coordonnées</h2>
             <p className="text-sm text-muted-foreground">
@@ -384,7 +346,7 @@ function DiagnosticPage() {
               </>
             ) : (
               <>
-                <Sparkles className="w-5 h-5" /> Obtenir mon diagnostic
+                <Wrench className="w-5 h-5" /> Obtenir mon pré-diagnostic
               </>
             )}
           </button>
@@ -395,7 +357,7 @@ function DiagnosticPage() {
             </p>
           )}
 
-          {leadId && !result && !loading && (
+          {leadSaved && !result && !loading && (
             <p className="text-sm text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-md p-3">
               Demande enregistrée — un technicien Ocarina Spa vous contactera rapidement.
             </p>
@@ -408,7 +370,7 @@ function DiagnosticPage() {
               <CheckCircle2 className="w-6 h-6 text-brand shrink-0 mt-1" />
               <div className="flex-1">
                 <h2 className="font-display text-2xl font-bold text-foreground">
-                  Diagnostic AI
+                  Pré-diagnostic technique
                 </h2>
                 <p className="mt-2 text-foreground">{result.diagnostic}</p>
 
@@ -474,7 +436,7 @@ function DiagnosticPage() {
                   </Link>
                 </div>
                 <p className="mt-4 text-xs text-muted-foreground">
-                  Ce diagnostic est informatif. Seule une inspection physique permet de
+                  Ce pré-diagnostic est informatif. Seule une inspection physique permet de
                   confirmer la panne. Votre demande est déjà enregistrée chez Ocarina Spa.
                 </p>
               </div>

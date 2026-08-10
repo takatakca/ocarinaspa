@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Phone, MapPin, AlertTriangle, Sparkles, Wrench, AlertCircle } from "lucide-react";
+import { Phone, MapPin, AlertTriangle, Wrench, AlertCircle, CreditCard } from "lucide-react";
 import { SITE } from "@/lib/seo";
 import { trackPhoneCall } from "@/lib/gtag";
 import logo from "@/assets/ocarina-logo.png";
@@ -33,13 +33,13 @@ export function Footer() {
           <h3 className="text-brand font-display font-semibold text-lg mb-4">Services</h3>
           <ul className="space-y-2 text-sm opacity-90">
             <li><Link to="/services" className="hover:text-brand inline-flex items-center gap-1.5"><Wrench className="w-3.5 h-3.5" /> Réparation Spa</Link></li>
-            <li><Link to="/diagnostic" className="hover:text-brand inline-flex items-center gap-1.5"><Sparkles className="w-3.5 h-3.5" /> Diagnostic AI</Link></li>
+            <li><Link to="/diagnostic" className="hover:text-brand inline-flex items-center gap-1.5"><Wrench className="w-3.5 h-3.5" /> Pré-diagnostic</Link></li>
             <li><Link to="/codes-erreur" className="hover:text-brand inline-flex items-center gap-1.5"><AlertCircle className="w-3.5 h-3.5" /> Codes d'erreur</Link></li>
             <li><Link to="/vente-spas" className="hover:text-brand">Vente de spas</Link></li>
             <li><Link to="/pieces" className="hover:text-brand">Pièces</Link></li>
             <li><Link to="/urgence-spa" className="hover:text-brand inline-flex items-center gap-1.5"><AlertTriangle className="w-3.5 h-3.5 text-red-400" /> Urgence 24/7</Link></li>
             <li><Link to="/marques" className="hover:text-brand">Marques réparées</Link></li>
-            <li><Link to="/payer-facture" className="hover:text-brand">💳 Payer une facture</Link></li>
+            <li><Link to="/payer-facture" className="hover:text-brand inline-flex items-center gap-1.5"><CreditCard className="w-3.5 h-3.5" /> Payer une facture</Link></li>
           </ul>
         </div>
 
@@ -51,8 +51,8 @@ export function Footer() {
             <li><Link to="/villes" className="hover:text-brand">Blainville · Saint-Jérôme</Link></li>
             <li><Link to="/villes" className="hover:text-brand">Repentigny · Longueuil</Link></li>
             <li><Link to="/villes" className="hover:text-brand">Trois-Rivières · Québec</Link></li>
-            <li><Link to="/villes" className="text-brand hover:underline">Voir toutes les villes →</Link></li>
-            <li><Link to="/succursales" className="hover:text-brand">📍 Succursale Québec</Link></li>
+            <li><Link to="/villes" className="text-brand hover:underline">Voir les zones desservies →</Link></li>
+            <li><Link to="/succursales" className="hover:text-brand inline-flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5" /> Point de service Bécancour</Link></li>
           </ul>
         </div>
 
@@ -64,19 +64,22 @@ export function Footer() {
           <Link to="/contact" className="block mt-3 text-sm hover:text-brand underline">
             Demander une soumission
           </Link>
+          <Link to="/confidentialite" className="block mt-2 text-sm hover:text-brand underline">
+            Politique de confidentialité
+          </Link>
           <p className="text-sm opacity-80 mt-4 flex items-start gap-2">
             <MapPin className="w-4 h-4 mt-0.5 shrink-0 text-brand" />
             <span>{SITE.address.street}<br />{SITE.address.city}, {SITE.address.region} {SITE.address.postalCode}</span>
           </p>
           <p className="text-xs opacity-70 mt-4">
-            Marques : Jacuzzi, Hydropool, Arctic Spas, Sundance, Beachcomber, Bullfrog, Hot Spring, Maax, Master Spas, Caldera, Vita Spa, Coast Spas, Wellis, Passion Spas.
+            Marques : Hydropool, Arctic Spas, Beachcomber, Coast Spas, Sunrise Spas, Jacuzzi, Sundance, Hot Spring, Caldera, Bullfrog, Master Spas, Maax et Vita Spa.
           </p>
         </div>
       </div>
       <div className="border-t border-white/10">
         <div className="container mx-auto px-4 py-5 text-xs opacity-70 flex flex-col sm:flex-row justify-between gap-2">
           <span>© {new Date().getFullYear()} {SITE.legalName}. Tous droits réservés.</span>
-          <span>Réparation & vente de spas — partout au Québec.</span>
+          <span>Réparation & vente de spas — zones desservies au Québec.</span>
         </div>
       </div>
     </footer>

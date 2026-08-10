@@ -22,9 +22,11 @@ import { Route as PiecesRouteImport } from './routes/pieces'
 import { Route as PayerFactureRouteImport } from './routes/payer-facture'
 import { Route as PaiementConfirmeRouteImport } from './routes/paiement-confirme'
 import { Route as MarquesRouteImport } from './routes/marques'
+import { Route as EsRouteImport } from './routes/es'
 import { Route as EnRouteImport } from './routes/en'
 import { Route as DiagnosticRouteImport } from './routes/diagnostic'
 import { Route as ContactRouteImport } from './routes/contact'
+import { Route as ConfidentialiteRouteImport } from './routes/confidentialite'
 import { Route as CodesErreurRouteImport } from './routes/codes-erreur'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
@@ -44,9 +46,12 @@ import { Route as EntretienSpaVilleRouteImport } from './routes/entretien-spa.$v
 import { Route as EntretienPiscineVilleRouteImport } from './routes/entretien-piscine.$ville'
 import { Route as ApiPublicStripeWebhookRouteImport } from './routes/api/public/stripe-webhook'
 import { Route as ApiPublicServiceRequestRouteImport } from './routes/api/public/service-request'
+import { Route as ApiInternalAutomationReconcileRouteImport } from './routes/api/internal/automation-reconcile'
 import { Route as AuthenticatedAdminQaRouteImport } from './routes/_authenticated/admin.qa'
+import { Route as AuthenticatedAdminHistoriqueRouteImport } from './routes/_authenticated/admin.historique'
 import { Route as AuthenticatedAdminFacturesRouteImport } from './routes/_authenticated/admin.factures'
 import { Route as AuthenticatedAdminExperienceRouteImport } from './routes/_authenticated/admin.experience'
+import { Route as AuthenticatedAdminAutomationRouteImport } from './routes/_authenticated/admin.automation'
 
 const VillesRoute = VillesRouteImport.update({
   id: '/villes',
@@ -113,6 +118,11 @@ const MarquesRoute = MarquesRouteImport.update({
   path: '/marques',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EsRoute = EsRouteImport.update({
+  id: '/es',
+  path: '/es',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EnRoute = EnRouteImport.update({
   id: '/en',
   path: '/en',
@@ -126,6 +136,11 @@ const DiagnosticRoute = DiagnosticRouteImport.update({
 const ContactRoute = ContactRouteImport.update({
   id: '/contact',
   path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConfidentialiteRoute = ConfidentialiteRouteImport.update({
+  id: '/confidentialite',
+  path: '/confidentialite',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CodesErreurRoute = CodesErreurRouteImport.update({
@@ -222,11 +237,23 @@ const ApiPublicServiceRequestRoute = ApiPublicServiceRequestRouteImport.update({
   path: '/api/public/service-request',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiInternalAutomationReconcileRoute =
+  ApiInternalAutomationReconcileRouteImport.update({
+    id: '/api/internal/automation-reconcile',
+    path: '/api/internal/automation-reconcile',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AuthenticatedAdminQaRoute = AuthenticatedAdminQaRouteImport.update({
   id: '/admin/qa',
   path: '/admin/qa',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAdminHistoriqueRoute =
+  AuthenticatedAdminHistoriqueRouteImport.update({
+    id: '/admin/historique',
+    path: '/admin/historique',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminFacturesRoute =
   AuthenticatedAdminFacturesRouteImport.update({
     id: '/admin/factures',
@@ -239,14 +266,22 @@ const AuthenticatedAdminExperienceRoute =
     path: '/admin/experience',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminAutomationRoute =
+  AuthenticatedAdminAutomationRouteImport.update({
+    id: '/admin/automation',
+    path: '/admin/automation',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/codes-erreur': typeof CodesErreurRoute
+  '/confidentialite': typeof ConfidentialiteRoute
   '/contact': typeof ContactRoute
   '/diagnostic': typeof DiagnosticRoute
   '/en': typeof EnRoute
+  '/es': typeof EsRoute
   '/marques': typeof MarquesRoute
   '/paiement-confirme': typeof PaiementConfirmeRoute
   '/payer-facture': typeof PayerFactureRoute
@@ -273,9 +308,12 @@ export interface FileRoutesByFullPath {
   '/pieces-spa/$ville': typeof PiecesSpaVilleRoute
   '/reparation-spa/$ville': typeof ReparationSpaVilleRoute
   '/vente-spa/$ville': typeof VenteSpaVilleRoute
+  '/admin/automation': typeof AuthenticatedAdminAutomationRoute
   '/admin/experience': typeof AuthenticatedAdminExperienceRoute
   '/admin/factures': typeof AuthenticatedAdminFacturesRoute
+  '/admin/historique': typeof AuthenticatedAdminHistoriqueRoute
   '/admin/qa': typeof AuthenticatedAdminQaRoute
+  '/api/internal/automation-reconcile': typeof ApiInternalAutomationReconcileRoute
   '/api/public/service-request': typeof ApiPublicServiceRequestRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
 }
@@ -283,9 +321,11 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/codes-erreur': typeof CodesErreurRoute
+  '/confidentialite': typeof ConfidentialiteRoute
   '/contact': typeof ContactRoute
   '/diagnostic': typeof DiagnosticRoute
   '/en': typeof EnRoute
+  '/es': typeof EsRoute
   '/marques': typeof MarquesRoute
   '/paiement-confirme': typeof PaiementConfirmeRoute
   '/payer-facture': typeof PayerFactureRoute
@@ -312,9 +352,12 @@ export interface FileRoutesByTo {
   '/pieces-spa/$ville': typeof PiecesSpaVilleRoute
   '/reparation-spa/$ville': typeof ReparationSpaVilleRoute
   '/vente-spa/$ville': typeof VenteSpaVilleRoute
+  '/admin/automation': typeof AuthenticatedAdminAutomationRoute
   '/admin/experience': typeof AuthenticatedAdminExperienceRoute
   '/admin/factures': typeof AuthenticatedAdminFacturesRoute
+  '/admin/historique': typeof AuthenticatedAdminHistoriqueRoute
   '/admin/qa': typeof AuthenticatedAdminQaRoute
+  '/api/internal/automation-reconcile': typeof ApiInternalAutomationReconcileRoute
   '/api/public/service-request': typeof ApiPublicServiceRequestRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
 }
@@ -324,9 +367,11 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/codes-erreur': typeof CodesErreurRoute
+  '/confidentialite': typeof ConfidentialiteRoute
   '/contact': typeof ContactRoute
   '/diagnostic': typeof DiagnosticRoute
   '/en': typeof EnRoute
+  '/es': typeof EsRoute
   '/marques': typeof MarquesRoute
   '/paiement-confirme': typeof PaiementConfirmeRoute
   '/payer-facture': typeof PayerFactureRoute
@@ -353,9 +398,12 @@ export interface FileRoutesById {
   '/pieces-spa/$ville': typeof PiecesSpaVilleRoute
   '/reparation-spa/$ville': typeof ReparationSpaVilleRoute
   '/vente-spa/$ville': typeof VenteSpaVilleRoute
+  '/_authenticated/admin/automation': typeof AuthenticatedAdminAutomationRoute
   '/_authenticated/admin/experience': typeof AuthenticatedAdminExperienceRoute
   '/_authenticated/admin/factures': typeof AuthenticatedAdminFacturesRoute
+  '/_authenticated/admin/historique': typeof AuthenticatedAdminHistoriqueRoute
   '/_authenticated/admin/qa': typeof AuthenticatedAdminQaRoute
+  '/api/internal/automation-reconcile': typeof ApiInternalAutomationReconcileRoute
   '/api/public/service-request': typeof ApiPublicServiceRequestRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
 }
@@ -365,9 +413,11 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/codes-erreur'
+    | '/confidentialite'
     | '/contact'
     | '/diagnostic'
     | '/en'
+    | '/es'
     | '/marques'
     | '/paiement-confirme'
     | '/payer-facture'
@@ -394,9 +444,12 @@ export interface FileRouteTypes {
     | '/pieces-spa/$ville'
     | '/reparation-spa/$ville'
     | '/vente-spa/$ville'
+    | '/admin/automation'
     | '/admin/experience'
     | '/admin/factures'
+    | '/admin/historique'
     | '/admin/qa'
+    | '/api/internal/automation-reconcile'
     | '/api/public/service-request'
     | '/api/public/stripe-webhook'
   fileRoutesByTo: FileRoutesByTo
@@ -404,9 +457,11 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/codes-erreur'
+    | '/confidentialite'
     | '/contact'
     | '/diagnostic'
     | '/en'
+    | '/es'
     | '/marques'
     | '/paiement-confirme'
     | '/payer-facture'
@@ -433,9 +488,12 @@ export interface FileRouteTypes {
     | '/pieces-spa/$ville'
     | '/reparation-spa/$ville'
     | '/vente-spa/$ville'
+    | '/admin/automation'
     | '/admin/experience'
     | '/admin/factures'
+    | '/admin/historique'
     | '/admin/qa'
+    | '/api/internal/automation-reconcile'
     | '/api/public/service-request'
     | '/api/public/stripe-webhook'
   id:
@@ -444,9 +502,11 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/codes-erreur'
+    | '/confidentialite'
     | '/contact'
     | '/diagnostic'
     | '/en'
+    | '/es'
     | '/marques'
     | '/paiement-confirme'
     | '/payer-facture'
@@ -473,9 +533,12 @@ export interface FileRouteTypes {
     | '/pieces-spa/$ville'
     | '/reparation-spa/$ville'
     | '/vente-spa/$ville'
+    | '/_authenticated/admin/automation'
     | '/_authenticated/admin/experience'
     | '/_authenticated/admin/factures'
+    | '/_authenticated/admin/historique'
     | '/_authenticated/admin/qa'
+    | '/api/internal/automation-reconcile'
     | '/api/public/service-request'
     | '/api/public/stripe-webhook'
   fileRoutesById: FileRoutesById
@@ -485,9 +548,11 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   CodesErreurRoute: typeof CodesErreurRoute
+  ConfidentialiteRoute: typeof ConfidentialiteRoute
   ContactRoute: typeof ContactRoute
   DiagnosticRoute: typeof DiagnosticRoute
   EnRoute: typeof EnRoute
+  EsRoute: typeof EsRoute
   MarquesRoute: typeof MarquesRoute
   PaiementConfirmeRoute: typeof PaiementConfirmeRoute
   PayerFactureRoute: typeof PayerFactureRoute
@@ -514,6 +579,7 @@ export interface RootRouteChildren {
   PiecesSpaVilleRoute: typeof PiecesSpaVilleRoute
   ReparationSpaVilleRoute: typeof ReparationSpaVilleRoute
   VenteSpaVilleRoute: typeof VenteSpaVilleRoute
+  ApiInternalAutomationReconcileRoute: typeof ApiInternalAutomationReconcileRoute
   ApiPublicServiceRequestRoute: typeof ApiPublicServiceRequestRoute
   ApiPublicStripeWebhookRoute: typeof ApiPublicStripeWebhookRoute
 }
@@ -611,6 +677,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MarquesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/es': {
+      id: '/es'
+      path: '/es'
+      fullPath: '/es'
+      preLoaderRoute: typeof EsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/en': {
       id: '/en'
       path: '/en'
@@ -630,6 +703,13 @@ declare module '@tanstack/react-router' {
       path: '/contact'
       fullPath: '/contact'
       preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/confidentialite': {
+      id: '/confidentialite'
+      path: '/confidentialite'
+      fullPath: '/confidentialite'
+      preLoaderRoute: typeof ConfidentialiteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/codes-erreur': {
@@ -765,11 +845,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicServiceRequestRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/internal/automation-reconcile': {
+      id: '/api/internal/automation-reconcile'
+      path: '/api/internal/automation-reconcile'
+      fullPath: '/api/internal/automation-reconcile'
+      preLoaderRoute: typeof ApiInternalAutomationReconcileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/admin/qa': {
       id: '/_authenticated/admin/qa'
       path: '/admin/qa'
       fullPath: '/admin/qa'
       preLoaderRoute: typeof AuthenticatedAdminQaRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin/historique': {
+      id: '/_authenticated/admin/historique'
+      path: '/admin/historique'
+      fullPath: '/admin/historique'
+      preLoaderRoute: typeof AuthenticatedAdminHistoriqueRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/admin/factures': {
@@ -786,18 +880,29 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminExperienceRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/automation': {
+      id: '/_authenticated/admin/automation'
+      path: '/admin/automation'
+      fullPath: '/admin/automation'
+      preLoaderRoute: typeof AuthenticatedAdminAutomationRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAdminAutomationRoute: typeof AuthenticatedAdminAutomationRoute
   AuthenticatedAdminExperienceRoute: typeof AuthenticatedAdminExperienceRoute
   AuthenticatedAdminFacturesRoute: typeof AuthenticatedAdminFacturesRoute
+  AuthenticatedAdminHistoriqueRoute: typeof AuthenticatedAdminHistoriqueRoute
   AuthenticatedAdminQaRoute: typeof AuthenticatedAdminQaRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAdminAutomationRoute: AuthenticatedAdminAutomationRoute,
   AuthenticatedAdminExperienceRoute: AuthenticatedAdminExperienceRoute,
   AuthenticatedAdminFacturesRoute: AuthenticatedAdminFacturesRoute,
+  AuthenticatedAdminHistoriqueRoute: AuthenticatedAdminHistoriqueRoute,
   AuthenticatedAdminQaRoute: AuthenticatedAdminQaRoute,
 }
 
@@ -809,9 +914,11 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   CodesErreurRoute: CodesErreurRoute,
+  ConfidentialiteRoute: ConfidentialiteRoute,
   ContactRoute: ContactRoute,
   DiagnosticRoute: DiagnosticRoute,
   EnRoute: EnRoute,
+  EsRoute: EsRoute,
   MarquesRoute: MarquesRoute,
   PaiementConfirmeRoute: PaiementConfirmeRoute,
   PayerFactureRoute: PayerFactureRoute,
@@ -838,19 +945,10 @@ const rootRouteChildren: RootRouteChildren = {
   PiecesSpaVilleRoute: PiecesSpaVilleRoute,
   ReparationSpaVilleRoute: ReparationSpaVilleRoute,
   VenteSpaVilleRoute: VenteSpaVilleRoute,
+  ApiInternalAutomationReconcileRoute: ApiInternalAutomationReconcileRoute,
   ApiPublicServiceRequestRoute: ApiPublicServiceRequestRoute,
   ApiPublicStripeWebhookRoute: ApiPublicStripeWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

@@ -37,8 +37,8 @@ export function RepairsGrid() {
             Réparations de spa que nous effectuons au Québec
           </h2>
           <p className="mt-4 text-muted-foreground">
-            Plus de 20 ans d'expérience sur Balboa, Gecko, Waterway et LX. Diagnostic rapide,
-            réparation dès la première visite dans la majorité des cas.
+            Intervention sur des systèmes courants Balboa, Gecko, Waterway et LX. Diagnostic clair et
+            réparation sur place lorsque la pièce, le modèle et l’accès le permettent.
           </p>
         </div>
 
@@ -91,7 +91,7 @@ export function RepairsGrid() {
             to="/diagnostic"
             className="inline-flex items-center gap-2 border border-border text-foreground px-6 py-3 rounded-md font-semibold hover:border-brand hover:text-brand transition-colors"
           >
-            Diagnostic AI gratuit
+            Pré-diagnostic technique
           </Link>
         </div>
       </div>

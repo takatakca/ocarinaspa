@@ -21,6 +21,35 @@ export const quebecRegions: string[] = regionsRaw as string[];
 export const findMunicipalityBySlug = (slug: string): Municipality | undefined =>
   quebecMunicipalities.find((m) => m.slug === slug);
 
+
+/**
+ * Search-indexed service markets. The full municipality directory stays usable for visitors,
+ * but templated city/service pages outside this curated list are noindex to avoid scaled/doorway SEO.
+ */
+export const SEO_INDEXED_CITY_SLUGS = [
+  "becancour",
+  "laval",
+  "montreal",
+  "terrebonne",
+  "blainville",
+  "longueuil",
+  "trois-rivieres",
+  "mascouche",
+  "repentigny",
+  "saint-jerome",
+  "quebec",
+] as const;
+
+export const isSeoIndexedCity = (slug: string) =>
+  (SEO_INDEXED_CITY_SLUGS as readonly string[]).includes(slug);
+
+/**
+ * Only the core repair landing pages are search-indexed. Other city/service combinations remain
+ * available for visitors but are noindex to avoid publishing large amounts of near-duplicate SEO copy.
+ */
+export const isSeoIndexedServicePage = (serviceSlug: string, citySlug: string) =>
+  serviceSlug === "reparation-spa" && isSeoIndexedCity(citySlug);
+
 export const SERVICE_TYPES = [
   { slug: "reparation-spa", label: "Réparation de spa", verb: "Réparation", category: "spa" },
   { slug: "entretien-spa", label: "Entretien de spa", verb: "Entretien", category: "spa" },

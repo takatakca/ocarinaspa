@@ -6,7 +6,7 @@ import {
   WINTER_BRANDS,
   REPAIRED_SYSTEMS,
 } from "@/data/spaBrands";
-import { FEATURED_BRANDS, BRAND_IMAGES } from "@/data/brandImages";
+import { BRAND_IMAGES, FEATURED_BRANDS } from "@/data/brandImages";
 
 export function SpaBrands({ compact = false }: { compact?: boolean }) {
   const [query, setQuery] = useState("");
@@ -31,10 +31,7 @@ export function SpaBrands({ compact = false }: { compact?: boolean }) {
             Marques de spas que nous réparons au Québec
           </h2>
           <p className="mt-4 text-muted-foreground">
-            Ocarina Spa intervient sur la majorité des marques de spas, hot tubs et spas de
-            nage présents au Québec. Plusieurs marques utilisent des composantes communes —
-            Balboa, Gecko, Waterway, LX — ce qui nous permet de diagnostiquer rapidement les
-            problèmes courants.
+            Ocarina Spa priorise les marques canadiennes et intervient aussi sur plusieurs grandes marques présentes au Québec. La compatibilité dépend du modèle et des composantes installées — Balboa, Gecko, Waterway ou LX, entre autres.
           </p>
         </div>
 
@@ -168,11 +165,11 @@ export function SpaBrands({ compact = false }: { compact?: boolean }) {
                 <Snowflake className="w-6 h-6 text-brand shrink-0" strokeWidth={1.75} />
                 <div>
                   <h3 className="font-display text-xl font-semibold text-foreground">
-                    Spas conçus pour l'hiver québécois
+                    Marques canadiennes fréquemment rencontrées au Québec
                   </h3>
                   <p className="mt-2 text-sm text-muted-foreground max-w-3xl">
-                    Marques particulièrement performantes par grand froid grâce à leur isolation
-                    et leurs composantes adaptées :
+                    Ces marques ont une fabrication canadienne confirmée. Pour chaque intervention,
+                    nous validons le modèle, l'installation et les composantes avant de confirmer la réparation.
                   </p>
                   <div className="mt-4 flex flex-wrap gap-2">
                     {WINTER_BRANDS.map((b) => (

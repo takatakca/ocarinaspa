@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   createAdminInvoice,
   listAdminInvoices,
@@ -42,7 +42,8 @@ import {
   LogOut,
   CheckCircle2,
   MessageSquare,
-  Sparkles,
+  History,
+  Workflow,
 } from "lucide-react";
 import { gtag, trackInteracReceived } from "@/lib/gtag";
 
@@ -63,7 +64,7 @@ type FilterStatus =
   | "failed"
   | "void"
   | "pending_interac"
-  | "interac_received";
+  | "paid_interac";
 
 function money(cents: number, currency = "cad") {
   return new Intl.NumberFormat("fr-CA", {
@@ -91,6 +92,8 @@ function AdminInvoicesPage() {
   const [filter, setFilter] = useState<FilterStatus>("all");
   const [last, setLast] = useState<AdminInvoiceCreated | null>(null);
   const [loading, setLoading] = useState(false);
+  const createRequestIdRef = useRef<string | null>(null);
+  const createRequestFingerprintRef = useRef<string | null>(null);
   const [interacTarget, setInteracTarget] = useState<AdminInvoiceRow | null>(null);
   const [interacNote, setInteracNote] = useState("");
 
@@ -105,6 +108,7 @@ function AdminInvoicesPage() {
     applyTaxes: true,
     notes: "",
     daysUntilDue: "15",
+    creditCode: "",
   });
 
   useEffect(() => {
@@ -127,10 +131,17 @@ function AdminInvoicesPage() {
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
+    if (loading) return;
     setLoading(true);
+    const fingerprint = JSON.stringify(form);
+    if (!createRequestIdRef.current || createRequestFingerprintRef.current !== fingerprint) {
+      createRequestIdRef.current = crypto.randomUUID();
+      createRequestFingerprintRef.current = fingerprint;
+    }
     try {
       const result = await createFn({
         data: {
+          requestId: createRequestIdRef.current,
           customerName: form.customerName,
           customerEmail: form.customerEmail,
           customerPhone: form.customerPhone || undefined,
@@ -141,9 +152,12 @@ function AdminInvoicesPage() {
           applyTaxes: form.applyTaxes,
           notes: form.notes || undefined,
           daysUntilDue: Number(form.daysUntilDue) || 15,
+          creditCode: form.creditCode.trim() || undefined,
         },
       });
       setLast(result);
+      createRequestIdRef.current = null;
+      createRequestFingerprintRef.current = null;
       toast.success(`Facture créée : ${result.invoiceNumber ?? result.invoiceId}`);
       if (typeof window !== "undefined") {
         gtag("event", "admin_invoice_created", {
@@ -152,7 +166,7 @@ function AdminInvoicesPage() {
           currency: result.currency,
         });
       }
-      setForm({ ...form, description: "", amountBeforeTax: "", notes: "" });
+      setForm({ ...form, description: "", amountBeforeTax: "", notes: "", creditCode: "" });
       refresh();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Erreur de création");
@@ -247,6 +261,7 @@ function AdminInvoicesPage() {
     if (filter === "all") return true;
     if (filter === "failed")
       return r.status === "uncollectible" || r.status === "failed";
+    if (filter === "paid_interac") return r.status === "paid" && r.payment_method === "interac";
     return r.status === filter;
   });
 
@@ -261,9 +276,13 @@ function AdminInvoicesPage() {
         </div>
         <div className="flex flex-wrap gap-2">
           <Button asChild variant="secondary" size="sm">
-            <Link to="/admin/experience">
-              <Sparkles className="w-4 h-4" /> Voir expérience client
-            </Link>
+            <Link to="/admin/experience">Voir expérience client</Link>
+          </Button>
+          <Button asChild variant="secondary" size="sm">
+            <Link to="/admin/automation"><Workflow className="w-4 h-4" /> Assistant opérations</Link>
+          </Button>
+          <Button asChild variant="secondary" size="sm">
+            <Link to="/admin/historique"><History className="w-4 h-4" /> Historique</Link>
           </Button>
           <Button asChild variant="secondary" size="sm">
             <Link to="/admin/qa">Test paiement facture</Link>
@@ -348,7 +367,18 @@ function AdminInvoicesPage() {
               />
               Appliquer TPS 5% + TVQ 9.975%
             </label>
-            <Field label="Notes internes / bas de facture" className="md:col-span-2">
+            <Field label="Crédit magasin (optionnel)">
+              <Input
+                value={form.creditCode}
+                onChange={(e) => setForm({ ...form, creditCode: e.target.value.toUpperCase() })}
+                placeholder="OCARINA10-XXXX"
+                autoComplete="off"
+              />
+              <p className="mt-1 text-xs text-muted-foreground">
+                Le crédit doit appartenir au même courriel client. Il est réservé atomiquement puis marqué utilisé seulement après finalisation Stripe.
+              </p>
+            </Field>
+            <Field label="Notes internes / bas de facture">
               <Input
                 value={form.notes}
                 onChange={(e) => setForm({ ...form, notes: e.target.value })}
@@ -375,6 +405,11 @@ function AdminInvoicesPage() {
               <Info label="Montant" value={money(last.amountDueCents, last.currency)} />
               <Info label="Devise" value={last.currency.toUpperCase()} />
             </div>
+            {last.appliedCreditCode && (
+              <div className="rounded-md border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-900">
+                Crédit appliqué : <strong>{last.appliedCreditCode}</strong> · -{money(last.appliedCreditCents ?? 0, last.currency)}
+              </div>
+            )}
             <div className="flex flex-wrap gap-2">
               {last.hostedInvoiceUrl && (
                 <>
@@ -413,7 +448,7 @@ function AdminInvoicesPage() {
                 "open",
                 "paid",
                 "pending_interac",
-                "interac_received",
+                "paid_interac",
                 "failed",
                 "void",
               ] as const
@@ -483,7 +518,7 @@ function AdminInvoicesPage() {
                           <CheckCircle2 className="w-4 h-4" /> Interac reçu
                         </Button>
                       )}
-                      {(r.status === "paid" || r.status === "interac_received") && (
+                      {r.status === "paid" && (
                         <Button
                           size="sm"
                           variant="outline"
@@ -585,7 +620,7 @@ function statusFilterLabel(s: FilterStatus) {
       return "Payées";
     case "pending_interac":
       return "Interac en attente";
-    case "interac_received":
+    case "paid_interac":
       return "Interac reçu";
     case "failed":
       return "Échec";
