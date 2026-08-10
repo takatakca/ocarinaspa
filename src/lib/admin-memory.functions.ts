@@ -18,7 +18,7 @@ export type BusinessEventRow = {
   actor_type: string;
   actor_id: string | null;
   correlation_id: string | null;
-  payload: Record<string, unknown>;
+  payload: Record<string, any>;
   created_at: string;
 };
 
@@ -100,8 +100,8 @@ type AutomationMemoryRow = {
   task_type: string;
   status: string;
   instruction: string | null;
-  input: Record<string, unknown> | null;
-  output: Record<string, unknown> | null;
+  input: Record<string, any> | null;
+  output: Record<string, any> | null;
   error_message: string | null;
   created_at: string;
   completed_at: string | null;
