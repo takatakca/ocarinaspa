@@ -38,7 +38,7 @@ export const listBusinessEvents = createServerFn({ method: "GET" })
     if (data.entityId) query = query.eq("entity_id", data.entityId);
     const { data: rows, error } = await query;
     if (error) throw new Error(error.message);
-    return (rows ?? []) as BusinessEventRow[];
+    return (rows ?? []) as unknown as BusinessEventRow[];
   });
 
 export type OperationalMemorySearchResult = {
@@ -158,16 +158,16 @@ export const searchOperationalMemory = createServerFn({ method: "GET" })
       if (result.error) throw new Error(result.error.message);
     }
 
-    const invoices = ((invoiceRes.data ?? []) as OperationalMemorySearchResult["invoices"])
+    const invoices = ((invoiceRes.data ?? []) as unknown as OperationalMemorySearchResult["invoices"])
       .filter((row) => searchable(row).includes(q))
       .slice(0, 50);
-    const requests = ((requestRes.data ?? []) as ServiceRequestMemoryRow[])
+    const requests = ((requestRes.data ?? []) as unknown as ServiceRequestMemoryRow[])
       .filter((row) => searchable(row).includes(q))
       .slice(0, 50);
-    const diagnostics = ((diagnosticRes.data ?? []) as DiagnosticMemoryRow[])
+    const diagnostics = ((diagnosticRes.data ?? []) as unknown as DiagnosticMemoryRow[])
       .filter((row) => searchable(row).includes(q))
       .slice(0, 50);
-    const tasks = ((taskRes.data ?? []) as AutomationMemoryRow[])
+    const tasks = ((taskRes.data ?? []) as unknown as AutomationMemoryRow[])
       .filter((row) => searchable(row).includes(q))
       .slice(0, 50);
 
@@ -181,7 +181,7 @@ export const searchOperationalMemory = createServerFn({ method: "GET" })
     for (const diagnostic of diagnostics) relatedEntityIds.add(diagnostic.id);
     for (const task of tasks) relatedEntityIds.add(task.id);
 
-    const events = ((eventRes.data ?? []) as BusinessEventRow[])
+    const events = ((eventRes.data ?? []) as unknown as BusinessEventRow[])
       .filter((row) => searchable(row).includes(q) || relatedEntityIds.has(row.entity_id))
       .slice(0, 100);
 

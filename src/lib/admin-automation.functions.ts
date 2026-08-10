@@ -112,7 +112,7 @@ export const draftInvoiceAutomation = createServerFn({ method: "POST" })
       actorId: context.userId,
       payload: { status, missingFields },
     });
-    return task as AutomationTask;
+    return task as unknown as AutomationTask;
   });
 
 export const listAutomationTasks = createServerFn({ method: "GET" })
@@ -125,7 +125,7 @@ export const listAutomationTasks = createServerFn({ method: "GET" })
       .order("created_at", { ascending: false })
       .limit(100);
     if (error) throw new Error(error.message);
-    return (data ?? []) as AutomationTask[];
+    return (data ?? []) as unknown as AutomationTask[];
   });
 
 export const approveInvoiceAutomation = createServerFn({ method: "POST" })
