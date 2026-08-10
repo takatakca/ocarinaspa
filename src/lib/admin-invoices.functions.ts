@@ -391,8 +391,9 @@ export const checkIsAdmin = createServerFn({ method: "GET" })
       .filter(Boolean);
     if (allow.length === 0) return { isAdmin: false, userId: context.userId };
 
-    const userEmail = String(context.user?.email ?? context.claims?.email ?? "").toLowerCase();
-    const emailVerified = Boolean(context.user?.email_confirmed_at);
+    const claims = context.claims as Record<string, any> | undefined;
+    const userEmail = String(claims?.email ?? "").toLowerCase();
+    const emailVerified = Boolean(claims?.email_verified ?? claims?.user_metadata?.email_verified);
     if (!userEmail || !allow.includes(userEmail) || !emailVerified) {
       return { isAdmin: false, userId: context.userId };
     }
