@@ -148,11 +148,14 @@ export type Database = {
           expires_at: string
           id: string
           invoice_number: string | null
+          reserved_at: string | null
+          reserved_request_id: string | null
           status: string
           stripe_invoice_id: string | null
           survey_id: string | null
           updated_at: string
           used_at: string | null
+          used_request_id: string | null
         }
         Insert: {
           created_at?: string
@@ -167,11 +170,14 @@ export type Database = {
           expires_at?: string
           id?: string
           invoice_number?: string | null
+          reserved_at?: string | null
+          reserved_request_id?: string | null
           status?: string
           stripe_invoice_id?: string | null
           survey_id?: string | null
           updated_at?: string
           used_at?: string | null
+          used_request_id?: string | null
         }
         Update: {
           created_at?: string
@@ -186,11 +192,14 @@ export type Database = {
           expires_at?: string
           id?: string
           invoice_number?: string | null
+          reserved_at?: string | null
+          reserved_request_id?: string | null
           status?: string
           stripe_invoice_id?: string | null
           survey_id?: string | null
           updated_at?: string
           used_at?: string | null
+          used_request_id?: string | null
         }
         Relationships: [
           {
@@ -627,6 +636,24 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      claim_customer_credit: {
+        Args: {
+          p_credit_code: string
+          p_customer_email: string
+          p_request_id: string
+        }
+        Returns: {
+          credit_code: string
+          credit_value_cents: number
+          currency: string
+          expires_at: string
+          id: string
+        }[]
+      }
+      consume_customer_credit: {
+        Args: { p_credit_id: string; p_request_id: string }
+        Returns: boolean
+      }
       consume_rate_limit: {
         Args: {
           p_bucket_key: string
@@ -640,6 +667,10 @@ export type Database = {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      release_customer_credit: {
+        Args: { p_credit_id: string; p_request_id: string }
         Returns: boolean
       }
     }
