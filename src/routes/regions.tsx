@@ -9,9 +9,10 @@ const priorityCities = SEO_INDEXED_CITY_SLUGS
 
 const grouped = Array.from(
   priorityCities.reduce((map, city) => {
-    const list = map.get(city.region) ?? [];
+    const region = city.region ?? "Autres régions";
+    const list = map.get(region) ?? [];
     list.push(city);
-    map.set(city.region, list);
+    map.set(region, list);
     return map;
   }, new Map<string, typeof quebecMunicipalities>()),
 ).sort(([a], [b]) => a.localeCompare(b, "fr"));
