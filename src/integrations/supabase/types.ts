@@ -525,6 +525,9 @@ export type Database = {
           needs_followup: boolean
           paid_at: string | null
           payment_method: string | null
+          refund_status: string | null
+          refunded_at: string | null
+          refunded_cents: number
           status: string
           stripe_customer_id: string | null
           stripe_invoice_id: string
@@ -549,6 +552,9 @@ export type Database = {
           needs_followup?: boolean
           paid_at?: string | null
           payment_method?: string | null
+          refund_status?: string | null
+          refunded_at?: string | null
+          refunded_cents?: number
           status?: string
           stripe_customer_id?: string | null
           stripe_invoice_id: string
@@ -573,6 +579,9 @@ export type Database = {
           needs_followup?: boolean
           paid_at?: string | null
           payment_method?: string | null
+          refund_status?: string | null
+          refunded_at?: string | null
+          refunded_cents?: number
           status?: string
           stripe_customer_id?: string | null
           stripe_invoice_id?: string
