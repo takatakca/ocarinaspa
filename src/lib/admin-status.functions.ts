@@ -26,6 +26,8 @@ export type SystemStatus = {
   automationCronSecret: boolean;
   creditRedemptionMigrationApplied: boolean;
   refundReconciliationMigrationApplied: boolean;
+  emailDelivery: boolean;
+  adminAccessVerified: boolean;
 };
 
 export const getSystemStatus = createServerFn({ method: "GET" })
@@ -38,6 +40,10 @@ export const getSystemStatus = createServerFn({ method: "GET" })
     if (error || !isAdmin) throw new Response("Forbidden: admin only", { status: 403 });
 
     const has = (v: string | undefined) => Boolean(v && v.trim().length > 0);
+    const gstRateEnv = () =>
+      (process.env.STRIPE_TAX_RATE_GST_ID || process.env.STRIPE_GST_TAX_RATE_ID || "").trim();
+    const qstRateEnv = () =>
+      (process.env.STRIPE_TAX_RATE_QST_ID || process.env.STRIPE_QST_TAX_RATE_ID || "").trim();
     const stripeSecret = has(process.env.STRIPE_SECRET_KEY);
     const stripePublishableKey = has(
       process.env.STRIPE_PUBLISHABLE_KEY || process.env.VITE_STRIPE_PUBLISHABLE_KEY,
@@ -55,8 +61,8 @@ export const getSystemStatus = createServerFn({ method: "GET" })
         stripeApiReachable = Boolean(account?.id);
         stripeAccountMatches = Boolean(expectedAccount && account?.id === expectedAccount);
 
-        const gstRateId = (process.env.STRIPE_TAX_RATE_GST_ID || "").trim();
-        const qstRateId = (process.env.STRIPE_TAX_RATE_QST_ID || "").trim();
+        const gstRateId = gstRateEnv();
+        const qstRateId = qstRateEnv();
         if (gstRateId && qstRateId) {
           const [gst, qst] = await Promise.all([
             stripe.taxRates.retrieve(gstRateId),
@@ -117,8 +123,8 @@ export const getSystemStatus = createServerFn({ method: "GET" })
       adminEmails: has(process.env.ADMIN_EMAILS),
       gstRegistration: has(process.env.GST_REGISTRATION_NUMBER),
       qstRegistration: has(process.env.QST_REGISTRATION_NUMBER),
-      stripeGstTaxRate: has(process.env.STRIPE_TAX_RATE_GST_ID),
-      stripeQstTaxRate: has(process.env.STRIPE_TAX_RATE_QST_ID),
+      stripeGstTaxRate: has(gstRateEnv()),
+      stripeQstTaxRate: has(qstRateEnv()),
       stripeTaxRatesValid,
       lovableAi: has(process.env.LOVABLE_API_KEY),
       hardeningMigrationApplied,
@@ -128,6 +134,8 @@ export const getSystemStatus = createServerFn({ method: "GET" })
       automationCronSecret: has(process.env.AUTOMATION_CRON_SECRET),
       creditRedemptionMigrationApplied,
       refundReconciliationMigrationApplied,
+      emailDelivery: has(process.env.RESEND_API_KEY) || has(process.env.TRANSACTIONAL_EMAIL_PROVIDER),
+      adminAccessVerified: true,
     };
   });
 

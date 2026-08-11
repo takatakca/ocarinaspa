@@ -36,6 +36,9 @@ const CHECKLIST: { id: string; label: string; hint?: string }[] = [
   { id: "11", label: "Tester le sondage complet" },
   { id: "12", label: "Vérifier la génération du crédit 10 % (OCARINA10-XXXX)" },
   { id: "13", label: "Vérifier les données dans /admin/experience" },
+  { id: "14", label: "PROD — vraie facture de petit montant : création admin → /payer-facture → paiement → webhook → paid → /paiement-confirme → note → sondage → crédit 10 % → /admin/experience" },
+  { id: "15", label: "PROD — Interac : pending_interac → admin confirme réception → suivi/sondage" },
+  { id: "16", label: "PROD — remboursement complet Stripe : crédit 10 % inutilisé annulé/réconcilié" },
 ];
 
 function StatusRow({ label, ok, note }: { label: string; ok: boolean; note?: string }) {
@@ -140,6 +143,25 @@ function AdminQaPage() {
 
   const completed = CHECKLIST.filter((c) => done[c.id]).length;
 
+  const GATE: { label: string; ok: boolean }[] = [
+    { label: "Stripe live configuré", ok: !!status?.stripeLiveMode && !!status?.stripeSecret && !!status?.stripePublishableKey && !!status?.stripeKeyModesMatch },
+    { label: "Compte Stripe vérifié", ok: !!status?.stripeApiReachable && !!status?.stripeAccountMatches },
+    { label: "Webhook live configuré", ok: !!status?.stripeWebhookSecret },
+    { label: "TPS configurée", ok: !!status?.gstRegistration && !!status?.stripeGstTaxRate && !!status?.stripeTaxRatesValid },
+    { label: "TVQ configurée", ok: !!status?.qstRegistration && !!status?.stripeQstTaxRate && !!status?.stripeTaxRatesValid },
+    { label: "Interac configuré", ok: !!status?.interacEmail && !!status?.interacName },
+    { label: "Cron d'automatisation configuré", ok: !!status?.automationCronSecret },
+    { label: "Google Ads configuré", ok: tags.ads && Object.values(AW_LABELS).some(Boolean) },
+    { label: "GA4 configuré", ok: tags.ga4 },
+    { label: "Google Review configuré", ok: !!status?.googleReviewUrl },
+    { label: "Facebook configuré", ok: !!status?.facebookPageUrl },
+    { label: "Livraison courriel configurée", ok: !!status?.emailDelivery },
+    { label: "Migrations base de données appliquées", ok: !!status?.hardeningMigrationApplied && !!status?.creditRedemptionMigrationApplied && !!status?.refundReconciliationMigrationApplied },
+    { label: "Accès admin vérifié", ok: !!status?.adminAccessVerified && !!status?.adminEmails },
+  ];
+  const gatePassed = GATE.filter((g) => g.ok).length;
+  const gateReady = gatePassed === GATE.length;
+
   return (
     <div className="container max-w-4xl py-10">
       <div className="mb-8 flex flex-wrap items-center justify-between gap-3">
@@ -161,6 +183,32 @@ function AdminQaPage() {
         </div>
       </div>
 
+
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle className="flex items-center justify-between">
+            <span>Porte de lancement (Go-Live)</span>
+            <span className={`text-sm font-normal ${gateReady ? "text-primary" : "text-destructive"}`}>
+              {gatePassed}/{GATE.length} vert
+            </span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="pt-0">
+          <p className="mb-3 text-sm text-muted-foreground">
+            Ne pas passer en production tant que ces points ne sont pas tous verts.
+          </p>
+          {GATE.map((g) => (
+            <StatusRow key={g.label} label={g.label} ok={g.ok} />
+          ))}
+          <div
+            className={`mt-4 rounded-md border p-3 text-sm font-medium ${
+              gateReady ? "border-primary/40 bg-primary/10 text-primary" : "border-destructive/40 bg-destructive/10 text-destructive"
+            }`}
+          >
+            {gateReady ? "Porte ouverte : la configuration production est complète." : "Porte fermée : configuration production incomplète."}
+          </div>
+        </CardContent>
+      </Card>
       <Card className="mb-6">
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
@@ -241,6 +289,7 @@ function AdminQaPage() {
           <StatusRow label="URL publique du site" ok={!!status?.publicSiteUrl} note="PUBLIC_SITE_URL pour les liens automatiques post-paiement." />
           <StatusRow label="Google Review URL" ok={!!status?.googleReviewUrl} note="Lien officiel d'avis Google" />
           <StatusRow label="Facebook URL" ok={!!status?.facebookPageUrl} note="Page Facebook Ocarina Spa" />
+          <StatusRow label="Livraison courriel" ok={!!status?.emailDelivery} note="Fournisseur transactionnel — un envoi réel doit être testé de bout en bout." />
         </CardContent>
       </Card>
     </div>

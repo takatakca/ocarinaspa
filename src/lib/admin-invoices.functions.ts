@@ -53,8 +53,8 @@ export async function createStripeInvoiceCore(
   const isLive = (process.env.STRIPE_SECRET_KEY ?? "").startsWith("sk_live_");
   const gstRegistration = (process.env.GST_REGISTRATION_NUMBER ?? "").trim();
   const qstRegistration = (process.env.QST_REGISTRATION_NUMBER ?? "").trim();
-  const gstTaxRateId = (process.env.STRIPE_TAX_RATE_GST_ID ?? "").trim();
-  const qstTaxRateId = (process.env.STRIPE_TAX_RATE_QST_ID ?? "").trim();
+  const gstTaxRateId = (process.env.STRIPE_TAX_RATE_GST_ID || process.env.STRIPE_GST_TAX_RATE_ID || "").trim();
+  const qstTaxRateId = (process.env.STRIPE_TAX_RATE_QST_ID || process.env.STRIPE_QST_TAX_RATE_ID || "").trim();
   if (data.applyTaxes && isLive && (!gstRegistration || !qstRegistration || !gstTaxRateId || !qstTaxRateId)) {
     throw new Error("Facturation taxes non prête en production : configurez les numéros TPS/TVQ et les Tax Rate IDs Stripe avant de créer une facture taxable.");
   }

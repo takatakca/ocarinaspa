@@ -150,6 +150,7 @@ export const Route = createFileRoute("/api/public/stripe-webhook")({
             "invoice.payment_failed",
             "invoice.voided",
             "invoice.paid",
+            "invoice.payment_succeeded",
           ]);
 
           if (relevant.has(event.type) && objectId) {
@@ -226,7 +227,7 @@ export const Route = createFileRoute("/api/public/stripe-webhook")({
             // follow-up task per invoice, create an opaque experience link, then queue an email
             // when the optional transactional-email infrastructure is available. Payment
             // processing never fails because email delivery is unavailable.
-            if (event.type === "invoice.paid" && isPaid) {
+            if ((event.type === "invoice.paid" || event.type === "invoice.payment_succeeded") && isPaid) {
               const followupKey = `post-payment:${invoice.id}`;
               const { data: followupTask, error: followupClaimErr } = await supabaseAdmin
                 .from("automation_tasks" as any)
