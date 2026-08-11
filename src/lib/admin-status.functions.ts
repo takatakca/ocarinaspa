@@ -26,7 +26,14 @@ export type SystemStatus = {
   automationCronSecret: boolean;
   creditRedemptionMigrationApplied: boolean;
   refundReconciliationMigrationApplied: boolean;
+  emailDelivery: boolean;
+  adminAccessVerified: boolean;
 };
+
+const gstRateEnv = () =>
+  (process.env.STRIPE_TAX_RATE_GST_ID || process.env.STRIPE_GST_TAX_RATE_ID || "").trim();
+const qstRateEnv = () =>
+  (process.env.STRIPE_TAX_RATE_QST_ID || process.env.STRIPE_QST_TAX_RATE_ID || "").trim();
 
 export const getSystemStatus = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
