@@ -30,11 +30,6 @@ export type SystemStatus = {
   adminAccessVerified: boolean;
 };
 
-const gstRateEnv = () =>
-  (process.env.STRIPE_TAX_RATE_GST_ID || process.env.STRIPE_GST_TAX_RATE_ID || "").trim();
-const qstRateEnv = () =>
-  (process.env.STRIPE_TAX_RATE_QST_ID || process.env.STRIPE_QST_TAX_RATE_ID || "").trim();
-
 export const getSystemStatus = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<SystemStatus> => {
@@ -45,6 +40,10 @@ export const getSystemStatus = createServerFn({ method: "GET" })
     if (error || !isAdmin) throw new Response("Forbidden: admin only", { status: 403 });
 
     const has = (v: string | undefined) => Boolean(v && v.trim().length > 0);
+    const gstRateEnv = () =>
+      (process.env.STRIPE_TAX_RATE_GST_ID || process.env.STRIPE_GST_TAX_RATE_ID || "").trim();
+    const qstRateEnv = () =>
+      (process.env.STRIPE_TAX_RATE_QST_ID || process.env.STRIPE_QST_TAX_RATE_ID || "").trim();
     const stripeSecret = has(process.env.STRIPE_SECRET_KEY);
     const stripePublishableKey = has(
       process.env.STRIPE_PUBLISHABLE_KEY || process.env.VITE_STRIPE_PUBLISHABLE_KEY,
