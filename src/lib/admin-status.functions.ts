@@ -18,6 +18,9 @@ export type SystemStatus = {
   stripeGstTaxRate: boolean;
   stripeQstTaxRate: boolean;
   stripeTaxRatesValid: boolean;
+  stripeGstTaxRateVerified: boolean;
+  stripeQstTaxRateVerified: boolean;
+  googleReviewCompliance: boolean;
   lovableAi: boolean;
   hardeningMigrationApplied: boolean;
   googleReviewUrl: boolean;

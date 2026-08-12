@@ -25,7 +25,7 @@ export async function assertStripeAccountMatches(options: { requireConfiguredInL
     throw new Error("STRIPE_ACCOUNT_ID doit être configuré avant toute écriture Stripe en production.");
   }
   if (_accountCheck && Date.now() - _accountCheck.checkedAt < 5 * 60 * 1000 && _accountCheck.expected === expected) {
-    if (expected && _accountCheck.actual !== expected) throw new Error("La clé Stripe active ne correspond pas au STRIPE_ACCOUNT_ID configuré.");
+    if (expected && _accountCheck.actual !== expected) throw new Error("Compte Stripe production non vérifié.");
     return _accountCheck.actual;
   }
   const account = await (stripe.accounts.retrieve as unknown as () => Promise<{ id: string }>)();
