@@ -32,7 +32,7 @@ export async function assertStripeAccountMatches(options: { requireConfiguredInL
   const actual = account.id;
   _accountCheck = { expected, actual, checkedAt: Date.now() };
   if (expected && actual !== expected) {
-    throw new Error(`Compte Stripe incorrect: la clé active pointe vers ${actual}, pas vers le compte configuré.`);
+    throw new Error("Compte Stripe production non vérifié.");
   }
   return actual;
 }
