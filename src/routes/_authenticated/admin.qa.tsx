@@ -39,6 +39,8 @@ const CHECKLIST: { id: string; label: string; hint?: string }[] = [
   { id: "14", label: "PROD — vraie facture de petit montant : création admin → /payer-facture → paiement → webhook → paid → /paiement-confirme → note → sondage → crédit 10 % → /admin/experience" },
   { id: "15", label: "PROD — Interac : pending_interac → admin confirme réception → suivi/sondage" },
   { id: "16", label: "PROD — remboursement complet Stripe : crédit 10 % inutilisé annulé/réconcilié" },
+  { id: "17", label: "PROD — réutiliser le crédit OCARINA10-XXXX sur une nouvelle facture", hint: "Réduction Stripe réelle, crédit marqué utilisé, réutilisation impossible" },
+  { id: "18", label: "Conformité Google Review : lien visible pour toutes les notes (1-5★), aucun incitatif, crédit lié au sondage seulement" },
 ];
 
 function StatusRow({ label, ok, note }: { label: string; ok: boolean; note?: string }) {
@@ -147,8 +149,8 @@ function AdminQaPage() {
     { label: "Stripe live configuré", ok: !!status?.stripeLiveMode && !!status?.stripeSecret && !!status?.stripePublishableKey && !!status?.stripeKeyModesMatch },
     { label: "Compte Stripe vérifié", ok: !!status?.stripeApiReachable && !!status?.stripeAccountMatches },
     { label: "Webhook live configuré", ok: !!status?.stripeWebhookSecret },
-    { label: "TPS configurée", ok: !!status?.gstRegistration && !!status?.stripeGstTaxRate && !!status?.stripeTaxRatesValid },
-    { label: "TVQ configurée", ok: !!status?.qstRegistration && !!status?.stripeQstTaxRate && !!status?.stripeTaxRatesValid },
+    { label: "TPS vérifiée auprès de Stripe (5 %, active, live)", ok: !!status?.gstRegistration && !!status?.stripeGstTaxRate && !!status?.stripeGstTaxRateVerified },
+    { label: "TVQ vérifiée auprès de Stripe (9,975 %, active, live)", ok: !!status?.qstRegistration && !!status?.stripeQstTaxRate && !!status?.stripeQstTaxRateVerified },
     { label: "Interac configuré", ok: !!status?.interacEmail && !!status?.interacName },
     { label: "Cron d'automatisation configuré", ok: !!status?.automationCronSecret },
     { label: "Google Ads configuré", ok: tags.ads && Object.values(AW_LABELS).some(Boolean) },
@@ -158,6 +160,7 @@ function AdminQaPage() {
     { label: "Livraison courriel configurée", ok: !!status?.emailDelivery },
     { label: "Migrations base de données appliquées", ok: !!status?.hardeningMigrationApplied && !!status?.creditRedemptionMigrationApplied && !!status?.refundReconciliationMigrationApplied },
     { label: "Accès admin vérifié", ok: !!status?.adminAccessVerified && !!status?.adminEmails },
+    { label: "Conformité Google Review (aucun filtrage, aucun incitatif)", ok: !!status?.googleReviewCompliance },
   ];
   const gatePassed = GATE.filter((g) => g.ok).length;
   const gateReady = gatePassed === GATE.length;
