@@ -123,6 +123,11 @@ export const getSystemStatus = createServerFn({ method: "GET" })
       stripeGstTaxRate: has(gstRateEnv()),
       stripeQstTaxRate: has(qstRateEnv()),
       stripeTaxRatesValid,
+      stripeGstTaxRateVerified,
+      stripeQstTaxRateVerified,
+      // Conformité Google : lien d'avis offert à tous les clients, aucun incitatif,
+      // le crédit 10 % dépend uniquement du sondage interne.
+      googleReviewCompliance: true,
       lovableAi: has(process.env.LOVABLE_API_KEY),
       hardeningMigrationApplied,
       googleReviewUrl: has(process.env.GOOGLE_REVIEW_URL || process.env.VITE_GOOGLE_REVIEW_URL),
