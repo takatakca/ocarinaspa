@@ -44,3 +44,46 @@ export function stripeModesMatch() {
   return (secret.startsWith("sk_live_") && publishable.startsWith("pk_live_")) ||
     (secret.startsWith("sk_test_") && publishable.startsWith("pk_test_"));
 }
+
+export type TaxRateCheck = { ok: boolean; active: boolean; livemode: boolean; percentageOk: boolean; found: boolean };
+
+async function checkTaxRate(id: string, expectedPercentage: number, requireLive: boolean): Promise<TaxRateCheck> {
+  const empty: TaxRateCheck = { ok: false, active: false, livemode: false, percentageOk: false, found: false };
+  if (!id || !id.startsWith("txr_")) return empty;
+  try {
+    const rate = await getStripe().taxRates.retrieve(id);
+    const active = rate.active === true;
+    const livemode = rate.livemode === true;
+    const percentageOk = Math.abs(Number(rate.percentage) - expectedPercentage) < 0.0001;
+    return {
+      found: true,
+      active,
+      livemode,
+      percentageOk,
+      ok: active && percentageOk && (!requireLive || livemode),
+    };
+  } catch {
+    return empty;
+  }
+}
+
+/** Validate the real Stripe TaxRate objects (not just the txr_ prefix). */
+export async function verifyStripeTaxRates(requireLive: boolean) {
+  const gstId = (process.env.STRIPE_TAX_RATE_GST_ID || process.env.STRIPE_GST_TAX_RATE_ID || "").trim();
+  const qstId = (process.env.STRIPE_TAX_RATE_QST_ID || process.env.STRIPE_QST_TAX_RATE_ID || "").trim();
+  const [gst, qst] = await Promise.all([
+    checkTaxRate(gstId, 5, requireLive),
+    checkTaxRate(qstId, 9.975, requireLive),
+  ]);
+  return { gst, qst, ok: gst.ok && qst.ok };
+}
+
+/** Blocks taxable live invoice creation when the Stripe tax rate objects are not verified. */
+export async function assertTaxRatesUsable() {
+  const live = (process.env.STRIPE_SECRET_KEY ?? "").startsWith("sk_live_");
+  const result = await verifyStripeTaxRates(live);
+  if (!result.ok) {
+    throw new Error("Taxes non vérifiées auprès de Stripe (TPS 5 % / TVQ 9,975 %, actives et en mode production). Création de facture taxable bloquée.");
+  }
+  return result;
+}
