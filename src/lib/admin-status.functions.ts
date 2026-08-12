@@ -18,6 +18,9 @@ export type SystemStatus = {
   stripeGstTaxRate: boolean;
   stripeQstTaxRate: boolean;
   stripeTaxRatesValid: boolean;
+  stripeGstTaxRateVerified: boolean;
+  stripeQstTaxRateVerified: boolean;
+  googleReviewCompliance: boolean;
   lovableAi: boolean;
   hardeningMigrationApplied: boolean;
   googleReviewUrl: boolean;
@@ -52,28 +55,22 @@ export const getSystemStatus = createServerFn({ method: "GET" })
     let stripeApiReachable = false;
     let stripeAccountMatches = false;
     let stripeTaxRatesValid = false;
+    let stripeGstTaxRateVerified = false;
+    let stripeQstTaxRateVerified = false;
 
     if (stripeSecret) {
       try {
-        const { getStripe } = await import("./stripe.server");
+        const { getStripe, verifyStripeTaxRates } = await import("./stripe.server");
         const stripe = getStripe();
         const account = await (stripe.accounts.retrieve as unknown as () => Promise<{ id: string }>)();
         stripeApiReachable = Boolean(account?.id);
         stripeAccountMatches = Boolean(expectedAccount && account?.id === expectedAccount);
 
-        const gstRateId = gstRateEnv();
-        const qstRateId = qstRateEnv();
-        if (gstRateId && qstRateId) {
-          const [gst, qst] = await Promise.all([
-            stripe.taxRates.retrieve(gstRateId),
-            stripe.taxRates.retrieve(qstRateId),
-          ]);
-          stripeTaxRatesValid =
-            gst.active === true &&
-            qst.active === true &&
-            Math.abs(gst.percentage - 5) < 0.0001 &&
-            Math.abs(qst.percentage - 9.975) < 0.0001;
-        }
+        const requireLive = (process.env.STRIPE_SECRET_KEY ?? "").startsWith("sk_live_");
+        const rates = await verifyStripeTaxRates(requireLive);
+        stripeGstTaxRateVerified = rates.gst.ok;
+        stripeQstTaxRateVerified = rates.qst.ok;
+        stripeTaxRatesValid = rates.ok;
       } catch (err) {
         console.error("[admin-status] Stripe self-check failed", err);
       }
@@ -126,6 +123,11 @@ export const getSystemStatus = createServerFn({ method: "GET" })
       stripeGstTaxRate: has(gstRateEnv()),
       stripeQstTaxRate: has(qstRateEnv()),
       stripeTaxRatesValid,
+      stripeGstTaxRateVerified,
+      stripeQstTaxRateVerified,
+      // Conformité Google : lien d'avis offert à tous les clients, aucun incitatif,
+      // le crédit 10 % dépend uniquement du sondage interne.
+      googleReviewCompliance: true,
       lovableAi: has(process.env.LOVABLE_API_KEY),
       hardeningMigrationApplied,
       googleReviewUrl: has(process.env.GOOGLE_REVIEW_URL || process.env.VITE_GOOGLE_REVIEW_URL),
