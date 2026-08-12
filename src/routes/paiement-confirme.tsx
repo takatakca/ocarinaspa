@@ -244,6 +244,70 @@ function PaiementConfirmePage() {
   );
 }
 
+function GoogleReviewCard({
+  googleReviewUrl,
+  secondary,
+}: {
+  googleReviewUrl: string | null;
+  secondary: boolean;
+}) {
+  return (
+    <div className="bg-background rounded-xl border border-border shadow-sm p-6">
+      <h2 className={secondary ? "font-display text-lg font-semibold" : "font-display text-xl font-semibold"}>
+        {secondary ? "Partager mon expérience sur Google" : "Partager votre expérience sur Google"}
+      </h2>
+      <p className="text-sm text-muted-foreground mt-2">
+        {secondary
+          ? "Vous pouvez aussi publier un avis honnête sur Google, quel que soit votre niveau de satisfaction. Cette étape est facultative et n'a aucun effet sur votre crédit client."
+          : "Merci pour votre confiance. Si vous souhaitez partager votre expérience publiquement, vous pouvez laisser un avis honnête sur Google. Cette étape est entièrement facultative et n'a aucun effet sur votre crédit client."}
+      </p>
+      {googleReviewUrl ? (
+        <a
+          href={googleReviewUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={() => trackGoogleReviewClick()}
+          className={
+            secondary
+              ? "inline-flex items-center gap-2 mt-4 border border-border px-5 py-2.5 rounded-md font-semibold hover:bg-surface"
+              : "inline-flex items-center gap-2 mt-4 bg-brand text-brand-foreground px-5 py-2.5 rounded-md font-semibold hover:bg-brand-dark"
+          }
+        >
+          Laisser un avis Google <ExternalLink className="w-4 h-4" />
+        </a>
+      ) : (
+        <p className="mt-3 text-xs text-muted-foreground">
+          Le lien d'avis Google sera affiché ici dès qu'il sera configuré par l'administrateur.
+        </p>
+      )}
+    </div>
+  );
+}
+
+function SurveyCard({ surveyToken }: { surveyToken: string }) {
+  return (
+    <div className="bg-background rounded-xl border border-border shadow-sm p-6">
+      <div className="flex items-start gap-3">
+        <MessageSquare className="w-6 h-6 text-brand shrink-0 mt-0.5" />
+        <div className="flex-1">
+          <h3 className="font-semibold">Aidez-nous à améliorer notre service</h3>
+          <p className="text-sm text-muted-foreground mt-1">
+            Complétez notre court sondage interne et recevez un crédit magasin égal à 10&nbsp;%
+            du montant réellement payé, applicable sur un prochain service Ocarina Spa. Ce crédit
+            est lié uniquement au sondage interne, jamais à un avis public.
+          </p>
+          <a
+            href={`/sondage?token=${encodeURIComponent(surveyToken)}`}
+            className="inline-block mt-3 bg-brand text-brand-foreground px-5 py-2.5 rounded-md font-semibold hover:bg-brand-dark"
+          >
+            Remplir le sondage
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function PostRatingActions({
   rating,
   surveyToken,
@@ -257,16 +321,17 @@ function PostRatingActions({
   googleReviewUrl: string | null;
   facebookUrl: string | null;
 }) {
+  const lowRating = rating <= 3;
   return (
     <div className="space-y-4">
-      {rating <= 3 && (
+      {lowRating && (
         <div className="bg-background rounded-xl border border-red-300 dark:border-red-900 shadow-sm p-6">
           <h2 className="font-display text-xl font-semibold text-red-700 dark:text-red-400">
-            Nous voulons mieux comprendre ce qui s'est passé
+            Nous voulons améliorer votre expérience
           </h2>
           <p className="text-sm mt-2">
+            Expliquez-nous ce qui s'est passé dans le sondage, demandez un rappel ou posez une question.
             Votre demande a été signalée à notre équipe{needsFollowup ? " pour un suivi" : ""}.
-            Vous pouvez aussi nous joindre directement.
           </p>
           <a
             href={`tel:${SITE.phoneTel}`}
@@ -278,47 +343,17 @@ function PostRatingActions({
         </div>
       )}
 
-      <div className="bg-background rounded-xl border border-border shadow-sm p-6">
-        <h2 className="font-display text-xl font-semibold">Partager votre expérience sur Google</h2>
-        <p className="text-sm text-muted-foreground mt-2">
-          Si vous le souhaitez, vous pouvez laisser un avis honnête qui reflète votre expérience.
-          Cette étape est entièrement facultative et n'a aucun effet sur votre crédit client.
-        </p>
-        {googleReviewUrl ? (
-          <a
-            href={googleReviewUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={() => trackGoogleReviewClick()}
-            className="inline-flex items-center gap-2 mt-4 bg-brand text-brand-foreground px-5 py-2.5 rounded-md font-semibold hover:bg-brand-dark"
-          >
-            Laisser un avis Google <ExternalLink className="w-4 h-4" />
-          </a>
-        ) : (
-          <p className="mt-3 text-xs text-muted-foreground">
-            Le lien d'avis Google sera affiché ici dès qu'il sera configuré par l'administrateur.
-          </p>
-        )}
-      </div>
-
-      <div className="bg-background rounded-xl border border-border shadow-sm p-6">
-        <div className="flex items-start gap-3">
-          <MessageSquare className="w-6 h-6 text-brand shrink-0 mt-0.5" />
-          <div className="flex-1">
-            <h3 className="font-semibold">Aidez-nous à améliorer notre service</h3>
-            <p className="text-sm text-muted-foreground mt-1">
-              Complétez notre court sondage interne et recevez un crédit magasin égal à 10&nbsp;%
-              du montant réellement payé, applicable sur un prochain service Ocarina Spa.
-            </p>
-            <a
-              href={`/sondage?token=${encodeURIComponent(surveyToken)}`}
-              className="inline-block mt-3 bg-brand text-brand-foreground px-5 py-2.5 rounded-md font-semibold hover:bg-brand-dark"
-            >
-              Remplir le sondage
-            </a>
-          </div>
-        </div>
-      </div>
+      {lowRating ? (
+        <>
+          <SurveyCard surveyToken={surveyToken} />
+          <GoogleReviewCard googleReviewUrl={googleReviewUrl} secondary />
+        </>
+      ) : (
+        <>
+          <GoogleReviewCard googleReviewUrl={googleReviewUrl} secondary={false} />
+          <SurveyCard surveyToken={surveyToken} />
+        </>
+      )}
 
       {facebookUrl && (
         <div className="bg-background rounded-xl border border-border shadow-sm p-6">
