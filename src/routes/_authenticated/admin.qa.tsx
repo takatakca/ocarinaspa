@@ -285,8 +285,8 @@ function AdminQaPage() {
           <StatusRow label="Mode Stripe live" ok={!!status?.stripeLiveMode} note="Doit rester test jusqu’à validation finale, puis passer live." />
           <StatusRow label="No TPS" ok={!!status?.gstRegistration} note="Requis pour les factures taxables en production." />
           <StatusRow label="No TVQ" ok={!!status?.qstRegistration} note="Requis pour les factures taxables en production." />
-          <StatusRow label="Stripe Tax Rate TPS" ok={!!status?.stripeGstTaxRate} note="STRIPE_TAX_RATE_GST_ID" />
-          <StatusRow label="Stripe Tax Rate TVQ" ok={!!status?.stripeQstTaxRate} note="STRIPE_TAX_RATE_QST_ID" />
+          <StatusRow label="Stripe Tax Rate TPS" ok={!!status?.stripeGstTaxRate} note="STRIPE_GST_TAX_RATE_ID" />
+          <StatusRow label="Stripe Tax Rate TVQ" ok={!!status?.stripeQstTaxRate} note="STRIPE_QST_TAX_RATE_ID" />
           <StatusRow label="Taux Stripe validés" ok={!!status?.stripeTaxRatesValid} note="TPS 5 % et TVQ 9,975 %, actifs dans Stripe." />
           <StatusRow label="Assistant backend" ok={!!status?.lovableAi} note="LOVABLE_API_KEY" />
           <StatusRow label="URL publique du site" ok={!!status?.publicSiteUrl} note="PUBLIC_SITE_URL pour les liens automatiques post-paiement." />

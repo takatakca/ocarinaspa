@@ -69,8 +69,8 @@ async function checkTaxRate(id: string, expectedPercentage: number, requireLive:
 
 /** Validate the real Stripe TaxRate objects (not just the txr_ prefix). */
 export async function verifyStripeTaxRates(requireLive: boolean) {
-  const gstId = (process.env.STRIPE_TAX_RATE_GST_ID || process.env.STRIPE_GST_TAX_RATE_ID || "").trim();
-  const qstId = (process.env.STRIPE_TAX_RATE_QST_ID || process.env.STRIPE_QST_TAX_RATE_ID || "").trim();
+  const gstId = (process.env.STRIPE_GST_TAX_RATE_ID || process.env.STRIPE_TAX_RATE_GST_ID || "").trim();
+  const qstId = (process.env.STRIPE_QST_TAX_RATE_ID || process.env.STRIPE_TAX_RATE_QST_ID || "").trim();
   const [gst, qst] = await Promise.all([
     checkTaxRate(gstId, 5, requireLive),
     checkTaxRate(qstId, 9.975, requireLive),
