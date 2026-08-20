@@ -44,9 +44,9 @@ export const getSystemStatus = createServerFn({ method: "GET" })
 
     const has = (v: string | undefined) => Boolean(v && v.trim().length > 0);
     const gstRateEnv = () =>
-      (process.env.STRIPE_TAX_RATE_GST_ID || process.env.STRIPE_GST_TAX_RATE_ID || "").trim();
+      (process.env.STRIPE_GST_TAX_RATE_ID || process.env.STRIPE_TAX_RATE_GST_ID || "").trim();
     const qstRateEnv = () =>
-      (process.env.STRIPE_TAX_RATE_QST_ID || process.env.STRIPE_QST_TAX_RATE_ID || "").trim();
+      (process.env.STRIPE_QST_TAX_RATE_ID || process.env.STRIPE_TAX_RATE_QST_ID || "").trim();
     const stripeSecret = has(process.env.STRIPE_SECRET_KEY);
     const stripePublishableKey = has(
       process.env.STRIPE_PUBLISHABLE_KEY || process.env.VITE_STRIPE_PUBLISHABLE_KEY,
