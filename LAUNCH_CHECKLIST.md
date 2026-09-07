@@ -66,7 +66,7 @@ In live mode:
    - `invoice.finalized`
    - `charge.refunded`
 6. Put that endpoint's live `whsec_...` in `STRIPE_WEBHOOK_SECRET`.
-7. Configure `AUTOMATION_CRON_SECRET` and schedule an hourly authenticated POST to `/api/internal/automation-reconcile`. This reconciles Stripe/local status, retries pending follow-up delivery, expires credits, and flags recovery work.
+7. Configure `AUTOMATION_CRON_SECRET_V2` and schedule an hourly authenticated POST to `/api/internal/automation-reconcile`. This reconciles Stripe/local status, retries pending follow-up delivery, expires credits, and flags recovery work.
 8. Confirm `/admin/qa` says the Stripe API is reachable and the returned account matches `STRIPE_ACCOUNT_ID`.
 
 ### Card payment flow

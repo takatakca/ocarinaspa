@@ -274,7 +274,7 @@ function AdminQaPage() {
           <StatusRow label="Migration pré-production" ok={!!status?.hardeningMigrationApplied} note="Mémoire, idempotence, tokens et ledger webhook disponibles." />
           <StatusRow label="Crédits magasin transactionnels" ok={!!status?.creditRedemptionMigrationApplied} note="Réservation atomique et protection contre le double usage." />
           <StatusRow label="Réconciliation remboursements" ok={!!status?.refundReconciliationMigrationApplied} note="Colonnes de remboursement + webhook charge.refunded disponibles." />
-          <StatusRow label="Watchdog automatique" ok={!!status?.automationCronSecret} note="AUTOMATION_CRON_SECRET — à appeler périodiquement via /api/internal/automation-reconcile." />
+          <StatusRow label="Watchdog automatique" ok={!!status?.automationCronSecret} note="AUTOMATION_CRON_SECRET_V2 — à appeler périodiquement via /api/internal/automation-reconcile." />
           <StatusRow label="Interac" ok={!!status?.interacEmail} note="Courriel de virement Interac" />
           <StatusRow
             label="Question de sécurité Interac"
