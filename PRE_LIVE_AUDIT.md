@@ -111,7 +111,7 @@ If Ocarina Spa invoices taxable services, confirm the business registration/tax 
 
 ### BLOCKER 7 — Automation scheduler
 
-Set `AUTOMATION_CRON_SECRET` and configure the host scheduler to POST periodically (recommended hourly for this workflow) to `/api/internal/automation-reconcile` with the Bearer secret. Without the scheduler, the reconciliation exists but is not automatic.
+Set `AUTOMATION_CRON_SECRET_V2` and configure the host scheduler to POST periodically (recommended hourly for this workflow) to `/api/internal/automation-reconcile` with the Bearer secret. Without the scheduler, the reconciliation exists but is not automatic.
 
 ### BLOCKER 8 — Transactional email delivery
 

@@ -133,7 +133,7 @@ export const getSystemStatus = createServerFn({ method: "GET" })
       googleReviewUrl: has(process.env.GOOGLE_REVIEW_URL || process.env.VITE_GOOGLE_REVIEW_URL),
       facebookPageUrl: has(process.env.FACEBOOK_PAGE_URL || process.env.VITE_FACEBOOK_PAGE_URL),
       publicSiteUrl: has(process.env.PUBLIC_SITE_URL),
-      automationCronSecret: has(process.env.AUTOMATION_CRON_SECRET),
+      automationCronSecret: has(process.env.AUTOMATION_CRON_SECRET_V2),
       creditRedemptionMigrationApplied,
       refundReconciliationMigrationApplied,
       emailDelivery: has(process.env.RESEND_API_KEY) && has(process.env.EMAIL_FROM),
