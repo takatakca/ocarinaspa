@@ -11,7 +11,7 @@ export const Route = createFileRoute("/api/internal/automation-reconcile")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const expected = (process.env.AUTOMATION_CRON_SECRET ?? "").trim();
+        const expected = (process.env.AUTOMATION_CRON_SECRET_V2 ?? "").trim();
         if (!expected) return Response.json({ error: "Not configured" }, { status: 503 });
         const auth = request.headers.get("authorization") ?? "";
         const supplied = auth.startsWith("Bearer ") ? auth.slice(7).trim() : "";
