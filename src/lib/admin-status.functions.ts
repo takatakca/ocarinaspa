@@ -136,7 +136,7 @@ export const getSystemStatus = createServerFn({ method: "GET" })
       automationCronSecret: has(process.env.AUTOMATION_CRON_SECRET),
       creditRedemptionMigrationApplied,
       refundReconciliationMigrationApplied,
-      emailDelivery: has(process.env.RESEND_API_KEY) || has(process.env.TRANSACTIONAL_EMAIL_PROVIDER),
+      emailDelivery: has(process.env.RESEND_API_KEY) && has(process.env.EMAIL_FROM),
       adminAccessVerified: true,
     };
   });
