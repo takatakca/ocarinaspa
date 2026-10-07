@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { CheckCircle2, XCircle, FileText, Activity, RefreshCw } from "lucide-react";
-import { AW_LABELS } from "@/lib/gtag";
+import { AW_LABELS, GA4_ID } from "@/lib/gtag";
 
 export const Route = createFileRoute("/_authenticated/admin/qa")({
   component: AdminQaPage,
@@ -20,7 +20,6 @@ export const Route = createFileRoute("/_authenticated/admin/qa")({
 });
 
 const GOOGLE_ADS_ID = "AW-18182973757";
-const GA4_ID = "G-8YYZKVZBW0";
 
 const CHECKLIST: { id: string; label: string; hint?: string }[] = [
   { id: "1", label: "Créer une facture test de 1 $ CAD (Stripe test mode)", hint: "Dashboard Stripe → Invoices → Create invoice, ou /admin/factures" },

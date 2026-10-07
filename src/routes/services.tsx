@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Layout } from "@/components/Layout";
 import { SERVICE_TYPES } from "@/data/quebecMunicipalities";
 import { Stethoscope, Wrench, Sun, Snowflake, Droplets } from "lucide-react";
+import { altLinks } from "@/lib/seo";
 
 const icons: Record<string, typeof Stethoscope> = {
   "reparation-spa": Stethoscope,
@@ -19,6 +20,7 @@ export const Route = createFileRoute("/services")({
       { property: "og:title", content: "Nos services de spa au Québec" },
       { property: "og:description", content: "Réparation, installation, ouverture, fermeture, entretien à domicile dans les zones desservies au Québec." },
     ],
+    links: altLinks({ path: "/services", enPath: null }),
   }),
   component: Services,
 });

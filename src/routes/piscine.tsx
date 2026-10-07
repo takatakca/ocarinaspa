@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Layout } from "@/components/Layout";
 import { ServiceRequestForm } from "@/components/ServiceRequestForm";
-import { SITE, localBusinessSchema } from "@/lib/seo";
+import { SITE, localBusinessSchema, altLinks } from "@/lib/seo";
 import { trackPhoneCall } from "@/lib/gtag";
 import { Phone, Sun, Snowflake, Droplets, Sparkles } from "lucide-react";
 
@@ -20,6 +20,7 @@ export const Route = createFileRoute("/piscine")({
       { property: "og:title", content: "Service de piscine — Ocarina Spa Québec" },
       { property: "og:description", content: "Ouverture, fermeture, nettoyage et entretien de piscine dans les zones desservies au Québec." },
     ],
+    links: altLinks({ path: "/piscine", enPath: null }),
     scripts: [{ type: "application/ld+json", children: JSON.stringify(localBusinessSchema()) }],
   }),
   component: () => (

@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Layout } from "@/components/Layout";
 import { quebecMunicipalities, SEO_INDEXED_CITY_SLUGS } from "@/data/quebecMunicipalities";
 import { MapPin } from "lucide-react";
+import { altLinks } from "@/lib/seo";
 
 const priorityCities = SEO_INDEXED_CITY_SLUGS
   .map((slug) => quebecMunicipalities.find((m) => m.slug === slug))
@@ -32,6 +33,7 @@ export const Route = createFileRoute("/regions")({
         content: "Consultez les principaux secteurs où le service mobile Ocarina Spa est offert.",
       },
     ],
+    links: altLinks({ path: "/regions", enPath: null }),
   }),
   component: () => (
     <Layout>

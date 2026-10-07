@@ -1,6 +1,8 @@
 import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
 import { Toaster } from "@/components/ui/sonner";
 import { PrivacyConsentBanner } from "@/components/PrivacyConsentBanner";
+import { SITE } from "@/site.config";
+import { jsonLdScript, websiteJsonLd } from "@/seo/jsonld";
 
 import appCss from "../styles.css?url";
 
@@ -42,6 +44,8 @@ export const Route = createRootRoute({
       { property: "og:image", content: "https://ocarinaspa.ca/ocarina-logo.png" },
       { name: "twitter:image", content: "https://ocarinaspa.ca/ocarina-logo.png" },
       { property: "og:type", content: "website" },
+      { property: "og:site_name", content: SITE.name },
+      { property: "og:locale", content: SITE.locale },
     ],
     links: [
       {
@@ -49,6 +53,8 @@ export const Route = createRootRoute({
         href: appCss,
       },
     ],
+    // WebSite node only: pages already emit the LocalBusiness node (@id …/#business, src/lib/seo.ts).
+    scripts: [jsonLdScript({ ...websiteJsonLd(), publisher: { "@id": `${SITE.url}/#business` } })],
   }),
   shellComponent: RootShell,
   component: RootComponent,

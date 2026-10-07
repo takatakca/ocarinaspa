@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Layout } from "@/components/Layout";
 import { ServiceRequestForm } from "@/components/ServiceRequestForm";
-import { SITE, localBusinessSchema } from "@/lib/seo";
+import { SITE, localBusinessSchema, altLinks } from "@/lib/seo";
 import { trackPhoneCall } from "@/lib/gtag";
 import card from "@/assets/ocarina-card.jpg";
 import { Phone } from "lucide-react";
@@ -14,6 +14,7 @@ export const Route = createFileRoute("/vente-spas")({
       { property: "og:title", content: "Vente de spas — Ocarina Spa Québec" },
       { property: "og:description", content: "Spas neufs, accessoires, livraison et installation dans les zones desservies au Québec." },
     ],
+    links: altLinks({ path: "/vente-spas", enPath: null }),
     scripts: [{ type: "application/ld+json", children: JSON.stringify(localBusinessSchema()) }],
   }),
   component: () => (

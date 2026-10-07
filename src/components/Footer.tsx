@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { Phone, MapPin, AlertTriangle, Wrench, AlertCircle, CreditCard } from "lucide-react";
 import { SITE } from "@/lib/seo";
 import { trackPhoneCall } from "@/lib/gtag";
+import { ManageCookiesLink } from "@/consent/ManageCookiesLink";
 import logo from "@/assets/ocarina-logo.png";
 
 export function Footer() {
@@ -67,6 +68,7 @@ export function Footer() {
           <Link to="/confidentialite" className="block mt-2 text-sm hover:text-brand underline">
             Politique de confidentialité
           </Link>
+          <ManageCookiesLink className="block mt-2 text-sm hover:text-brand underline" />
           <p className="text-sm opacity-80 mt-4 flex items-start gap-2">
             <MapPin className="w-4 h-4 mt-0.5 shrink-0 text-brand" />
             <span>{SITE.address.street}<br />{SITE.address.city}, {SITE.address.region} {SITE.address.postalCode}</span>

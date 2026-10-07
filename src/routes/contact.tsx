@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Layout } from "@/components/Layout";
 import { ServiceRequestForm } from "@/components/ServiceRequestForm";
 import { Phone, MapPin, Clock } from "lucide-react";
-import { SITE } from "@/lib/seo";
+import { SITE, altLinks } from "@/lib/seo";
 import { trackPhoneCall } from "@/lib/gtag";
 
 export const Route = createFileRoute("/contact")({
@@ -13,6 +13,7 @@ export const Route = createFileRoute("/contact")({
       { property: "og:title", content: "Contact — Ocarina Spa Québec" },
       { property: "og:description", content: "Demandez un service de spa dans nos zones desservies au Québec. Réponse rapide." },
     ],
+    links: altLinks({ path: "/contact", enPath: null }),
   }),
   component: Contact,
 });
