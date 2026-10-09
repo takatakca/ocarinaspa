@@ -45,46 +45,58 @@ function Index() {
   return (
     <Layout>
       {/* 1. Hero */}
-      <section className="bg-surface">
-        <div className="container mx-auto px-4 py-14 md:py-20 grid lg:grid-cols-2 gap-10 items-center">
-          <div>
-            <p className="text-brand font-semibold tracking-wide uppercase text-sm">
-              Techniciens spécialisés • Service au Québec
+      <section className="relative overflow-hidden">
+        <div aria-hidden className="pointer-events-none absolute -top-40 right-[-10rem] w-[40rem] h-[40rem] rounded-full bg-brand/20 blur-3xl" />
+        <div aria-hidden className="pointer-events-none absolute bottom-[-12rem] left-[-8rem] w-[30rem] h-[30rem] rounded-full bg-gold/10 blur-3xl" />
+        <div className="relative container mx-auto px-4 pt-16 pb-24 md:pt-24 md:pb-32 grid lg:grid-cols-12 gap-12 items-center">
+          <div className="lg:col-span-7">
+            <p className="inline-flex items-center gap-2 glass rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-brand">
+              <span className="w-1.5 h-1.5 rounded-full bg-brand animate-pulse" />
+              Techniciens spécialisés • Québec
             </p>
-            <h1 className="mt-3 font-display text-4xl md:text-5xl lg:text-6xl font-bold leading-tight text-foreground">
-              Réparation et vente de <span className="text-brand">spas</span> au Québec
+            <h1 className="mt-6 font-display text-6xl md:text-7xl lg:text-[6.5rem] leading-[0.92] text-foreground">
+              L'art de la <span className="text-water">réparation</span><br />
+              de <span className="text-water">spas</span>
             </h1>
-            <p className="mt-6 text-lg text-muted-foreground max-w-lg">
-              Service mobile professionnel : diagnostic, réparation, ouverture, fermeture, pièces
-              et installation. Systèmes courants — Balboa, Gecko, Waterway, LX.
+            <p className="mt-8 text-lg md:text-xl text-muted-foreground max-w-xl leading-relaxed">
+              Service mobile haut de gamme : diagnostic, réparation, ouverture, fermeture, pièces
+              et installation. Balboa, Gecko, Waterway, LX.
             </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <a href={`tel:${SITE.phoneTel}`} onClick={trackPhoneCall} className="inline-flex items-center gap-2 bg-brand text-brand-foreground px-6 py-3.5 rounded-md font-semibold text-lg hover:bg-brand-dark transition-colors shadow-lg shadow-brand/30">
+            <div className="mt-10 flex flex-wrap gap-3">
+              <a href={`tel:${SITE.phoneTel}`} onClick={trackPhoneCall} className="group inline-flex items-center gap-2 bg-brand text-brand-foreground px-7 py-4 rounded-full font-semibold text-lg shadow-glow hover:scale-[1.03] transition-transform">
                 <Phone className="w-5 h-5" /> Appeler maintenant
               </a>
-              <Link to="/contact" onClick={trackQuickSubmission} className="inline-flex items-center gap-2 border-2 border-brand text-brand px-6 py-3.5 rounded-md font-semibold text-lg hover:bg-brand hover:text-brand-foreground transition-colors">
+              <Link to="/contact" onClick={trackQuickSubmission} className="inline-flex items-center gap-2 glass text-foreground px-7 py-4 rounded-full font-semibold text-lg hover:border-brand hover:text-brand transition-colors">
                 Soumission rapide
               </Link>
-              <Link to="/diagnostic" className="inline-flex items-center gap-2 border border-border text-foreground px-6 py-3.5 rounded-md font-semibold text-lg hover:border-brand hover:text-brand transition-colors">
+              <Link to="/diagnostic" className="inline-flex items-center gap-2 text-foreground px-5 py-4 font-semibold text-lg underline-offset-8 hover:underline hover:text-gold transition-colors">
                 <ClipboardCheck className="w-5 h-5" /> Pré-diagnostic
               </Link>
             </div>
-            <div className="mt-8 flex flex-wrap gap-2">
+            <div className="mt-10 flex flex-wrap gap-x-6 gap-y-3">
               {["Service mobile", "Diagnostic sur place", "Pièces courantes", "Service hivernal", "Suivi après intervention"].map((b) => (
-                <span key={b} className="inline-flex items-center gap-1.5 bg-card border border-border px-3 py-1.5 rounded-full text-xs text-foreground">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-brand" /> {b}
+                <span key={b} className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
+                  <CheckCircle2 className="w-4 h-4 text-gold" /> {b}
                 </span>
               ))}
             </div>
           </div>
-          <div className="relative">
-            <img
-              src={heroTechnician}
-              alt="Technicien Ocarina Spa en uniforme réparant un pack électronique de spa en hiver au Québec"
-              width={1600}
-              height={1067}
-              className="w-full h-auto rounded-2xl shadow-2xl object-cover"
-            />
+          <div className="lg:col-span-5 relative">
+            <div aria-hidden className="absolute inset-0 rounded-[2.5rem] border border-brand/40 animate-ripple" />
+            <div className="relative animate-float-slow">
+              <div className="absolute -inset-1 rounded-[2.5rem] bg-gradient-to-br from-glow via-brand to-gold opacity-60 blur-md" />
+              <img
+                src={heroTechnician}
+                alt="Technicien Ocarina Spa en uniforme réparant un pack électronique de spa en hiver au Québec"
+                width={1600}
+                height={1067}
+                className="relative w-full aspect-[4/5] rounded-[2.5rem] object-cover"
+              />
+              <div className="absolute -bottom-6 -left-6 glass rounded-2xl px-5 py-4 shadow-glow">
+                <div className="font-display text-4xl text-gold leading-none">24/7</div>
+                <div className="text-xs uppercase tracking-widest text-muted-foreground mt-1">Urgence hiver</div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
