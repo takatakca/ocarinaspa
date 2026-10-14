@@ -29,8 +29,8 @@ Set runtime secrets using the cPanel application environment (never commit an op
 
 Repository **Settings → Secrets and variables → Actions**:
 
-Variables:
-- `OCARINASPA_SUPABASE_URL` (project URL, public), `OCARINASPA_SUPABASE_PROJECT_ID` (public), `OCARINASPA_SUPABASE_PUBLISHABLE_KEY` (public browser key).
+Variables (facultatives pour les trois valeurs publiques Supabase préconfigurées dans le workflow, modifiables lors d'une migration de projet) :
+- `OCARINASPA_SUPABASE_URL` (project URL, public), `OCARINASPA_SUPABASE_PROJECT_ID` (public), `OCARINASPA_SUPABASE_PUBLISHABLE_KEY` (clé anon/public browser, pas une clé service role).
 - `OCARINASPA_AUTO_DEPLOY=true` **only after** cPanel has the correct Node app and the pre-live release blockers have been cleared. Default is off.
 - `OCARINASPA_PRODUCTION_URL=https://ocarinaspa.ca` for post-deploy verification.
 
