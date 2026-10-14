@@ -33,8 +33,12 @@ jobs:
           for name in VITE_SUPABASE_URL VITE_SUPABASE_PUBLISHABLE_KEY VITE_SUPABASE_PROJECT_ID; do
             if [ -z "${!name}" ]; then echo "::error::Missing GitHub Actions variable for $name"; exit 1; fi
           done
-      - name: Synchronize lockfile with package.json
-        run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+      - name: Regenerate npm lockfile without using stale resolution data
+        shell: bash
+        run: |
+          set -euo pipefail
+          mv package-lock.json package-lock.previous.json
+          npm install --package-lock-only --ignore-scripts --no-audit --no-fund
       - name: Install dependencies
         run: npm ci --no-audit --no-fund
       - name: Static pre-live gate
