@@ -13,11 +13,17 @@ console.log('Ocarina Spa — static pre-live gate\n');
 
 // Deployment contract
 const pkg = JSON.parse(read('package.json'));
-pkg.scripts?.start === 'node .output/server/index.mjs'
-  ? pass('production start points to .output/server/index.mjs')
-  : fail('production start command is not aligned with Node/Nitro output');
+if (read('vite.config.ts').includes('@lovable.dev/vite-tanstack-config') || pkg.devDependencies?.['@lovable.dev/vite-tanstack-config']) {
+  fail('editor-specific Vite configuration is still required');
+} else pass('Vite build is independent of the old editor');
+
+pkg.scripts?.start === 'node server.cjs' && exists('server.cjs') && read('server.cjs').includes('.output/server/index.mjs')
+  ? pass('cPanel startup bridge points to the Nitro node-server output')
+  : fail('Node/cPanel startup bridge is not aligned with .output/server/index.mjs');
 exists('vite.config.node.ts') ? pass('Node build config exists') : fail('vite.config.node.ts missing');
-exists('server.cjs') ? fail('obsolete server.cjs is present') : pass('no obsolete server.cjs entrypoint');
+pkg.scripts?.['prelive:check'] === 'node scripts/prelive-check.mjs'
+  ? pass('prelive static gate is executable via npm')
+  : fail('npm prelive:check script missing');
 exists('bun.lockb') ? fail('stale bun.lockb can override npm dependency resolution') : pass('npm is the only lockfile strategy');
 exists('wrangler.jsonc') ? fail('stale Cloudflare wrangler config is present in Node release') : pass('no stale Cloudflare wrangler deployment config');
 
@@ -29,11 +35,10 @@ if (!exists('package-lock.json')) {
   try {
     const lock = JSON.parse(read('package-lock.json'));
     const lockRoot = lock.packages?.[''] ?? {};
-    const a = JSON.stringify(pkg.dependencies ?? {});
-    const b = JSON.stringify(lockRoot.dependencies ?? {});
-    const c = JSON.stringify(pkg.devDependencies ?? {});
-    const d = JSON.stringify(lockRoot.devDependencies ?? {});
-    a === b && c === d ? pass('package.json and package-lock root dependencies agree') : fail('package-lock root dependencies are stale');
+    const equalDeps = (a, b) => Object.keys(a ?? {}).length === Object.keys(b ?? {}).length && Object.entries(a ?? {}).every(([name, version]) => b?.[name] === version);
+    equalDeps(pkg.dependencies, lockRoot.dependencies) && equalDeps(pkg.devDependencies, lockRoot.devDependencies)
+      ? pass('package.json and package-lock root dependencies agree')
+      : fail('package-lock root dependencies are stale');
     for (const dep of [...Object.keys(pkg.dependencies ?? {}), ...Object.keys(pkg.devDependencies ?? {})]) {
       const key = `node_modules/${dep}`;
       lock.packages?.[key] ? null : fail(`package-lock is missing installed metadata for root dependency ${dep}`);

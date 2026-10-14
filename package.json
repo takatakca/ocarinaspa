@@ -8,16 +8,16 @@
     "dev": "vite dev",
     "build": "vite build",
     "build:dev": "vite build --mode development",
-    "build:node": "cross-env NITRO_PRESET=node-server vite build --config vite.config.node.ts",
+    "build:node": "vite build --config vite.config.node.ts",
     "start": "node server.cjs",
     "preview": "vite preview",
     "lint": "eslint .",
     "format": "prettier --write .",
     "test": "vitest run",
-    "test:seo": "vitest run tests/seo.test.ts"
+    "test:seo": "vitest run tests/seo.test.ts",
+    "prelive:check": "node scripts/prelive-check.mjs"
   },
   "dependencies": {
-    "@cloudflare/vite-plugin": "^1.25.5",
     "@hono/node-server": "^2.0.2",
     "@hookform/resolvers": "^5.2.2",
     "@radix-ui/react-accordion": "^1.2.12",
@@ -78,7 +78,6 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.32.0",
-    "@lovable.dev/vite-tanstack-config": "2.25.3",
     "@types/node": "^22.16.5",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",

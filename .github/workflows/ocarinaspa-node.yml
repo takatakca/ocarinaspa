@@ -1,0 +1,107 @@
+name: Ocarina Spa — Node build and optional MochaHost deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write # commit a synchronized lockfile only after a successful build
+
+concurrency:
+  group: ocarinaspa-production
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      VITE_SUPABASE_URL: ${{ vars.OCARINASPA_SUPABASE_URL }}
+      VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.OCARINASPA_SUPABASE_PUBLISHABLE_KEY }}
+      VITE_SUPABASE_PROJECT_ID: ${{ vars.OCARINASPA_SUPABASE_PROJECT_ID }}
+      SUPABASE_URL: ${{ vars.OCARINASPA_SUPABASE_URL }}
+      SUPABASE_PUBLISHABLE_KEY: ${{ vars.OCARINASPA_SUPABASE_PUBLISHABLE_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          registry-url: https://registry.npmjs.org
+      - name: Check required public build configuration
+        shell: bash
+        run: |
+          for name in VITE_SUPABASE_URL VITE_SUPABASE_PUBLISHABLE_KEY VITE_SUPABASE_PROJECT_ID; do
+            if [ -z "${!name}" ]; then echo "::error::Missing GitHub Actions variable for $name"; exit 1; fi
+          done
+      - name: Synchronize lockfile with package.json
+        run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Static pre-live gate
+        run: npm run prelive:check
+      - name: Build standalone Node application
+        run: npm run build:node
+      - name: Record regenerated dependency lock
+        shell: bash
+        run: |
+          git add package-lock.json
+          if ! git diff --cached --quiet; then
+            git config user.name 'github-actions[bot]'
+            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            git commit -m 'chore(lockfile): synchronize verified Node dependencies [skip ci]'
+            git push origin HEAD:main
+          fi
+      - name: Package Node release
+        run: tar -czf ocarinaspa-node.tar.gz .output server.cjs package.json package-lock.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ocarinaspa-node-release
+          path: ocarinaspa-node.tar.gz
+          retention-days: 14
+
+  deploy:
+    if: ${{ vars.OCARINASPA_AUTO_DEPLOY == 'true' }}
+    needs: build
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: ocarinaspa-node-release
+      - run: tar -xzf ocarinaspa-node.tar.gz
+      - name: Deploy verified artifact to cPanel
+        shell: bash
+        env:
+          DEPLOY_HOST: ${{ secrets.OCARINASPA_SSH_HOST }}
+          DEPLOY_PORT: ${{ secrets.OCARINASPA_SSH_PORT }}
+          DEPLOY_USER: ${{ secrets.OCARINASPA_SSH_USER }}
+          APP_ROOT: ${{ secrets.OCARINASPA_SSH_APP_ROOT }}
+          SSH_PRIVATE_KEY: ${{ secrets.OCARINASPA_SSH_PRIVATE_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.OCARINASPA_SSH_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          for name in DEPLOY_HOST DEPLOY_PORT DEPLOY_USER APP_ROOT SSH_PRIVATE_KEY SSH_KNOWN_HOSTS; do
+            test -n "${!name}" || { echo "::error::Missing deployment secret $name"; exit 1; }
+          done
+          [[ "$DEPLOY_PORT" =~ ^[0-9]+$ ]] || exit 1
+          [[ "$DEPLOY_HOST" =~ ^[a-zA-Z0-9.-]+$ ]] || exit 1
+          [[ "$DEPLOY_USER" =~ ^[a-zA-Z0-9_-]+$ ]] || exit 1
+          [[ "$APP_ROOT" =~ ^/[a-zA-Z0-9_./-]+$ ]] || exit 1
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/id_ed25519 ~/.ssh/known_hosts
+          SSH=(ssh -i ~/.ssh/id_ed25519 -p "$DEPLOY_PORT" -o StrictHostKeyChecking=yes -o BatchMode=yes)
+          RSYNC_SSH="ssh -i $HOME/.ssh/id_ed25519 -p $DEPLOY_PORT -o StrictHostKeyChecking=yes -o BatchMode=yes"
+          "${SSH[@]}" "$DEPLOY_USER@$DEPLOY_HOST" "mkdir -p '$APP_ROOT/.output' '$APP_ROOT/tmp'"
+          rsync -az --delete -e "$RSYNC_SSH" .output/ "$DEPLOY_USER@$DEPLOY_HOST:$APP_ROOT/.output/"
+          rsync -az -e "$RSYNC_SSH" server.cjs package.json package-lock.json "$DEPLOY_USER@$DEPLOY_HOST:$APP_ROOT/"
+          "${SSH[@]}" "$DEPLOY_USER@$DEPLOY_HOST" "touch '$APP_ROOT/tmp/restart.txt'"
+      - name: Verify public homepage after restart
+        env:
+          SITE_URL: ${{ vars.OCARINASPA_PRODUCTION_URL }}
+        run: |
+          set -euo pipefail
+          test -n "$SITE_URL" || { echo "::error::Missing OCARINASPA_PRODUCTION_URL"; exit 1; }
+          curl --fail --location --retry 4 --retry-delay 5 --max-time 20 "$SITE_URL/" --output /dev/null

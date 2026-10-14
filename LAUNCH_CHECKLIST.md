@@ -2,14 +2,16 @@
 
 This checklist is the release gate. Do not switch production traffic until every **BLOCKER** is green.
 
+**2026-10-14 code alignment:** GitHub Actions now builds a Node/Nitro artifact and can conditionally deploy to MochaHost. Enabling production requires `OCARINASPA_AUTO_DEPLOY=true` only after the gates below pass. The canonical cPanel startup file is `server.cjs`, which imports `.output/server/index.mjs`. The old `dist/server/server.js` deployment guide and Lovable-specific build path are retired.
+
 ## 1. Runtime and deployment
 
 - Use Node.js 22 for build/runtime.
-- The uploaded lockfile was stale and has been removed. On the real deployment registry, run `npm install` once to generate a fresh `package-lock.json`, review/commit it, then use `npm ci` for repeatable CI builds.
+- The tracked lockfile was stale on 2026-10-14. GitHub Actions first regenerates it via `npm install --package-lock-only --ignore-scripts`, performs `npm ci` and the production build, then commits it after a passing build. Use `npm ci` for repeatable later builds.
 - Build: `npm run build:node`.
-- Start: `npm start` → `.output/server/index.mjs`.
+- Start: `npm start` → `server.cjs` → `.output/server/index.mjs`.
 - Run `npm run prelive:check` before the build.
-- The repository intentionally does not ship a stale Bun lockfile; npm is the single package-manager source of truth.
+- The stale Bun lockfile was removed; npm is the only package manager.
 
 ## 2. Required migrations — BLOCKER
 

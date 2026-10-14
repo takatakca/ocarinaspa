@@ -1,96 +1,60 @@
-# Déploiement Ocarina Spa sur MochaHost (Node.js / cPanel)
+# OCARINASPA.CA — GitHub → MochaHost (Node 22 / cPanel)
 
-## 1. Build local
+> Source of truth: `package.json`, `vite.config.node.ts`, `server.cjs` and the GitHub workflow `.github/workflows/ocarinaspa-node.yml`.
+> The legacy `dist/server/server.js` and Lovable Cloud deployment instructions are obsolete.
 
-```bash
-npm install
-npm run build:node     # produit dist/client + dist/server/server.js
-npm start              # test local sur http://localhost:3000 (lance server.cjs)
-```
+## 1. Runtime contract
 
-Si `npm start` fonctionne localement, le projet est prêt à téléverser.
+- Build on GitHub Actions with Node.js **22** (not on MochaHost): `npm install --package-lock-only --ignore-scripts`, `npm ci`, `npm run prelive:check`, `npm run build:node`.
+- The TanStack Start / Nitro build emits `.output/server/index.mjs` and the rest of `.output/`.
+- `npm start` executes `node server.cjs`. The cPanel startup file is exactly `server.cjs`; this lightweight bridge imports Nitro's server entry and respects the cPanel-provided `PORT`.
+- The CI artifact contains `.output/`, `server.cjs`, `package.json`, and `package-lock.json`.
+- The workflow regenerates and commits the lockfile **only after** a successful dependency install, prelive static check and Node build.
 
-## 2. Fichiers à téléverser sur MochaHost
+## 2. MochaHost application
 
-Téléverse vers le dossier de ton app Node sur cPanel
-(par ex. `/home/USER/apps/ocarinaspa/`) :
+In **cPanel → Setup Node.js App**, create or select the Ocarina Spa app:
 
-- `server.cjs`          ← point d'entrée (startup file cPanel)
-- `package.json`
-- `package-lock.json` (ou `bun.lockb`)
-- `.env`                ← copié depuis `.env.example` et rempli
-- `dist/client/`        ← assets statiques
-- `dist/server/server.js` (+ `dist/server/assets/`) ← bundle SSR
-
-Tu peux **exclure** : `node_modules/`, `src/`, `tests/`, `scripts/`, `.git/`,
-`server.js` (la version ESM de dev local), fichiers de dev.
-
-Structure attendue sur le serveur :
-
-```text
-apps/ocarinaspa/
-  server.cjs
-  package.json
-  .env
-  dist/
-    client/
-    server/
-      server.js
-      assets/
-  node_modules/         (créé par "Run NPM Install")
-```
-
-## 3. Configuration cPanel → "Setup Node.js App"
-
-| Champ | Valeur |
-|---|---|
-| Node.js version | 20.x ou 22.x |
-| Application mode | Production |
-| Application root | `apps/ocarinaspa` (ou ton dossier) |
-| Application URL | `ocarinaspa.ca` (ton domaine) |
+| Field | Value |
+| --- | --- |
+| Node.js | 22.x |
+| Mode | Production |
+| Application root | Actual Ocarina Spa app root under the cPanel user |
+| Application URL | `ocarinaspa.ca` |
 | Application startup file | `server.cjs` |
-| Passenger log file | (laisse par défaut) |
 
-Clique **Create**, puis **Run NPM Install** (cPanel installera les deps de
-production, dont `sirv` et `@hono/node-server`).
+Set runtime secrets using the cPanel application environment (never commit an operational `.env`). Keep any existing production database and backups intact.
 
-> Si tu vois `Cannot find module 'sirv'` (ou `@hono/node-server`) au démarrage :
-> supprime le dossier `node_modules/` côté cPanel, puis re-clique
-> **Run NPM Install**, puis **Restart**.
+## 3. GitHub Actions configuration
 
-## 4. Variables d'environnement à ajouter dans cPanel
+Repository **Settings → Secrets and variables → Actions**:
 
-Dans la section "Environment variables" de l'app Node :
+Variables:
+- `OCARINASPA_SUPABASE_URL` (project URL, public), `OCARINASPA_SUPABASE_PROJECT_ID` (public), `OCARINASPA_SUPABASE_PUBLISHABLE_KEY` (public browser key).
+- `OCARINASPA_AUTO_DEPLOY=true` **only after** cPanel has the correct Node app and the pre-live release blockers have been cleared. Default is off.
+- `OCARINASPA_PRODUCTION_URL=https://ocarinaspa.ca` for post-deploy verification.
 
-```
-NODE_ENV=production
-HOST=0.0.0.0
-SUPABASE_URL=https://jbdkvdowxwrwyuhglxgu.supabase.co
-SUPABASE_PUBLISHABLE_KEY=...
-SUPABASE_SERVICE_ROLE_KEY=...
-VITE_SUPABASE_URL=https://jbdkvdowxwrwyuhglxgu.supabase.co
-VITE_SUPABASE_PUBLISHABLE_KEY=...
-VITE_SUPABASE_PROJECT_ID=jbdkvdowxwrwyuhglxgu
-```
+Secrets (required only for deploy):
+- `OCARINASPA_SSH_HOST`, `OCARINASPA_SSH_PORT`, `OCARINASPA_SSH_USER`, `OCARINASPA_SSH_APP_ROOT`.
+- `OCARINASPA_SSH_PRIVATE_KEY`: SSH private key with deployment access.
+- `OCARINASPA_SSH_KNOWN_HOSTS`: **verified** host key entry. Do not auto-trust `ssh-keyscan` in a live deployment.
 
-`PORT` est fourni automatiquement par cPanel — ne le surcharge pas.
+The workflow builds and packages on every push to `main`, uploads a downloadable artifact, and deploys via rsync/SSH **only when** `OCARINASPA_AUTO_DEPLOY` is `true`. It restarts Passenger via `tmp/restart.txt` and checks the public homepage. It does not run a heavy npm build on cPanel.
 
-## 5. Démarrer
+## 4. Runtime environment — never put secret values in GitHub source
 
-Clique **Save** → **Run NPM Install** → **Restart**. Le site répondra sur ton
-domaine.
+At minimum: `NODE_ENV=production`, `PUBLIC_SITE_URL=https://ocarinaspa.ca`, `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_ACCOUNT_ID`, `STRIPE_PUBLISHABLE_KEY`, `ADMIN_EMAILS`, `AUTOMATION_CRON_SECRET_V2`, verified `RESEND_API_KEY` and `EMAIL_FROM`.
 
-## Commandes résumé
+Also configure TPS/TVQ, Interac, social destinations and conversion labels as described in `LAUNCH_CHECKLIST.md`. In Supabase apply all pending migrations **before** enabling production workflows.
 
-| Action | Commande |
-|---|---|
-| Dev local (Lovable preview) | `npm run dev` |
-| Build pour MochaHost | `npm run build:node` |
-| Démarrer prod local | `npm start` (lance `server.cjs`) |
-| Build Lovable (Cloudflare) | `npm run build` |
+## 5. Deployment safeguards
 
-## Statique vs SSR
+- **Do not enable automatic production deployment** while Stripe/webhook, Supabase migrations, taxes or admin access remain unverified; publishing an unvalidated financial flow is not safe.
+- The SSH job only replaces the build output plus the startup/package manifests; it does not replace the database or the server's environment.
+- If the GitHub build fails, no production deployment occurs. The existing live site is left untouched.
+- If restart/smoke check fails, inspect the GitHub job log and cPanel Passenger error log; restore the previous artifact before further edits.
+- A public site responding does **not** establish which host serves it: independently check DNS, cPanel domain mapping, and deployment markers before cutover.
 
-Le serveur Node sert **toutes les routes** (incluant les 16 358 pages
-ville×service) en SSR. Refresh sur `/reparation-spa/montreal` fonctionne,
-liens directs fonctionnent, sitemap dynamique sur `/sitemap.xml` fonctionne.
+## 6. Manual launch validation
+
+Use `/admin/qa` and `LAUNCH_CHECKLIST.md`: confirm the actual Stripe live account, signed webhook, invoices, Interac, refunds, TPS/TVQ, Supabase migrations/RLS, official review links, Resend delivery, EN/ES language scope and real employee imagery.

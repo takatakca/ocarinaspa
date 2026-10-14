@@ -7,8 +7,6 @@ export type TransactionalEmail = {
   text: string;
 };
 
-const RESEND_GATEWAY_URL = "https://connector-gateway.lovable.dev/resend";
-
 function senderAddress() {
   const configured = (process.env.EMAIL_FROM ?? "").trim();
   return configured || "Ocarina Spa <factures@ocarinaspa.ca>";
@@ -26,26 +24,6 @@ async function sendWithResend(message: TransactionalEmail): Promise<boolean> {
     text: message.text,
   };
 
-  const lovableKey = (process.env.LOVABLE_API_KEY ?? "").trim();
-
-  // Connector-managed connections must be called through the Lovable gateway.
-  if (lovableKey) {
-    const response = await fetch(`${RESEND_GATEWAY_URL}/emails`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${lovableKey}`,
-        "X-Connection-Api-Key": resendKey,
-      },
-      body: JSON.stringify(payload),
-    });
-    if (response.ok) return true;
-    const body = await response.text();
-    console.error(`[email] resend gateway failed [${response.status}]: ${body}`);
-    // A raw Resend API key (BYOK, no connector link) is rejected by the gateway.
-    if (response.status !== 401 && response.status !== 403) return false;
-  }
-
   const direct = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: {
@@ -55,8 +33,8 @@ async function sendWithResend(message: TransactionalEmail): Promise<boolean> {
     body: JSON.stringify(payload),
   });
   if (direct.ok) return true;
-  const body = await direct.text();
-  console.error(`[email] resend api failed [${direct.status}]: ${body}`);
+  // Do not log provider response bodies: they can contain customer data.
+  console.error(`[email] resend api failed [${direct.status}]`);
   return false;
 }
 
