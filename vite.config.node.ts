@@ -8,6 +8,7 @@ import react from "@vitejs/plugin-react";
 import tsConfigPaths from "vite-tsconfig-paths";
 import tailwindcss from "@tailwindcss/vite";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
+import { nitro } from "nitro/vite";
 
 // Force Nitro to emit a Node.js server bundle (no Cloudflare Workers).
 process.env.NITRO_PRESET = process.env.NITRO_PRESET || "node-server";
@@ -17,6 +18,7 @@ export default defineConfig({
     tsConfigPaths({ projects: ["./tsconfig.json"] }),
     tailwindcss(),
     tanstackStart(),
+    nitro(),
     react(),
   ],
   resolve: {

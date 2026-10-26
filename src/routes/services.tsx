@@ -37,7 +37,7 @@ function Services() {
 
       <section className="container mx-auto px-4 py-16 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {SERVICE_TYPES.map((s) => {
-          const Icon = icons[s.slug];
+          const Icon = icons[s.slug] ?? Wrench;
           return (
             <Link
               key={s.slug}
