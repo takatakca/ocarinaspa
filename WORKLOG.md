@@ -1,5 +1,6 @@
 # Work log
 
+- 2026-10-27 | Claude | claude/remove-lovable-ai → PR | active | Remove Lovable: rule-based pre-diagnostic from the error-code reference, admin invoice form instead of AI text parsing, service-request emails via Resend (no Lovable queue) | owner merges; set RESEND_API_KEY + EMAIL_FROM and SUPABASE_SERVICE_ROLE_KEY in Coolify, then test a real diagnostic and service request
 - 2026-10-26 | Claude | claude/coolify-node-build → PR #1 | PR #1 open | Fix Node build (missing Nitro plugin, npm peer-set crash in CI) and /services SSR crash; Coolify preview app on vps2 | owner reviews and merges; preview rebuilds from main; switch ocarinaspa.ca DNS only after owner approval
 
 - 2026-10-14 | GPT-6 (GitHub) | main → direct commit | done | Unblocked CI public Supabase build variables using verified historical anon/browser configuration; kept all server-only credentials out of GitHub source | Watch GitHub Actions npm install, build and package; resolve any failure before enabling deployment

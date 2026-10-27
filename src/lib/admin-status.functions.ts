@@ -21,7 +21,6 @@ export type SystemStatus = {
   stripeGstTaxRateVerified: boolean;
   stripeQstTaxRateVerified: boolean;
   googleReviewCompliance: boolean;
-  lovableAi: boolean;
   hardeningMigrationApplied: boolean;
   googleReviewUrl: boolean;
   facebookPageUrl: boolean;
@@ -128,7 +127,6 @@ export const getSystemStatus = createServerFn({ method: "GET" })
       // Conformité Google : lien d'avis offert à tous les clients, aucun incitatif,
       // le crédit 10 % dépend uniquement du sondage interne.
       googleReviewCompliance: true,
-      lovableAi: has(process.env.LOVABLE_API_KEY),
       hardeningMigrationApplied,
       googleReviewUrl: has(process.env.GOOGLE_REVIEW_URL || process.env.VITE_GOOGLE_REVIEW_URL),
       facebookPageUrl: has(process.env.FACEBOOK_PAGE_URL || process.env.VITE_FACEBOOK_PAGE_URL),

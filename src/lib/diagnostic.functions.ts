@@ -30,47 +30,18 @@ const DiagnosticResultSchema = z.object({
 
 export type DiagnosticResult = z.infer<typeof DiagnosticResultSchema>;
 
+// Rule-based (src/lib/spa-prediagnostic.ts): no external AI provider. The schema check stays as a guard.
 async function generateDiagnostic(data: z.infer<typeof LeadInput>): Promise<DiagnosticResult> {
-  const key = process.env.LOVABLE_API_KEY;
-  if (!key) throw new Error("Pré-diagnostic temporairement indisponible.");
-
-  const userMessage = `Code d'erreur : ${data.error_code || "aucun"}\nMarque : ${data.brand}\nModèle : ${data.model || "inconnu"}\nAnnée : ${data.spa_year || "inconnu"}\nSymptômes : ${data.problem_description}\nLe spa chauffe ? ${data.heating || "inconnu"}\nLa pompe fonctionne ? ${data.pump_works || "inconnu"}\nBruit anormal de pompe ? ${data.pump_noise || "inconnu"}\nDepuis quand ? ${data.since || "inconnu"}\nVille : ${data.city}`;
-
-  const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${key}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: "google/gemini-2.5-flash",
-      temperature: 0.1,
-      response_format: { type: "json_object" },
-      messages: [
-        {
-          role: "system",
-          content:
-            "Tu fournis un PRE-DIAGNOSTIC technique de spa pour Ocarina Spa au Québec, en français clair et professionnel. Tu ne prétends jamais confirmer une panne sans inspection. Les actions destinées au client doivent être uniquement des observations et vérifications sans danger (affichage du panneau, température, bruit, niveau d'eau, état visuel extérieur, arrêt de l'utilisation si nécessaire). N'ordonne jamais d'ouvrir un panneau électrique, de toucher au câblage, de mesurer une tension sous tension, de contourner un GFCI/disjoncteur/sécurité, ni de démonter une pompe ou un chauffe-eau. En cas d'odeur de brûlé, eau près de composantes électriques, disjoncteur qui déclenche, risque de gel, ou doute électrique : recommander d'arrêter l'utilisation et de contacter un technicien qualifié. Réponds STRICTEMENT en JSON avec diagnostic, likelyCauses, actions, urgency ('faible'|'moyenne'|'haute'), recommendCall.",
-        },
-        { role: "user", content: userMessage },
-      ],
-    }),
-  });
-
-  if (resp.status === 429) throw new Error("Trop de demandes — réessayez dans quelques minutes.");
-  if (!resp.ok) throw new Error("Pré-diagnostic temporairement indisponible.");
-
-  const json = await resp.json();
-  const content = json.choices?.[0]?.message?.content ?? "{}";
+  const { preDiagnose } = await import("@/lib/spa-prediagnostic");
   try {
-    return DiagnosticResultSchema.parse(JSON.parse(content));
+    return DiagnosticResultSchema.parse(preDiagnose(data));
   } catch {
     throw new Error("Le pré-diagnostic n'a pas pu être validé. Un technicien pourra vous rappeler.");
   }
 }
 
 /**
- * One public transaction boundary: capture the lead, run the backend assistant, persist the result.
+ * One public transaction boundary: capture the lead, run the rule-based pre-diagnostic, persist the result.
  * The browser never receives a mutable lead id that can later be used to update someone else's lead.
  */
 export const submitDiagnosticLead = createServerFn({ method: "POST" })
