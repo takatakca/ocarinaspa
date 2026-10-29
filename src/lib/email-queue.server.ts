@@ -1,5 +1,3 @@
-import { supabaseAdmin } from "@/integrations/supabase/client.server";
-
 export type TransactionalEmail = {
   to: string;
   subject: string;
@@ -39,26 +37,17 @@ async function sendWithResend(message: TransactionalEmail): Promise<boolean> {
 }
 
 /**
- * Deliver a transactional email.
- * Resend is the configured provider; the Supabase email queue stays as a fallback
- * so nothing is lost when the provider is momentarily unavailable.
+ * Deliver a transactional email through Resend.
+ * Returns false when Resend is not configured or refuses the message, so callers record a follow-up
+ * instead of assuming delivery (the former editor-managed queue has no consumer on this host).
  */
 export async function enqueueTransactionalEmail(message: TransactionalEmail) {
   try {
-    if (await sendWithResend(message)) return true;
+    return await sendWithResend(message);
   } catch (error) {
     console.error("[email] resend send threw", error instanceof Error ? error.message : String(error));
-  }
-
-  const { error } = await supabaseAdmin.rpc("enqueue_email" as never, {
-    queue_name: "transactional_emails",
-    message: message as never,
-  } as never);
-  if (error) {
-    console.error("[email-queue] enqueue failed", error.message);
     return false;
   }
-  return true;
 }
 
 export function escapeEmailHtml(value: string) {
