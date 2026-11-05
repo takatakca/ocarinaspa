@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { TakatakMigrationNotice } from "@/components/TakatakMigrationNotice";
 import { Layout } from "@/components/Layout";
 import { SpaBrands } from "@/components/SpaBrands";
 import { RepairsGrid } from "@/components/RepairsGrid";
@@ -21,8 +22,17 @@ const FAQS = [
   { q: "Est-ce que vous desservez ma ville ?", a: "Nous desservons l'ensemble du Québec. Consultez la page Villes desservies pour confirmer votre municipalité." },
 ];
 
+// Build-time opt-in; existing service homepage stays intact unless explicitly enabled.
+const SHOW_TAKATAK_MIGRATION_NOTICE = import.meta.env.VITE_TAKATAK_MIGRATION_NOTICE_HOME === "true";
+
 export const Route = createFileRoute("/")({
-  head: () => ({
+  head: () => SHOW_TAKATAK_MIGRATION_NOTICE ? ({
+    meta: [
+      { title: "Notre serveur a déménagé — Ocarina Spa · TAKATAK" },
+      { name: "description", content: "Demandez le transfert de votre site ou domaine vers TAKATAK.CA." },
+      { name: "robots", content: "noindex,follow" },
+    ],
+  }) : ({
     meta: [
       { title: "Ocarina Spa Québec — Réparation et vente de spas" },
       { name: "description", content: "Réparation, vente, entretien, installation, ouverture et fermeture de spas dans nos zones desservies au Québec. Service à domicile. Appelez le 819-913-7727." },
@@ -42,6 +52,7 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
+  if (SHOW_TAKATAK_MIGRATION_NOTICE) return <TakatakMigrationNotice />;
   return (
     <Layout>
       {/* 1. Hero */}
