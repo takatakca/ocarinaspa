@@ -58,8 +58,7 @@
   font-family: inherit;
   font-size: clamp(29px, 5.5vw, 45px);
   font-style: normal;
-  /* The site theme marks heading weight important; keep this override scoped. */
-  font-weight: 700 !important;
+  font-weight: 700;
   line-height: 1.15;
   letter-spacing: -.03em;
   text-transform: none;
@@ -108,6 +107,10 @@
 .takatak-moved__support { margin-top: 24px; padding-top: 16px; border-top: 1px solid #37537b; }
 .takatak-moved__support a { color: #29C3FF; text-decoration: underline; text-underline-offset: 3px; }
 .takatak-moved .takatak-moved__support p { font-size: 13px; margin: 13px 0 0; }
+/* Important declarations in the theme's base layer outrank unlayered CSS. */
+@layer base {
+  .takatak-moved h1 { font-weight: 700 !important; }
+}
 </style>
 </head>
 <body><main class="takatak-moved">
