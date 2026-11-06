@@ -1,5 +1,7 @@
 # Work log
 
+- 2026-11-06 | Codex @ ChatGPT Work | fix/notice-match-mielaissa-20261106 | active | Match the owner-approved Miel Aissa notice typography, layout and wording in the Ocarina component and static preview | Build, deploy and compare live computed styles
+
 - 2026-11-05 | GPT-6 | feat/takatak-migration-notice-20261105 → PR #5 | PR #5 open | Add optional TAKATAK legacy moved notice and static preview to Ocarina Spa without changing existing root by default | Review CI, verify public intake, stage/activate via Coolify only after backup and approval
 
 
