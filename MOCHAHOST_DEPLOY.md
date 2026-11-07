@@ -1,3 +1,5 @@
+> Current hosting: Coolify; see [release handoff](docs/RELEASE_20261107.md). This MochaHost procedure is retained for explicitly selected manual legacy operations only. Automatic deployment to this target is disabled in the release workflow. Signed: Codex — ChatGPT Work.
+
 # OCARINASPA.CA — GitHub → MochaHost (Node 22 / cPanel)
 
 > Source of truth: `package.json`, `vite.config.node.ts`, `server.cjs` and the GitHub workflow `.github/workflows/ocarinaspa-node.yml`.

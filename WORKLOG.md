@@ -1,6 +1,6 @@
 # Work log
 
-- 2026-11-07 | Codex — ChatGPT Work | codex/sequential-release-20261107 | active | Sequentially reconcile hosting notes and Lovable removal; freeze CI dependencies and verify native release with approved notice retained | Validate candidate and exact main, preserve rollback, record final receipt
+- 2026-11-07 | Codex — ChatGPT Work | codex/sequential-release-20261107 | source prepared; release PR receipt pending | Integrated hosting, Lovable removal and consent branch; 83 tests/typecheck/prelive pass; frozen CI, runtime proof and rollback prepared | See docs/RELEASE_20261107.md; finish final CI/main deployment and signed receipt with approved notice true
 
 - 2026-11-06 | Codex @ ChatGPT Work | fix/notice-match-mielaissa-20261106 → PR #6 | done; deployed on VPS1 | Ocarina notice and static preview match approved Miel Aissa typography, sizing, spacing, card and shared wording; scoped base-layer heading override; live selected computed styles identical (system heading 45px/700, body 17px, button 355px); prelive, production build and CI passed on fd0c363; image notice-style-20261106-matched; rollback saved in notice-style-20261106/docker-compose.before.yaml | Preserve VITE_TAKATAK_MIGRATION_NOTICE_HOME=true on future deployments
 

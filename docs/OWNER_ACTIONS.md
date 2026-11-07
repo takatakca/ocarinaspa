@@ -1,3 +1,5 @@
+> Current release handoff (2026-11-07 11:16 UTC): see [RELEASE_20261107.md](RELEASE_20261107.md). Production is the existing Coolify app on VPS1, controlled by VPS2; the approved notice is already visible. Provider/commerce activation remains separately unverified. The instructions below include historical context. Signed: Codex — ChatGPT Work.
+
 # Owner actions — ocarinaspa.ca
 
 Updated 2026-10-29. Hands-on checklist for the hosting move (MochaHost → Coolify). The main file for all sites is in Google Drive › 00 — Opérations TAKATAK: “2026-10-29 — TAKATAK hosting (MochaHost → Coolify) — MAIN FILE — OWNER and CLAUDE actions”. Item numbers are the same everywhere. This repository is public: no secret values and no hosting-account details are written here, only key names, settings and steps; account-level steps are in the private Drive main file.
