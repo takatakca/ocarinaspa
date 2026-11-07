@@ -46,7 +46,6 @@ Configure in the backend/host secret manager only:
 - `STRIPE_PUBLISHABLE_KEY`
 - `ADMIN_EMAILS`
 - `PUBLIC_SITE_URL=https://ocarinaspa.ca`
-- `LOVABLE_API_KEY` if backend diagnostic/operations assistant is enabled
 
 Never expose `sk_*`, `whsec_*`, or the Supabase service-role key to the browser or Git repository.
 
