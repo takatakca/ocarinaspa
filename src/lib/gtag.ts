@@ -1,6 +1,8 @@
 import { readPrivacyConsent, type PrivacyConsent } from "@/lib/privacy-consent";
 export const AW_ID = "AW-18182973757";
-export const GA4_ID = "G-8YYZKVZBW0";
+/** GA4 measurement ID: VITE_GA4_ID when set to a valid G-… ID, else Ocarina's existing property. */
+const ga4FromEnv = String(import.meta.env.VITE_GA4_ID ?? "").trim();
+export const GA4_ID = /^G-[A-Z0-9]{4,}$/i.test(ga4FromEnv) ? ga4FromEnv : "G-8YYZKVZBW0";
 
 export type EventName =
   | "phone_call"
@@ -101,7 +103,13 @@ function rawGtag(...args: any[]) {
 function ensureGtagFunction() {
   if (typeof window === "undefined") return;
   window.dataLayer = window.dataLayer ?? [];
-  if (!window.gtag) window.gtag = (...args: any[]) => window.dataLayer?.push(args);
+  if (!window.gtag) {
+    window.gtag = function gtag() {
+      // gtag.js only runs commands pushed as the Arguments object (a plain array is ignored).
+      // eslint-disable-next-line prefer-rest-params
+      window.dataLayer?.push(arguments);
+    };
+  }
 }
 
 /** Google tags are not requested from Google until the visitor opts in. */

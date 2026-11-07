@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Layout } from "@/components/Layout";
 import { quebecMunicipalities, SEO_INDEXED_CITY_SLUGS } from "@/data/quebecMunicipalities";
 import { MapPin, Phone } from "lucide-react";
-import { SITE } from "@/lib/seo";
+import { SITE, altLinks } from "@/lib/seo";
 import { trackPhoneCall } from "@/lib/gtag";
 
 const priorityCities = SEO_INDEXED_CITY_SLUGS
@@ -24,6 +24,7 @@ export const Route = createFileRoute("/villes")({
         content: "Principaux secteurs desservis pour la réparation et l'entretien de spas au Québec.",
       },
     ],
+    links: altLinks({ path: "/villes", enPath: null }),
   }),
   component: Villes,
 });
