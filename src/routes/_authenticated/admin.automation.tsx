@@ -6,6 +6,9 @@ import { checkIsAdmin } from "@/lib/admin-invoices.functions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { CheckCircle2, Copy, ExternalLink, FileText, History, Play, XCircle } from "lucide-react";
 
@@ -13,6 +16,24 @@ export const Route = createFileRoute("/_authenticated/admin/automation")({
   component: AdminAutomationPage,
   head: () => ({ meta: [{ title: "Admin — Assistant opérations Ocarina Spa" }, { name: "robots", content: "noindex,nofollow" }] }),
 });
+
+const EMPTY_FORM = {
+  customerName: "", customerEmail: "", customerPhone: "", customerAddress: "", customerCity: "",
+  description: "", amountBeforeTax: "", notes: "", daysUntilDue: "15", applyTaxes: true, sendInvoice: false,
+};
+
+// Empty text becomes null so the server marks it as missing instead of guessing a value.
+function toDraft(f: typeof EMPTY_FORM) {
+  const text = (v: string) => v.trim() || null;
+  const amount = Number.parseFloat(f.amountBeforeTax);
+  const days = Number.parseInt(f.daysUntilDue, 10);
+  return {
+    customerName: text(f.customerName), customerEmail: text(f.customerEmail), customerPhone: text(f.customerPhone),
+    customerAddress: text(f.customerAddress), customerCity: text(f.customerCity), description: text(f.description),
+    amountBeforeTax: Number.isFinite(amount) && amount > 0 ? amount : null, applyTaxes: f.applyTaxes, notes: text(f.notes),
+    daysUntilDue: Number.isFinite(days) ? Math.min(365, Math.max(0, days)) : 15, sendInvoice: f.sendInvoice, missingFields: [],
+  };
+}
 
 function taskSummary(task: AutomationTask) {
   const d = task.input ?? {};
@@ -44,7 +65,8 @@ function AdminAutomationPage() {
   const approveFn = useServerFn(approveInvoiceAutomation);
   const rejectFn = useServerFn(rejectAutomationTask);
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
-  const [instruction, setInstruction] = useState("");
+  const [form, setForm] = useState(EMPTY_FORM);
+  const set = (key: keyof typeof EMPTY_FORM) => (e: { target: { value: string } }) => setForm((f) => ({ ...f, [key]: e.target.value }));
   const [tasks, setTasks] = useState<AutomationTask[]>([]);
   const [busy, setBusy] = useState(false);
 
@@ -54,7 +76,7 @@ function AdminAutomationPage() {
 
   async function draft() {
     setBusy(true);
-    try { await draftFn({ data: { instruction } }); setInstruction(""); await refresh(); toast.success("Brouillon préparé. Vérifiez-le avant approbation."); }
+    try { await draftFn({ data: toDraft(form) }); setForm(EMPTY_FORM); await refresh(); toast.success("Brouillon préparé. Vérifiez-le avant approbation."); }
     catch (e) { toast.error(e instanceof Error ? e.message : "Erreur"); }
     finally { setBusy(false); }
   }
@@ -76,11 +98,25 @@ function AdminAutomationPage() {
         <div className="flex gap-2"><Button asChild variant="outline" size="sm"><Link to="/admin/factures"><FileText className="h-4 w-4" /> Factures</Link></Button><Button asChild variant="outline" size="sm"><Link to="/admin/historique"><History className="h-4 w-4" /> Historique</Link></Button></div>
       </div>
       <Card className="mb-6">
-        <CardHeader><CardTitle>Préparer une facture à partir d’une instruction</CardTitle></CardHeader>
-        <CardContent className="space-y-3">
-          <Textarea rows={5} value={instruction} onChange={(e) => setInstruction(e.target.value)} placeholder="Ex. Prépare une facture pour Jean Tremblay, jean@exemple.ca, réparation pompe 325 $ avant taxes, échéance 15 jours. Ne l’envoie pas encore." />
-          <p className="text-xs text-muted-foreground">Le système refuse d’inventer un nom, un courriel ou un montant manquant. Vérifiez toujours le brouillon avant approbation.</p>
-          <Button onClick={draft} disabled={busy || instruction.trim().length < 10}><Play className="h-4 w-4" /> Préparer le brouillon</Button>
+        <CardHeader><CardTitle>Préparer une facture</CardTitle></CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div><Label htmlFor="inv-name">Nom du client</Label><Input id="inv-name" value={form.customerName} onChange={set("customerName")} /></div>
+            <div><Label htmlFor="inv-email">Courriel</Label><Input id="inv-email" type="email" value={form.customerEmail} onChange={set("customerEmail")} /></div>
+            <div><Label htmlFor="inv-phone">Téléphone</Label><Input id="inv-phone" value={form.customerPhone} onChange={set("customerPhone")} /></div>
+            <div><Label htmlFor="inv-city">Ville</Label><Input id="inv-city" value={form.customerCity} onChange={set("customerCity")} /></div>
+            <div className="sm:col-span-2"><Label htmlFor="inv-address">Adresse</Label><Input id="inv-address" value={form.customerAddress} onChange={set("customerAddress")} /></div>
+            <div className="sm:col-span-2"><Label htmlFor="inv-desc">Description du service</Label><Input id="inv-desc" value={form.description} onChange={set("description")} placeholder="Ex. Réparation pompe" /></div>
+            <div><Label htmlFor="inv-amount">Montant avant taxes (CAD)</Label><Input id="inv-amount" type="number" min="0" step="0.01" value={form.amountBeforeTax} onChange={set("amountBeforeTax")} /></div>
+            <div><Label htmlFor="inv-due">Échéance (jours)</Label><Input id="inv-due" type="number" min="0" max="365" value={form.daysUntilDue} onChange={set("daysUntilDue")} /></div>
+            <div className="sm:col-span-2"><Label htmlFor="inv-notes">Notes</Label><Textarea id="inv-notes" rows={2} value={form.notes} onChange={set("notes")} /></div>
+          </div>
+          <div className="flex flex-wrap gap-6 text-sm">
+            <label className="flex items-center gap-2"><Checkbox checked={form.applyTaxes} onCheckedChange={(v) => setForm((f) => ({ ...f, applyTaxes: v === true }))} /> Appliquer TPS/TVQ</label>
+            <label className="flex items-center gap-2"><Checkbox checked={form.sendInvoice} onCheckedChange={(v) => setForm((f) => ({ ...f, sendInvoice: v === true }))} /> Envoyer au client après approbation</label>
+          </div>
+          <p className="text-xs text-muted-foreground">Un champ obligatoire vide (nom, courriel, description, montant) met le brouillon en attente d’information. Vérifiez toujours le brouillon avant approbation.</p>
+          <Button onClick={draft} disabled={busy}><Play className="h-4 w-4" /> Préparer le brouillon</Button>
         </CardContent>
       </Card>
       <div className="space-y-3">

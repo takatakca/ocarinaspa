@@ -1,7 +1,7 @@
 /**
- * Admin-only operational assistant.
- * The model may prepare a structured Stripe invoice draft, but a financial write never executes
- * until an authenticated admin explicitly approves the task. This creates a durable checkpoint.
+ * Admin-only operations queue.
+ * The admin fills a structured Stripe invoice draft (no external AI provider); a financial write never
+ * executes until an authenticated admin explicitly approves the task. This creates a durable checkpoint.
  */
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
@@ -47,38 +47,11 @@ export type AutomationTask = {
 
 export const draftInvoiceAutomation = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ instruction: z.string().trim().min(10).max(4000) }).parse(d))
+  .inputValidator((d: unknown) => InvoiceDraft.parse(d))
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
-    const key = process.env.LOVABLE_API_KEY;
-    if (!key) throw new Error("Assistant backend non configuré (LOVABLE_API_KEY)." );
-
-    const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        temperature: 0,
-        response_format: { type: "json_object" },
-        messages: [
-          {
-            role: "system",
-            content:
-              "Tu prépares uniquement un brouillon de facture Ocarina Spa à partir de l'instruction admin. N'invente JAMAIS un montant, un email, un téléphone ou un nom. Si une donnée requise manque, mets null et ajoute son nom à missingFields. Retourne seulement JSON: customerName, customerEmail, customerPhone, customerAddress, customerCity, description, amountBeforeTax (nombre CAD avant taxes), applyTaxes (bool), notes, daysUntilDue (0-365), sendInvoice (true uniquement si l'admin demande explicitement d'envoyer), missingFields (array).",
-          },
-          { role: "user", content: data.instruction },
-        ],
-      }),
-    });
-    if (!resp.ok) throw new Error("Impossible de préparer le brouillon pour le moment.");
-    const json = await resp.json();
-    const content = json.choices?.[0]?.message?.content ?? "{}";
-    let parsed: InvoiceDraftType;
-    try {
-      parsed = InvoiceDraft.parse(JSON.parse(content));
-    } catch {
-      throw new Error("Le brouillon généré n'a pas passé la validation de sécurité.");
-    }
+    const parsed: InvoiceDraftType = data;
+    const instruction = `Formulaire admin : ${parsed.description ?? "facture"} — ${parsed.customerName ?? "client à préciser"}`;
 
     const requiredMissing = [
       !parsed.customerName ? "customerName" : null,
@@ -96,7 +69,7 @@ export const draftInvoiceAutomation = createServerFn({ method: "POST" })
         task_type: "create_stripe_invoice",
         status,
         requested_by: context.userId,
-        instruction: data.instruction,
+        instruction,
         input: { ...parsed, missingFields },
       } as any)
       .select("id, task_type, status, instruction, input, output, error_message, created_at, approved_at, completed_at")

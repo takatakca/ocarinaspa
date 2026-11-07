@@ -1,3 +1,5 @@
+> Current release handoff (2026-11-07 11:16 UTC): see [RELEASE_20261107.md](RELEASE_20261107.md). Production is the existing Coolify app on VPS1, controlled by VPS2; the approved notice is already visible. Provider/commerce activation remains separately unverified. The instructions below include historical context. Signed: Codex — ChatGPT Work.
+
 # Ocarina Spa → TAKATAK legacy transfer notice
 
 **Prepared 2026-11-05. No live activation by this PR.** Based on merged [TAKATAK PR #254](https://github.com/takatakca/takatak-v1/pull/254).

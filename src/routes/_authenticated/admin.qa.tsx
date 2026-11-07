@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { CheckCircle2, XCircle, FileText, Activity, RefreshCw } from "lucide-react";
-import { AW_LABELS } from "@/lib/gtag";
+import { AW_LABELS, GA4_ID } from "@/lib/gtag";
 
 export const Route = createFileRoute("/_authenticated/admin/qa")({
   component: AdminQaPage,
@@ -20,7 +20,6 @@ export const Route = createFileRoute("/_authenticated/admin/qa")({
 });
 
 const GOOGLE_ADS_ID = "AW-18182973757";
-const GA4_ID = "G-8YYZKVZBW0";
 
 const CHECKLIST: { id: string; label: string; hint?: string }[] = [
   { id: "1", label: "Créer une facture test de 1 $ CAD (Stripe test mode)", hint: "Dashboard Stripe → Invoices → Create invoice, ou /admin/factures" },
@@ -288,7 +287,6 @@ function AdminQaPage() {
           <StatusRow label="Stripe Tax Rate TPS" ok={!!status?.stripeGstTaxRate} note="STRIPE_GST_TAX_RATE_ID" />
           <StatusRow label="Stripe Tax Rate TVQ" ok={!!status?.stripeQstTaxRate} note="STRIPE_QST_TAX_RATE_ID" />
           <StatusRow label="Taux Stripe validés" ok={!!status?.stripeTaxRatesValid} note="TPS 5 % et TVQ 9,975 %, actifs dans Stripe." />
-          <StatusRow label="Assistant backend" ok={!!status?.lovableAi} note="LOVABLE_API_KEY" />
           <StatusRow label="URL publique du site" ok={!!status?.publicSiteUrl} note="PUBLIC_SITE_URL pour les liens automatiques post-paiement." />
           <StatusRow label="Google Review URL" ok={!!status?.googleReviewUrl} note="Lien officiel d'avis Google" />
           <StatusRow label="Facebook URL" ok={!!status?.facebookPageUrl} note="Page Facebook Ocarina Spa" />

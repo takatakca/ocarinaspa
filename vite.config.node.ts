@@ -1,5 +1,5 @@
-// Production build config for standard Node.js hosting (MochaHost / cPanel).
-// This config is INDEPENDENT from vite.config.ts (Lovable preview).
+// Production build config for the standalone Node.js server (Coolify; also runs under cPanel Passenger).
+// vite.config.ts re-exports this file, so development and production share one configuration.
 // Build with:  npm run build:node
 // Output:      .output/server/index.mjs  (standalone Node server, listens on PORT)
 // Start with:  npm start
@@ -18,7 +18,11 @@ export default defineConfig({
     tsConfigPaths({ projects: ["./tsconfig.json"] }),
     tailwindcss(),
     tanstackStart(),
-    nitro(),
+    nitro({
+      routeRules: {
+        "/ocarina-release.json": { headers: { "cache-control": "no-store" } },
+      },
+    }),
     react(),
   ],
   resolve: {

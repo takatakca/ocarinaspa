@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Layout } from "@/components/Layout";
 import { ServiceRequestForm } from "@/components/ServiceRequestForm";
-import { SITE, localBusinessSchema } from "@/lib/seo";
+import { SITE, localBusinessSchema, altLinks } from "@/lib/seo";
 import { trackPhoneCall } from "@/lib/gtag";
 import { Phone } from "lucide-react";
 
@@ -13,6 +13,7 @@ export const Route = createFileRoute("/pieces")({
       { property: "og:title", content: "Pièces et accessoires de spa — Ocarina Spa" },
       { property: "og:description", content: "Pompes, chauffe-eau, jets, filtres et plus. Pièces livrées sur place." },
     ],
+    links: altLinks({ path: "/pieces", enPath: null }),
     scripts: [{ type: "application/ld+json", children: JSON.stringify(localBusinessSchema()) }],
   }),
   component: () => (

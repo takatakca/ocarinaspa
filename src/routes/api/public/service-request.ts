@@ -117,8 +117,6 @@ async function dispatchEmails(req: {
   urgency?: string | null;
   preferred_date?: string | null;
 }) {
-  // Try Lovable email queue if available (after email_domain--setup_email_infra).
-  // We call the same RPC the email infrastructure uses; if missing, this no-ops.
   const adminEmail = "info@ocarinaspa.ca";
   const summary =
     `Nouvelle demande de service — ${req.service_type}\n\n` +
@@ -132,16 +130,11 @@ async function dispatchEmails(req: {
     (req.spa_model ? `Modèle: ${req.spa_model}\n` : "") +
     (req.problem_description ? `\nProblème:\n${req.problem_description}\n` : "");
 
-  // Attempt RPC enqueue (added by setup_email_infra). Will throw silently if not present.
-  const tryEnqueue = async (
-    queue: "auth_emails" | "transactional_emails",
-    rendered: { to: string; subject: string; html: string; text: string },
-  ) => {
-    const { error } = await supabaseAdmin.rpc("enqueue_email" as never, {
-      queue_name: queue,
-      message: rendered as never,
-    } as never);
-    if (error) throw error;
+  // Sent through Resend; a refused or unconfigured send throws so the caller records a follow-up task.
+  const { enqueueTransactionalEmail } = await import("@/lib/email-queue.server");
+  const undelivered: string[] = [];
+  const send = async (message: { to: string; subject: string; html: string; text: string }) => {
+    if (!(await enqueueTransactionalEmail(message))) undelivered.push(message.to === adminEmail ? "admin" : "customer");
   };
 
   const adminHtml =
@@ -168,7 +161,7 @@ async function dispatchEmails(req: {
     `<p style="color:#666;font-size:13px;margin-top:24px">— L'équipe Ocarina Spa Québec</p>`;
 
   // Admin notification
-  await tryEnqueue("transactional_emails", {
+  await send({
     to: adminEmail,
     subject: `Nouvelle demande — ${req.service_type} (${req.city})`,
     html: adminHtml,
@@ -176,12 +169,13 @@ async function dispatchEmails(req: {
   });
 
   // Client acknowledgment
-  await tryEnqueue("transactional_emails", {
+  await send({
     to: req.email,
     subject: `Nous avons bien reçu votre demande — Ocarina Spa Québec`,
     html: clientHtml,
     text: `Bonjour ${req.full_name},\n\nNous avons bien reçu votre demande pour ${req.service_type} à ${req.city}.\nNotre équipe vous contactera rapidement.\n\nUrgence ? 819-913-7727\n\n— Ocarina Spa Québec`,
   });
+  if (undelivered.length) throw new Error(`email not delivered: ${undelivered.join(", ")}`);
 }
 
 function escapeHtml(s: string) {

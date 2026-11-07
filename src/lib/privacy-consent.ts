@@ -1,4 +1,8 @@
 export const PRIVACY_CONSENT_STORAGE_KEY = "ocarina_privacy_consent_v1";
+/** Fired with the saved choice as `detail`. */
+export const PRIVACY_CONSENT_EVENT = "ocarina:privacy-consent";
+/** Fired when the choice is cleared ("Gérer mes témoins"): the banner shows again. */
+export const PRIVACY_CONSENT_RESET_EVENT = "ocarina:privacy-consent-reset";
 
 export type PrivacyConsent = {
   version: 1;
@@ -29,7 +33,7 @@ export function savePrivacyConsent(input: Pick<PrivacyConsent, "analytics" | "ma
   const value: PrivacyConsent = { version: 1, ...input, decidedAt: new Date().toISOString() };
   if (typeof window !== "undefined") {
     window.localStorage.setItem(PRIVACY_CONSENT_STORAGE_KEY, JSON.stringify(value));
-    window.dispatchEvent(new CustomEvent("ocarina:privacy-consent", { detail: value }));
+    window.dispatchEvent(new CustomEvent(PRIVACY_CONSENT_EVENT, { detail: value }));
   }
   return value;
 }
@@ -37,5 +41,5 @@ export function savePrivacyConsent(input: Pick<PrivacyConsent, "analytics" | "ma
 export function clearPrivacyConsent() {
   if (typeof window === "undefined") return;
   window.localStorage.removeItem(PRIVACY_CONSENT_STORAGE_KEY);
-  window.dispatchEvent(new CustomEvent("ocarina:privacy-consent-reset"));
+  window.dispatchEvent(new CustomEvent(PRIVACY_CONSENT_RESET_EVENT));
 }

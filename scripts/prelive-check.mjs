@@ -27,6 +27,12 @@ pkg.scripts?.['prelive:check'] === 'node scripts/prelive-check.mjs'
 exists('bun.lockb') ? fail('stale bun.lockb can override npm dependency resolution') : pass('npm is the only lockfile strategy');
 exists('wrangler.jsonc') ? fail('stale Cloudflare wrangler config is present in Node release') : pass('no stale Cloudflare wrangler deployment config');
 
+// No editor-hosted AI gateway or email queue: pre-diagnostic is rule-based, invoices use the admin form, email uses Resend.
+const srcFiles = (dir) => fs.readdirSync(path.join(root, dir), { withFileTypes: true }).flatMap((e) =>
+  e.isDirectory() ? srcFiles(path.join(dir, e.name)) : /\.(ts|tsx)$/.test(e.name) ? [path.join(dir, e.name)] : []);
+const lovableRuntime = srcFiles('src').filter((f) => /ai\.gateway\.lovable\.dev|LOVABLE_API_KEY|enqueue_email/.test(read(f)));
+lovableRuntime.length ? fail(`editor-hosted AI/email dependency remains in ${lovableRuntime.join(', ')}`) : pass('no editor-hosted AI gateway or email queue in runtime code');
+
 // Lockfile sanity. This audited archive intentionally removes the original stale lockfile.
 // The deployment runner must generate a fresh lock from package.json, then CI should use npm ci.
 if (!exists('package-lock.json')) {
