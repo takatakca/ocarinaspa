@@ -59,8 +59,9 @@ export function preDiagnose(input: PreDiagnosticInput): PreDiagnostic {
   const danger = hasAny(text, DANGER_WORDS);
   const notHeating = input.heating === "non" || input.heating === "intermittent";
   const pumpDown = input.pump_works === "non";
-  const freeze =
-    code?.code === "ICE" || hasAny(text, FREEZE_WORDS) || (input.heating === "non" && pumpDown);
+  const overheating = code?.code === "OH" || code?.code === "HL";
+  const freeze = !overheating &&
+    (code?.code === "ICE" || hasAny(text, FREEZE_WORDS) || (input.heating === "non" && pumpDown));
   const leak = hasAny(text, LEAK_WORDS);
 
   const causes: string[] = [
@@ -86,27 +87,27 @@ export function preDiagnose(input: PreDiagnosticInput): PreDiagnostic {
     actions.push(
       "Cessez d'utiliser le spa et ne touchez à aucune composante électrique : un technicien qualifié doit l'inspecter.",
     );
-  if (freeze)
+  if (freeze && !danger)
     actions.push(
       "Gardez le couvercle bien fermé et appelez-nous rapidement : un spa arrêté par temps froid peut geler en quelques heures.",
     );
-  if (code && ["OH", "HL"].includes(code.code))
+  if (overheating && !danger)
     actions.push(
       "Retirez le couvercle pour laisser l'eau refroidir et n'utilisez pas le spa tant que la température est élevée.",
     );
-  if (code && ["FLO", "LF", "DR"].includes(code.code))
+  if (!danger && code && ["FLO", "LF", "DR"].includes(code.code))
     actions.push(
       "Vérifiez que le filtre est propre et bien en place, et que l'eau couvre les écumoires.",
     );
-  if (notHeating && !freeze)
+  if (!danger && notHeating && !freeze && !overheating)
     actions.push(
       "Vérifiez que le couvercle est bien fermé et notez la température affichée au panneau.",
     );
-  if (input.pump_noise === "oui")
+  if (!danger && input.pump_noise === "oui")
     actions.push(
       "Notez quand le bruit se produit (démarrage, haute vitesse) et vérifiez le niveau d'eau.",
     );
-  if (leak) actions.push("Notez où l'eau s'accumule et à quelle vitesse le niveau baisse.");
+  if (leak && !danger) actions.push("Notez où l'eau s'accumule et à quelle vitesse le niveau baisse.");
   actions.push("Notez le code et les messages affichés au panneau pour le technicien.");
 
   const urgency: PreDiagnostic["urgency"] =
@@ -120,7 +121,8 @@ export function preDiagnose(input: PreDiagnosticInput): PreDiagnostic {
   const parts = [
     `Pré-diagnostic automatique pour votre spa ${input.brand}, établi sans inspection.`,
   ];
-  if (code) parts.push(`${code.title} : ${code.meaning} Intervention habituelle : ${code.action}`);
+  // The reference's repair actions are for technicians, not customer instructions.
+  if (code) parts.push(`${code.title} : ${code.meaning} Un technicien doit confirmer la cause avant toute réparation.`);
   else if (input.error_code?.trim())
     parts.push(
       `Le code « ${input.error_code.trim()} » ne figure pas dans notre référence : un technicien le vérifiera.`,

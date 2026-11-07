@@ -18,7 +18,11 @@ export default defineConfig({
     tsConfigPaths({ projects: ["./tsconfig.json"] }),
     tailwindcss(),
     tanstackStart(),
-    nitro(),
+    nitro({
+      routeRules: {
+        "/ocarina-release.json": { headers: { "cache-control": "no-store" } },
+      },
+    }),
     react(),
   ],
   resolve: {

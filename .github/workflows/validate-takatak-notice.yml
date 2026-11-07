@@ -29,16 +29,15 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Re-resolve dependency lock for CI without changing repository
-        shell: bash
-        run: |
-          set -euo pipefail
-          mv package-lock.json package-lock.previous.json
-          npm install --package-lock-only --ignore-scripts --no-audit --no-fund
-          npm ci --no-audit --no-fund
+      - name: Install reviewed frozen dependencies
+        run: npm ci --no-audit --no-fund
       - name: Check live-site release gates statically
         run: npm run prelive:check
       - name: Build with current homepage (notice disabled)
         run: npm run build:node
+      - name: Verify built server with notice disabled
+        run: node scripts/verify-built-release.mjs
       - name: Build with opt-in notice enabled
         run: VITE_TAKATAK_MIGRATION_NOTICE_HOME=true npm run build:node
+      - name: Verify built server with notice enabled
+        run: VITE_TAKATAK_MIGRATION_NOTICE_HOME=true node scripts/verify-built-release.mjs

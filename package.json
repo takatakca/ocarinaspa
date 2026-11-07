@@ -6,9 +6,9 @@
   "scripts": {
     "import:municipalities": "bun run scripts/import-quebec-municipalities.ts",
     "dev": "vite dev",
-    "build": "vite build",
+    "build": "node scripts/write-release.mjs && vite build",
     "build:dev": "vite build --mode development",
-    "build:node": "vite build --config vite.config.node.ts",
+    "build:node": "node scripts/write-release.mjs && vite build --config vite.config.node.ts",
     "start": "node server.cjs",
     "preview": "vite preview",
     "lint": "eslint .",
